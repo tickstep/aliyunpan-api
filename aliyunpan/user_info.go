@@ -57,21 +57,21 @@ type (
 
 	// userInfoResult 用户信息返回实体
 	userInfoResult struct {
-		DomainID       string `json:"domain_id"`
-		UserID         string `json:"user_id"`
-		Avatar         string `json:"avatar"`
-		CreatedAt      int64  `json:"created_at"`
-		UpdatedAt      int64  `json:"updated_at"`
-		Email          string `json:"email"`
-		NickName       string `json:"nick_name"`
-		Phone          string `json:"phone"`
-		Role           string `json:"role"`
-		Status         string `json:"status"`
-		UserName       string `json:"user_name"`
-		Description    string `json:"description"`
-		DefaultDriveID string `json:"default_drive_id"`
-		DenyChangePasswordBySelf    bool `json:"deny_change_password_by_self"`
-		NeedChangePasswordNextLogin bool `json:"need_change_password_next_login"`
+		DomainId    string `json:"domain_id"`
+		UserId      string `json:"user_id"`
+		Avatar                      string `json:"avatar"`
+		CreatedAt                   int64  `json:"created_at"`
+		UpdatedAt                   int64  `json:"updated_at"`
+		Email                       string `json:"email"`
+		NickName                    string `json:"nick_name"`
+		Phone                       string `json:"phone"`
+		Role                        string `json:"role"`
+		Status                      string `json:"status"`
+		UserName                    string `json:"user_name"`
+		Description                 string `json:"description"`
+		DefaultDriveId              string `json:"default_drive_id"`
+		DenyChangePasswordBySelf    bool   `json:"deny_change_password_by_self"`
+		NeedChangePasswordNextLogin bool   `json:"need_change_password_next_login"`
 	}
 
 	personalInfoResult struct {
@@ -124,9 +124,9 @@ func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 	userInfo := &UserInfo{}
 
 	if r,err := p.getUserInfoReq(); err == nil {
-		userInfo.DomainId = r.DomainID
-		userInfo.DefaultDriveId = r.DefaultDriveID
-		userInfo.UserId = r.UserID
+		userInfo.DomainId = r.DomainId
+		userInfo.DefaultDriveId = r.DefaultDriveId
+		userInfo.UserId = r.UserId
 		userInfo.UserName = r.UserName
 		userInfo.CreatedAt = time.Unix(r.CreatedAt / 1000, 0).Format("2006-01-02 15:04:05")
 		userInfo.Email = r.Email

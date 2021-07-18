@@ -62,40 +62,47 @@ func main() {
 	fmt.Println(objToJsonStr(ui))
 
 	// file list
-	fmt.Println(" ")
-	fl,_ := panClient.FileList(&aliyunpan.FileListParam{
-		DriveId: ui.DefaultDriveId,
-		ParentFileId: aliyunpan.DefaultRootParentFileId,
-		Limit: 10,
-	})
-	fmt.Println(objToJsonStr(fl))
+	//fmt.Println(" ")
+	//fl,_ := panClient.FileList(&aliyunpan.FileListParam{
+	//	DriveId: ui.DefaultDriveId,
+	//	ParentFileId: aliyunpan.DefaultRootParentFileId,
+	//	Limit: 10,
+	//})
+	//fmt.Println(objToJsonStr(fl))
 
 	// file info
-	fmt.Println(" ")
-	fi,_ := panClient.FileInfoById(ui.DefaultDriveId, "root")
-	fmt.Println(objToJsonStr(fi))
-	fi,_ = panClient.FileInfoById(ui.DefaultDriveId, "60f406509fc5f3874bff4aa194dfc52011122859")
-	fmt.Println(objToJsonStr(fi))
-	fi,_ = panClient.FileInfoById(ui.DefaultDriveId, "60f3c5b938e72352187e4c6da13879adf489267e")
-	fmt.Println(objToJsonStr(fi))
+	//fmt.Println(" ")
+	//fi,_ := panClient.FileInfoById(ui.DefaultDriveId, "root")
+	//fmt.Println(objToJsonStr(fi))
+	//fi,_ = panClient.FileInfoById(ui.DefaultDriveId, "60f406509fc5f3874bff4aa194dfc52011122859")
+	//fmt.Println(objToJsonStr(fi))
+	//fi,_ = panClient.FileInfoById(ui.DefaultDriveId, "60f3c5b938e72352187e4c6da13879adf489267e")
+	//fmt.Println(objToJsonStr(fi))
 
 	// file info by path
-	fmt.Println("file info by path")
-	fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/")
-	fmt.Println(objToJsonStr(fi))
-	fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api")
-	fmt.Println(objToJsonStr(fi))
-	fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api/test.txt")
-	fmt.Println(objToJsonStr(fi))
-	fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api/folder1/folder2/")
-	fmt.Println(objToJsonStr(fi))
-	fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api/folder1/folder2/folder3/test.zip")
-	fmt.Println(objToJsonStr(fi))
+	//fmt.Println("file info by path")
+	//fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/")
+	//fmt.Println(objToJsonStr(fi))
+	//fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api")
+	//fmt.Println(objToJsonStr(fi))
+	//fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api/test.txt")
+	//fmt.Println(objToJsonStr(fi))
+	//fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api/folder1/folder2/")
+	//fmt.Println(objToJsonStr(fi))
+	//fi,_ = panClient.FileInfoByPath(ui.DefaultDriveId, "/aliyunpan-api/folder1/folder2/folder3/test.zip")
+	//fmt.Println(objToJsonStr(fi))
 
-	// file info by path
-	fmt.Println("all file info in path")
-	fl1 := panClient.FilesDirectoriesRecurseList(ui.DefaultDriveId, "/", nil)
-	fmt.Println(objToJsonStr(fl1))
-	fl1 = panClient.FilesDirectoriesRecurseList(ui.DefaultDriveId, "/aliyunpan-api/folder1", nil)
-	fmt.Println(objToJsonStr(fl1))
+	// file list by path
+	//fmt.Println("all file info in path")
+	//fl1 := panClient.FilesDirectoriesRecurseList(ui.DefaultDriveId, "/", nil)
+	//fmt.Println(objToJsonStr(fl1))
+	//fl1 = panClient.FilesDirectoriesRecurseList(ui.DefaultDriveId, "/aliyunpan-api/folder1", nil)
+	//fmt.Println(objToJsonStr(fl1))
+
+	// mkdir
+	fmt.Println("mkdir")
+	mk,_ := panClient.Mkdir(ui.DefaultDriveId, "60f40b0feb801719ca9947478ee1f236bbdef9d8", "我的文件ABC123")
+	fmt.Println(objToJsonStr(mk))
+	mk,_ = panClient.MkdirByFullPath(ui.DefaultDriveId, "/aliyunpan-api/f1/f2/f3我的文件ABC123")
+	fmt.Println(objToJsonStr(mk))
 }
