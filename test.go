@@ -100,9 +100,16 @@ func main() {
 	//fmt.Println(objToJsonStr(fl1))
 
 	// mkdir
-	fmt.Println("mkdir")
-	mk,_ := panClient.Mkdir(ui.DefaultDriveId, "60f40b0feb801719ca9947478ee1f236bbdef9d8", "我的文件ABC123")
-	fmt.Println(objToJsonStr(mk))
-	mk,_ = panClient.MkdirByFullPath(ui.DefaultDriveId, "/aliyunpan-api/f1/f2/f3我的文件ABC123")
-	fmt.Println(objToJsonStr(mk))
+	//fmt.Println("mkdir")
+	//mk,_ := panClient.Mkdir(ui.DefaultDriveId, "60f40b0feb801719ca9947478ee1f236bbdef9d8", "我的文件ABC123")
+	//fmt.Println(objToJsonStr(mk))
+	//mk,_ = panClient.MkdirByFullPath(ui.DefaultDriveId, "/aliyunpan-api/f1/f2/f3我的文件ABC123")
+	//fmt.Println(objToJsonStr(mk))
+
+	// rename
+	fmt.Println("rename")
+	bb,_ := panClient.Rename(ui.DefaultDriveId, "60f432a37717e8d190cb443084d61409be1e44bc", "我的文件ABC123-1")
+	fmt.Println(bb)
+	bb,_ = panClient.Rename(ui.DefaultDriveId, "60f40b4794573a3eeb4b4e05904cebfc35328732", "ok-1.dmg")
+	fmt.Println(bb)
 }
