@@ -14,10 +14,15 @@
 
 package apierror
 
+import "encoding/json"
+
 const (
 	// 成功
 	ApiCodeOk ApiCode = 0
-	// 成功
+	// 失败
+	ApiCodeFailed ApiCode = 999
+
+	// 验证码
 	ApiCodeNeedCaptchaCode ApiCode = 10
 	// 会话/Token已过期
 	ApiCodeTokenExpiredCode ApiCode = 11
@@ -32,9 +37,9 @@ const (
 	// 文件已存在
 	ApiCodeFileAlreadyExisted = 16
 	// 上传达到日数量上限
-	UserDayFlowOverLimited = 17
-	// 失败
-	ApiCodeFailed ApiCode = 999
+	ApiCodeUserDayFlowOverLimited = 17
+	// Token无效或者已过期
+	ApiCodeAccessTokenInvalid = 18
 )
 
 type ApiCode int
@@ -78,4 +83,18 @@ func (a *ApiError) Error() string {
 
 func (a *ApiError) ErrCode() ApiCode {
 	return a.Code
+}
+
+// ParseCommonApiError 解析公共错误，如果没有错误则返回nil
+func ParseCommonApiError(data []byte) *ApiError  {
+	errResp := &ErrorResp{}
+	if err := json.Unmarshal(data, errResp); err == nil {
+		if errResp.ErrorCode != "" {
+			if "AccessTokenInvalid" == errResp.ErrorCode {
+				return NewApiError(ApiCodeAccessTokenInvalid, errResp.ErrorMsg)
+			}
+			return NewFailedApiError(errResp.ErrorMsg)
+		}
+	}
+	return nil
 }

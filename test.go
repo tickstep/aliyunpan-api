@@ -50,6 +50,12 @@ func main() {
 	}
 
 	// do login
-	accessToken, _ := aliyunpan.GetAccessTokenFromRefreshToken("3a4ec58d38de42d78f049691bbeab180")
-	fmt.Print(objToJsonStr(accessToken))
+	webToken, _ := aliyunpan.GetAccessTokenFromRefreshToken("3a4ec58d38de42d78f049691bbeab180")
+	fmt.Print(objToJsonStr(webToken))
+
+	// pan client
+	panClient := aliyunpan.NewPanClient(*webToken, aliyunpan.AppLoginToken{})
+
+	ui,_ := panClient.GetUserInfo()
+	fmt.Print(objToJsonStr(ui))
 }
