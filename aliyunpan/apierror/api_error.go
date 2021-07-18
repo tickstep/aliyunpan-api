@@ -92,6 +92,8 @@ func ParseCommonApiError(data []byte) *ApiError  {
 		if errResp.ErrorCode != "" {
 			if "AccessTokenInvalid" == errResp.ErrorCode {
 				return NewApiError(ApiCodeAccessTokenInvalid, errResp.ErrorMsg)
+			} else if "NotFound.File" == errResp.ErrorCode {
+				return NewApiError(ApiCodeFileNotFoundCode, errResp.ErrorMsg)
 			}
 			return NewFailedApiError(errResp.ErrorMsg)
 		}

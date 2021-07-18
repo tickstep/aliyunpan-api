@@ -119,6 +119,7 @@ func parseUserStatus(status string) UserStatus {
 	return UnknownStatus
 }
 
+// GetUserInfo 获取用户信息
 func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 	userInfo := &UserInfo{}
 
