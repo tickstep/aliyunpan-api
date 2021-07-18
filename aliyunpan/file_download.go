@@ -19,13 +19,43 @@ import (
 	"fmt"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/library-go/logger"
+	"net/http"
 	"strings"
+	"time"
 )
 
-func (p *PanClient) Rename(driveId, renameFileId, newName string) (bool, *apierror.ApiError) {
-	if renameFileId == "" {
-		return false, apierror.NewFailedApiError("请指定命名的文件")
+type (
+	DownloadFuncCallback func(httpMethod, fullUrl string, headers map[string]string) (resp *http.Response, err error)
+
+	AppFileDownloadRange struct {
+		// 起始值，包含
+		Offset int64
+		// 结束值，包含
+		End int64
 	}
+
+	GetFileDownloadUrlParam struct {
+		DriveId   string `json:"drive_id"`
+		FileId   string `json:"file_id"`
+		ExpireSec int    `json:"expire_sec"`
+	}
+
+	GetFileDownloadUrlResult struct {
+		Method      string    `json:"method"`
+		URL         string    `json:"url"`
+		InternalURL string    `json:"internal_url"`
+		CdnURL      string    `json:"cdn_url"`
+		Expiration  time.Time `json:"expiration"`
+		Size        int       `json:"size"`
+		Ratelimit   struct {
+			PartSpeed int `json:"part_speed"`
+			PartSize  int `json:"part_size"`
+		} `json:"ratelimit"`
+	}
+)
+
+// GetFileDownloadUrl 获取文件下载URL路径
+func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFileDownloadUrlResult, *apierror.ApiError) {
 	// header
 	header := map[string]string {
 		"accept": "application/json, text/plain, */*",
@@ -38,34 +68,37 @@ func (p *PanClient) Rename(driveId, renameFileId, newName string) (bool, *apierr
 
 	// url
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/adrive/v3/file/update", API_URL)
+	fmt.Fprintf(fullUrl, "%s/v2/file/get_download_url", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// data
+	sec := param.ExpireSec
+	if sec <= 0 {
+		sec = 14400
+	}
 	postData := map[string]interface{} {
-		"drive_id": driveId,
-		"file_id": renameFileId,
-		"name": newName,
-		"check_name_mode": "refuse",
+		"drive_id": param.DriveId,
+		"file_id": param.FileId,
+		"expire_sec": sec,
 	}
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, header)
 	if err != nil {
-		logger.Verboseln("get rename error ", err)
-		return false, apierror.NewFailedApiError(err.Error())
+		logger.Verboseln("get file download url error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
 	}
 
 	// handler common error
 	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
-		return false, err1
+		return nil, err1
 	}
 
 	// parse result
-	r := &FileEntity{}
+	r := &GetFileDownloadUrlResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
-		logger.Verboseln("parse rename result json error ", err2)
-		return false, apierror.NewFailedApiError(err2.Error())
+		logger.Verboseln("parse file download url result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
 	}
-	return true, nil
+	return r, nil
 }

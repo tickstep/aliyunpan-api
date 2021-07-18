@@ -112,4 +112,13 @@ func main() {
 	fmt.Println(bb)
 	bb,_ = panClient.Rename(ui.DefaultDriveId, "60f40b4794573a3eeb4b4e05904cebfc35328732", "ok-1.dmg")
 	fmt.Println(bb)
+
+	// download url
+	fmt.Println("download url")
+	dp := &aliyunpan.GetFileDownloadUrlParam{
+		DriveId: ui.DefaultDriveId,
+		FileId: "60f40b4794573a3eeb4b4e05904cebfc35328732",
+	}
+	gfdr,_ := panClient.GetFileDownloadUrl(dp)
+	fmt.Println(objToJsonStr(gfdr))
 }
