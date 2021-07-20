@@ -42,9 +42,9 @@ type (
 
 	GetFileDownloadUrlResult struct {
 		Method      string    `json:"method"`
-		URL         string    `json:"url"`
-		InternalURL string    `json:"internal_url"`
-		CdnURL      string    `json:"cdn_url"`
+		Url         string    `json:"url"`
+		InternalUrl string    `json:"internal_url"`
+		CdnUrl      string    `json:"cdn_url"`
 		Expiration  time.Time `json:"expiration"`
 		Size        int       `json:"size"`
 		Ratelimit   struct {

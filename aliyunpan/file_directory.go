@@ -92,8 +92,8 @@ type (
 		Crc64Hash       string    `json:"crc64_hash"`
 		ContentHash     string    `json:"content_hash"`
 		ContentHashName string    `json:"content_hash_name"`
-		DownloadURL     string    `json:"download_url"`
-		URL             string    `json:"url"`
+		DownloadUrl     string    `json:"download_Url"`
+		Url             string    `json:"Url"`
 		Category        string    `json:"category"`
 		EncryptMode     string    `json:"encrypt_mode"`
 		PunishFlag      int       `json:"punish_flag"`
