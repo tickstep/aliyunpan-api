@@ -26,7 +26,7 @@ const (
 	ApiCodeNeedCaptchaCode ApiCode = 10
 	// 会话/Token已过期
 	ApiCodeTokenExpiredCode ApiCode = 11
-	// 文件不存在
+	// 文件不存在 NotFound.File
 	ApiCodeFileNotFoundCode ApiCode = 12
 	// 上传文件失败
 	ApiCodeUploadFileStatusVerifyFailed = 13
@@ -34,12 +34,14 @@ const (
 	ApiCodeUploadOffsetVerifyFailed = 14
 	// 服务器上传文件不存在
 	ApiCodeUploadFileNotFound = 15
-	// 文件已存在
+	// 文件已存在 AlreadyExist.File
 	ApiCodeFileAlreadyExisted = 16
 	// 上传达到日数量上限
 	ApiCodeUserDayFlowOverLimited = 17
-	// Token无效或者已过期
+	// Token无效或者已过期 AccessTokenInvalid
 	ApiCodeAccessTokenInvalid = 18
+	// 被禁止 Forbidden
+	ApiCodeForbidden = 19
 )
 
 type ApiCode int
