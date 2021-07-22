@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
+	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"strings"
 )
@@ -28,11 +29,6 @@ func (p *PanClient) Rename(driveId, renameFileId, newName string) (bool, *apierr
 	}
 	// header
 	header := map[string]string {
-		"accept": "application/json, text/plain, */*",
-		"referer": "https://www.aliyundrive.com/",
-		"origin": "https://www.aliyundrive.com",
-		"content-type": "application/json;charset=UTF-8",
-		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -50,7 +46,7 @@ func (p *PanClient) Rename(driveId, renameFileId, newName string) (bool, *apierr
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, header)
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get rename error ", err)
 		return false, apierror.NewFailedApiError(err.Error())

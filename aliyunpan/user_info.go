@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
+	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"strings"
 	"time"
@@ -150,11 +151,6 @@ func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 // getUserInfoReq 获取用户基本信息
 func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 	header := map[string]string {
-		"accept": "application/json, text/plain, */*",
-		"referer": "https://www.aliyundrive.com/",
-		"origin": "https://www.aliyundrive.com",
-		"content-type": "application/json;charset=UTF-8",
-		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -164,7 +160,7 @@ func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 	postData := map[string]string {}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, header)
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get user info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -187,11 +183,6 @@ func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 // getPersonalInfoReq 获取用户网盘基本信息，包括配额，上传下载等权限限制
 func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiError) {
 	header := map[string]string {
-		"accept": "application/json, text/plain, */*",
-		"referer": "https://www.aliyundrive.com/",
-		"origin": "https://www.aliyundrive.com",
-		"content-type": "application/json;charset=UTF-8",
-		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -201,7 +192,7 @@ func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiErro
 	postData := map[string]string {}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, header)
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get person info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

@@ -70,3 +70,26 @@ func UTCTimeFormat(timeStr string) string {
 	timeUint := t.In(time.Local).Unix()
 	return time.Unix(timeUint, 0).Format("2006-01-02 15:04:05")
 }
+
+// 增加公共header
+func AddCommonHeader(headers map[string]string) map[string]string {
+	commonHeaders := map[string]string {
+		"accept": "application/json, text/plain, */*",
+		"referer": "https://www.aliyundrive.com/",
+		"origin": "https://www.aliyundrive.com",
+		"content-type": "application/json;charset=UTF-8",
+		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+	}
+	if headers == nil {
+		return commonHeaders
+	}
+
+	// merge
+	for k,v := range headers {
+		_,ok := commonHeaders[strings.ToLower(k)]
+		if !ok {
+			commonHeaders[k] = v
+		}
+	}
+	return commonHeaders
+}

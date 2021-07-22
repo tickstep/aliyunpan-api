@@ -74,13 +74,7 @@ func (w *WebLoginToken) IsAccessTokenExpired() bool {
 func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apierror.ApiError) {
 	client := requester.NewHTTPClient()
 
-	header := map[string]string {
-		"accept": "application/json, text/plain, */*",
-		"referer": "https://www.aliyundrive.com/",
-		"origin": "https://www.aliyundrive.com",
-		"content-type": "application/json;charset=UTF-8",
-		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-	}
+	header := map[string]string {}
 
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/v2/account/token", AUTH_URL)
@@ -90,7 +84,7 @@ func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apier
 		"grant_type": "refresh_token",
 	}
 
-	body, err := client.Fetch("POST", fullUrl.String(), postData, header)
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get access token error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

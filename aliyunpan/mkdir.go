@@ -42,11 +42,6 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 		parentFileId = DefaultRootParentFileId
 	}
 	header := map[string]string {
-		"accept": "application/json, text/plain, */*",
-		"referer": "https://www.aliyundrive.com/",
-		"origin": "https://www.aliyundrive.com",
-		"content-type": "application/json;charset=UTF-8",
-		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -63,7 +58,7 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, header)
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get file info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
