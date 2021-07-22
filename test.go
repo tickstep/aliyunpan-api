@@ -123,25 +123,42 @@ func main() {
 	//fmt.Println(objToJsonStr(gfdr))
 
 	// batch task
-	requests := aliyunpan.BatchRequestList{}
-	requests = append(requests, &aliyunpan.BatchRequest{
-		Id:      "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
-		Method:  "POST",
-		Url:     "/file/move",
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
-		Body:    map[string]interface{}{
-			"drive_id": "19519221",
-			"file_id": "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
-			"to_drive_id": "19519221",
-			"to_parent_file_id": "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
-		},
+	//requests := aliyunpan.BatchRequestList{}
+	//requests = append(requests, &aliyunpan.BatchRequest{
+	//	Id:      "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
+	//	Method:  "POST",
+	//	Url:     "/file/move",
+	//	Headers: map[string]string{
+	//		"Content-Type": "application/json",
+	//	},
+	//	Body:    map[string]interface{}{
+	//		"drive_id": "19519221",
+	//		"file_id": "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
+	//		"to_drive_id": "19519221",
+	//		"to_parent_file_id": "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+	//	},
+	//})
+	//batchParam := aliyunpan.BatchRequestParam{
+	//	Requests: requests,
+	//	Resource: "file",
+	//}
+	//result,_ := panClient.BatchTask("https://api.aliyundrive.com/v3/batch", &batchParam)
+	//fmt.Println(objToJsonStr(result))
+
+	// file move
+	fmp := []*aliyunpan.FileMoveParam{}
+	fmp = append(fmp, &aliyunpan.FileMoveParam{
+		DriveId:        "19519221",
+		FileId:         "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
+		ToDriveId:      "19519221",
+		ToParentFileId: "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
 	})
-	batchParam := aliyunpan.BatchRequestParam{
-		Requests: requests,
-		Resource: "file",
-	}
-	result,_ := panClient.BatchTask("https://api.aliyundrive.com/v3/batch", &batchParam)
+	fmp = append(fmp, &aliyunpan.FileMoveParam{
+		DriveId:        "19519221",
+		FileId:         "60bc44fb9cc604dab65c4709ba27f2cbc8954a20",
+		ToDriveId:      "19519221",
+		ToParentFileId: "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+	})
+	result,_ := panClient.Move(fmp)
 	fmt.Println(objToJsonStr(result))
 }

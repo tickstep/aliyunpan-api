@@ -16,6 +16,7 @@ package apiutil
 
 import (
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	uuid "github.com/satori/go.uuid"
 	"math/rand"
 	"net/http"
@@ -92,4 +93,15 @@ func AddCommonHeader(headers map[string]string) map[string]string {
 		}
 	}
 	return commonHeaders
+}
+
+func GetMapSet(param interface{}) map[string]interface{} {
+	if param == nil {
+		return nil
+	}
+
+	r,_ := jsoniter.MarshalToString(param)
+	m := map[string]interface{}{}
+	jsoniter.Unmarshal([]byte(r), &m)
+	return m
 }
