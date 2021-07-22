@@ -107,18 +107,41 @@ func main() {
 	//fmt.Println(objToJsonStr(mk))
 
 	// rename
-	fmt.Println("rename")
-	bb,_ := panClient.Rename(ui.DefaultDriveId, "60f432a37717e8d190cb443084d61409be1e44bc", "我的文件ABC123-1")
-	fmt.Println(bb)
-	bb,_ = panClient.Rename(ui.DefaultDriveId, "60f40b4794573a3eeb4b4e05904cebfc35328732", "ok-1.dmg")
-	fmt.Println(bb)
+	//fmt.Println("rename")
+	//bb,_ := panClient.Rename(ui.DefaultDriveId, "60f432a37717e8d190cb443084d61409be1e44bc", "我的文件ABC123-1")
+	//fmt.Println(bb)
+	//bb,_ = panClient.Rename(ui.DefaultDriveId, "60f40b4794573a3eeb4b4e05904cebfc35328732", "ok-1.dmg")
+	//fmt.Println(bb)
 
 	// download url
-	fmt.Println("download url")
-	dp := &aliyunpan.GetFileDownloadUrlParam{
-		DriveId: ui.DefaultDriveId,
-		FileId: "60f40b4794573a3eeb4b4e05904cebfc35328732",
+	//fmt.Println("download url")
+	//dp := &aliyunpan.GetFileDownloadUrlParam{
+	//	DriveId: ui.DefaultDriveId,
+	//	FileId: "60f40b4794573a3eeb4b4e05904cebfc35328732",
+	//}
+	//gfdr,_ := panClient.GetFileDownloadUrl(dp)
+	//fmt.Println(objToJsonStr(gfdr))
+
+	// batch task
+	requests := aliyunpan.BatchRequestList{}
+	requests = append(requests, &aliyunpan.BatchRequest{
+		Id:      "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
+		Method:  "POST",
+		Url:     "/file/move",
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		Body:    map[string]interface{}{
+			"drive_id": "19519221",
+			"file_id": "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
+			"to_drive_id": "19519221",
+			"to_parent_file_id": "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+		},
+	})
+	batchParam := aliyunpan.BatchRequestParam{
+		Requests: requests,
+		Resource: "file",
 	}
-	gfdr,_ := panClient.GetFileDownloadUrl(dp)
-	fmt.Println(objToJsonStr(gfdr))
+	result,_ := panClient.BatchTask("https://api.aliyundrive.com/v3/batch", &batchParam)
+	fmt.Println(objToJsonStr(result))
 }
