@@ -52,12 +52,19 @@ type(
 		Items []*shareEntityResult `json:"items"`
 		NextMarker string `json:"next_marker"`
 	}
+
+	ShareCancelResult struct {
+		// 分享ID
+		Id string
+		// 是否成功
+		Success bool
+	}
 )
 
-// ShareList 获取分享的列表
-func (p *PanClient) ShareList(userId string) ([]*ShareEntity, *apierror.ApiError) {
+// ShareList 获取分享链接列表
+func (p *PanClient) ShareLinkList(userId string) ([]*ShareEntity, *apierror.ApiError) {
 	resultList := []*ShareEntity{}
-	if r,e := p.getShareListReq(userId); e == nil {
+	if r,e := p.getShareLinkListReq(userId); e == nil {
 		for _,item := range r.Items {
 			resultList = append(resultList, &ShareEntity{
 				Creator: item.Creator,
@@ -79,7 +86,53 @@ func (p *PanClient) ShareList(userId string) ([]*ShareEntity, *apierror.ApiError
 	return resultList, nil
 }
 
-func (p *PanClient) getShareListReq(userId string) (*shareListResult, *apierror.ApiError) {
+// ShareLinkCancel 取消分享链接
+func (p *PanClient) ShareLinkCancel(shareIdList []string) ([]*ShareCancelResult, *apierror.ApiError) {
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v2/batch", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// param
+	pr := BatchRequestList{}
+	for _,shareId := range shareIdList {
+		pr = append(pr, &BatchRequest{
+			Id:      shareId,
+			Method:  "POST",
+			Url:     "/share_link/cancel",
+			Headers: map[string]string{
+				"Content-Type": "application/json",
+			},
+			Body:    map[string]interface{}{
+				"share_id": shareId,
+			},
+		})
+	}
+
+	batchParam := BatchRequestParam{
+		Requests: pr,
+		Resource: "file",
+	}
+
+	// request
+	result,err := p.BatchTask(fullUrl.String(), &batchParam)
+	if err != nil {
+		logger.Verboseln("share cancel error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// parse result
+	r := []*ShareCancelResult{}
+	for _,item := range result.Responses{
+		r = append(r, &ShareCancelResult{
+			Id: item.Id,
+			Success: item.Status == 204,
+		})
+	}
+	return r, nil
+}
+
+func (p *PanClient) getShareLinkListReq(userId string) (*shareListResult, *apierror.ApiError) {
 	// header
 	header := map[string]string {
 		"authorization": p.webToken.GetAuthorizationStr(),

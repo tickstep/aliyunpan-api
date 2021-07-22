@@ -203,6 +203,13 @@ func main() {
 	//fmt.Println(objToJsonStr(result))
 
 	// share list
-	slr,_ := panClient.ShareList(ui.UserId)
-	fmt.Println(objToJsonStr(slr))
+	//slr,_ := panClient.ShareLinkList(ui.UserId)
+	//fmt.Println(objToJsonStr(slr))
+
+	// share cancel
+	links := []string{}
+	links = append(links, "EPPnhbvacC7")
+	links = append(links, "LSzZy6SFmGg")
+	slc,_ := panClient.ShareLinkCancel(links)
+	fmt.Println(objToJsonStr(slc))
 }
