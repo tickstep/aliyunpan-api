@@ -32,8 +32,12 @@ type (
 	UserInfo struct {
 		// DomainId 域ID
 		DomainId string `json:"domainId"`
-		// DefaultDriveId 网盘ID
-		DefaultDriveId string `json:"defaultDriveId"`
+		// DefaultDriveId 文件网盘ID
+		FileDriveId string `json:"fileDriveId"`
+		// SafeBoxDriveId 保险箱网盘ID
+		SafeBoxDriveId string `json:"safeBoxDriveId"`
+		// AlbumDriveId 相册网盘ID
+		AlbumDriveId string `json:"albumDriveId"`
 		// 用户UID
 		UserId string `json:"userId"`
 		// UserName 用户名
@@ -94,6 +98,26 @@ type (
 			TotalSize uint64 `json:"total_size"`
 		} `json:"personal_space_info"`
 	}
+
+	safeBoxInfoResult struct {
+		DriveId         string `json:"drive_id"`
+		SboxUsedSize     int64    `json:"sbox_used_size"`
+		SboxTotalSize    int64  `json:"sbox_total_size"`
+		RecommendVip     string `json:"recommend_vip"`
+		PinSetup         bool   `json:"pin_setup"`
+		Locked           bool   `json:"locked"`
+		InsuranceEnabled bool   `json:"insurance_enabled"`
+	}
+
+	albumInfoResult struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		Data    struct {
+			DriveId   string `json:"driveId"`
+			DriveName string `json:"driveName"`
+		} `json:"data"`
+		ResultCode string `json:"resultCode"`
+	}
 )
 
 const (
@@ -126,7 +150,7 @@ func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 
 	if r,err := p.getUserInfoReq(); err == nil {
 		userInfo.DomainId = r.DomainId
-		userInfo.DefaultDriveId = r.DefaultDriveId
+		userInfo.FileDriveId = r.DefaultDriveId
 		userInfo.UserId = r.UserId
 		userInfo.UserName = r.UserName
 		userInfo.CreatedAt = time.Unix(r.CreatedAt / 1000, 0).Format("2006-01-02 15:04:05")
@@ -145,6 +169,19 @@ func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 	} else {
 		return nil, err
 	}
+
+	if r,err := p.getSafeBoxInfoReq(); err == nil {
+		userInfo.SafeBoxDriveId = r.DriveId
+	} else {
+		return nil, err
+	}
+
+	if r,err := p.getAlbumInfoReq(); err == nil {
+		userInfo.AlbumDriveId = r.Data.DriveId
+	} else {
+		return nil, err
+	}
+
 	return userInfo, nil
 }
 
@@ -207,6 +244,64 @@ func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiErro
 	r := &personalInfoResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse person info result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
+}
+
+// getSafeBoxInfoReq 获取保险箱信息
+func (p *PanClient) getSafeBoxInfoReq() (*safeBoxInfoResult, *apierror.ApiError) {
+	header := map[string]string {
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/v2/sbox/get", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+	postData := map[string]string {}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("get safe box info error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &safeBoxInfoResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse safe box info result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
+}
+
+func (p *PanClient) getAlbumInfoReq() (*albumInfoResult, *apierror.ApiError) {
+	header := map[string]string {
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/user/albums_info", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+	postData := map[string]string {}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("get album info error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// parse result
+	r := &albumInfoResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse album info result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil
