@@ -163,12 +163,12 @@ func main() {
 	//result,_ := panClient.FileMove(fmp)
 	//fmt.Println(objToJsonStr(result))
 
-	fdp := []*aliyunpan.FileDeleteParam{}
-	fdp = append(fdp, &aliyunpan.FileDeleteParam{
+	fdp := []*aliyunpan.FileBatchActionParam{}
+	fdp = append(fdp, &aliyunpan.FileBatchActionParam{
 		DriveId:        "19519221",
 		FileId:         "60bc44f8b120740fb5534534845ccbb9b973c8c1",
 	})
-	fdp = append(fdp, &aliyunpan.FileDeleteParam{
+	fdp = append(fdp, &aliyunpan.FileBatchActionParam{
 		DriveId:        "19519221",
 		FileId:         "60bc44fb7d68cc31cb024b19a7babe936ecb9af8",
 	})

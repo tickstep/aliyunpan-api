@@ -23,14 +23,14 @@ import (
 )
 
 type(
-	FileDeleteParam struct {
+	FileBatchActionParam struct {
 		// 网盘ID
 		DriveId        string `json:"drive_id"`
 		// 文件ID
 		FileId        string `json:"file_id"`
 	}
 
-	FileDeleteResult struct {
+	FileBatchActionResult struct {
 		// 文件ID
 		FileId string
 		// 是否成功
@@ -39,14 +39,18 @@ type(
 )
 
 // FileDelete 删除文件
-func (p *PanClient) FileDelete(param []*FileDeleteParam) ([]*FileDeleteResult, *apierror.ApiError) {
+func (p *PanClient) FileDelete(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/v2/batch", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
-	// data
-	requests,e := p.getFileDeleteBatchRequestList(param)
+	// process
+	return p.doFileBatchRequest(fullUrl.String(), "/recyclebin/trash", param)
+}
+
+func (p *PanClient) doFileBatchRequest(url, actionUrl string, param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+	requests,e := p.getFileDeleteBatchRequestList(actionUrl, param)
 	if e != nil {
 		return nil, e
 	}
@@ -56,16 +60,16 @@ func (p *PanClient) FileDelete(param []*FileDeleteParam) ([]*FileDeleteResult, *
 	}
 
 	// request
-	result,err := p.BatchTask(fullUrl.String(), &batchParam)
+	result,err := p.BatchTask(url, &batchParam)
 	if err != nil {
-		logger.Verboseln("file delete error ", err)
+		logger.Verboseln("file batch error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
 	}
 
 	// parse result
-	r := []*FileDeleteResult{}
+	r := []*FileBatchActionResult{}
 	for _,item := range result.Responses{
-		r = append(r, &FileDeleteResult{
+		r = append(r, &FileBatchActionResult{
 			FileId: item.Id,
 			Success: item.Status == 204,
 		})
@@ -73,7 +77,7 @@ func (p *PanClient) FileDelete(param []*FileDeleteParam) ([]*FileDeleteResult, *
 	return r, nil
 }
 
-func (p *PanClient) getFileDeleteBatchRequestList(param []*FileDeleteParam) (BatchRequestList, *apierror.ApiError) {
+func (p *PanClient) getFileDeleteBatchRequestList(actionUrl string, param []*FileBatchActionParam) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}
@@ -83,7 +87,7 @@ func (p *PanClient) getFileDeleteBatchRequestList(param []*FileDeleteParam) (Bat
 		r = append(r, &BatchRequest{
 			Id:      item.FileId,
 			Method:  "POST",
-			Url:     "/recyclebin/trash",
+			Url:     actionUrl,
 			Headers: map[string]string{
 				"Content-Type": "application/json",
 			},
