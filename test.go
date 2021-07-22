@@ -26,6 +26,7 @@ type (
 	userpw struct {
 		UserName string `json:"username"`
 		Password string `json:"password"`
+		RefreshToken string `json:"refreshToken"`
 	}
 )
 
@@ -50,7 +51,7 @@ func main() {
 	}
 
 	// do login
-	webToken, _ := aliyunpan.GetAccessTokenFromRefreshToken("3a4ec58d38de42d78f049691bbeab180")
+	webToken, _ := aliyunpan.GetAccessTokenFromRefreshToken(userpw.RefreshToken)
 	fmt.Println(objToJsonStr(webToken))
 
 	// pan client
@@ -146,19 +147,31 @@ func main() {
 	//fmt.Println(objToJsonStr(result))
 
 	// file move
-	fmp := []*aliyunpan.FileMoveParam{}
-	fmp = append(fmp, &aliyunpan.FileMoveParam{
+	//fmp := []*aliyunpan.FileMoveParam{}
+	//fmp = append(fmp, &aliyunpan.FileMoveParam{
+	//	DriveId:        "19519221",
+	//	FileId:         "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
+	//	ToDriveId:      "19519221",
+	//	ToParentFileId: "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+	//})
+	//fmp = append(fmp, &aliyunpan.FileMoveParam{
+	//	DriveId:        "19519221",
+	//	FileId:         "60bc44fb9cc604dab65c4709ba27f2cbc8954a20",
+	//	ToDriveId:      "19519221",
+	//	ToParentFileId: "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+	//})
+	//result,_ := panClient.FileMove(fmp)
+	//fmt.Println(objToJsonStr(result))
+
+	fdp := []*aliyunpan.FileDeleteParam{}
+	fdp = append(fdp, &aliyunpan.FileDeleteParam{
 		DriveId:        "19519221",
-		FileId:         "60bc44fcafaac4e737d14c969899d1ca553a7fa8",
-		ToDriveId:      "19519221",
-		ToParentFileId: "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+		FileId:         "60bc44f8b120740fb5534534845ccbb9b973c8c1",
 	})
-	fmp = append(fmp, &aliyunpan.FileMoveParam{
+	fdp = append(fdp, &aliyunpan.FileDeleteParam{
 		DriveId:        "19519221",
-		FileId:         "60bc44fb9cc604dab65c4709ba27f2cbc8954a20",
-		ToDriveId:      "19519221",
-		ToParentFileId: "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+		FileId:         "60bc44fb7d68cc31cb024b19a7babe936ecb9af8",
 	})
-	result,_ := panClient.Move(fmp)
+	result,_ := panClient.FileDelete(fdp)
 	fmt.Println(objToJsonStr(result))
 }

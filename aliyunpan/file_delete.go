@@ -23,18 +23,14 @@ import (
 )
 
 type(
-	FileMoveParam struct {
-		// 源网盘ID
+	FileDeleteParam struct {
+		// 网盘ID
 		DriveId        string `json:"drive_id"`
-		// 源文件ID
+		// 文件ID
 		FileId        string `json:"file_id"`
-		// 目标网盘ID
-		ToDriveId     string `json:"to_drive_id"`
-		// 目标文件夹ID
-		ToParentFileId string `json:"to_parent_file_id"`
 	}
 
-	FileMoveResult struct {
+	FileDeleteResult struct {
 		// 文件ID
 		FileId string
 		// 是否成功
@@ -42,15 +38,15 @@ type(
 	}
 )
 
-// FileMove 移动文件
-func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierror.ApiError) {
+// FileDelete 删除文件
+func (p *PanClient) FileDelete(param []*FileDeleteParam) ([]*FileDeleteResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/v3/batch", API_URL)
+	fmt.Fprintf(fullUrl, "%s/v2/batch", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// data
-	requests,e := p.getFileMoveBatchRequestList(param)
+	requests,e := p.getFileDeleteBatchRequestList(param)
 	if e != nil {
 		return nil, e
 	}
@@ -62,22 +58,22 @@ func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierr
 	// request
 	result,err := p.BatchTask(fullUrl.String(), &batchParam)
 	if err != nil {
-		logger.Verboseln("file move error ", err)
+		logger.Verboseln("file delete error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
 	}
 
 	// parse result
-	r := []*FileMoveResult{}
+	r := []*FileDeleteResult{}
 	for _,item := range result.Responses{
-		r = append(r, &FileMoveResult{
+		r = append(r, &FileDeleteResult{
 			FileId: item.Id,
-			Success:     item.Status == 200,
+			Success: item.Status == 204,
 		})
 	}
 	return r, nil
 }
 
-func (p *PanClient) getFileMoveBatchRequestList(param []*FileMoveParam) (BatchRequestList, *apierror.ApiError) {
+func (p *PanClient) getFileDeleteBatchRequestList(param []*FileDeleteParam) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}
@@ -87,7 +83,7 @@ func (p *PanClient) getFileMoveBatchRequestList(param []*FileMoveParam) (BatchRe
 		r = append(r, &BatchRequest{
 			Id:      item.FileId,
 			Method:  "POST",
-			Url:     "/file/move",
+			Url:     "/recyclebin/trash",
 			Headers: map[string]string{
 				"Content-Type": "application/json",
 			},
