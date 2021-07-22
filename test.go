@@ -190,15 +190,19 @@ func main() {
 	//fmt.Println(objToJsonStr(result))
 
 	// file starred
-	fdp := []*aliyunpan.FileBatchActionParam{}
-	fdp = append(fdp, &aliyunpan.FileBatchActionParam{
-		DriveId:        "19519221",
-		FileId:         "60bc44fb7d68cc31cb024b19a7babe936ecb9af8",
-	})
-	fdp = append(fdp, &aliyunpan.FileBatchActionParam{
-		DriveId:        "19519221",
-		FileId:         "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
-	})
-	result,_ := panClient.FileStarred(fdp)
-	fmt.Println(objToJsonStr(result))
+	//fdp := []*aliyunpan.FileBatchActionParam{}
+	//fdp = append(fdp, &aliyunpan.FileBatchActionParam{
+	//	DriveId:        "19519221",
+	//	FileId:         "60bc44fb7d68cc31cb024b19a7babe936ecb9af8",
+	//})
+	//fdp = append(fdp, &aliyunpan.FileBatchActionParam{
+	//	DriveId:        "19519221",
+	//	FileId:         "60f61cf4f15322f69a4c4d4fb58bbcf8188e788b",
+	//})
+	//result,_ := panClient.FileStarred(fdp)
+	//fmt.Println(objToJsonStr(result))
+
+	// share list
+	slr,_ := panClient.ShareList(ui.UserId)
+	fmt.Println(objToJsonStr(slr))
 }

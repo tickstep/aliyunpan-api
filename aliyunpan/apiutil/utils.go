@@ -67,6 +67,9 @@ func CheckFileNameValid(name string) bool {
 
 // UTCTimeFormat UTC时间转换为本地时间
 func UTCTimeFormat(timeStr string) string {
+	if timeStr == "" {
+		return ""
+	}
 	t, _ := time.Parse(time.RFC3339, timeStr)
 	timeUint := t.In(time.Local).Unix()
 	return time.Unix(timeUint, 0).Format("2006-01-02 15:04:05")
