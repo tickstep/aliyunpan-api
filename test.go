@@ -163,15 +163,29 @@ func main() {
 	//result,_ := panClient.FileMove(fmp)
 	//fmt.Println(objToJsonStr(result))
 
+	// file delete
+	//fdp := []*aliyunpan.FileBatchActionParam{}
+	//fdp = append(fdp, &aliyunpan.FileBatchActionParam{
+	//	DriveId:        "19519221",
+	//	FileId:         "60bc44f8b120740fb5534534845ccbb9b973c8c1",
+	//})
+	//fdp = append(fdp, &aliyunpan.FileBatchActionParam{
+	//	DriveId:        "19519221",
+	//	FileId:         "60bc44fb7d68cc31cb024b19a7babe936ecb9af8",
+	//})
+	//result,_ := panClient.FileDelete(fdp)
+	//fmt.Println(objToJsonStr(result))
+
+	// recycle bin file delete
 	fdp := []*aliyunpan.FileBatchActionParam{}
 	fdp = append(fdp, &aliyunpan.FileBatchActionParam{
 		DriveId:        "19519221",
-		FileId:         "60bc44f8b120740fb5534534845ccbb9b973c8c1",
+		FileId:         "60bc44f8367b636659564c2b9f057e8f5654241f",
 	})
 	fdp = append(fdp, &aliyunpan.FileBatchActionParam{
 		DriveId:        "19519221",
-		FileId:         "60bc44fb7d68cc31cb024b19a7babe936ecb9af8",
+		FileId:         "60bc44f703d4b148194447639d04632674c6b465",
 	})
-	result,_ := panClient.FileDelete(fdp)
+	result,_ := panClient.RecycleBinFileDelete(fdp)
 	fmt.Println(objToJsonStr(result))
 }

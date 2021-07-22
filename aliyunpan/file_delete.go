@@ -38,7 +38,7 @@ type(
 	}
 )
 
-// FileDelete 删除文件
+// FileDelete 删除文件到回收站
 func (p *PanClient) FileDelete(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
@@ -47,6 +47,28 @@ func (p *PanClient) FileDelete(param []*FileBatchActionParam) ([]*FileBatchActio
 
 	// process
 	return p.doFileBatchRequest(fullUrl.String(), "/recyclebin/trash", param)
+}
+
+// RecycleBinFileDelete 回收站彻底删除文件
+func (p *PanClient) RecycleBinFileDelete(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/v3/batch", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// process
+	return p.doFileBatchRequest(fullUrl.String(), "/file/delete", param)
+}
+
+// RecycleBinFileRestore 回收站还原文件。还原的文件会存放会原来的地方
+func (p *PanClient) RecycleBinFileRestore(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/v2/batch", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// process
+	return p.doFileBatchRequest(fullUrl.String(), "/recyclebin/restore", param)
 }
 
 func (p *PanClient) doFileBatchRequest(url, actionUrl string, param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
