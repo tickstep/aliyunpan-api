@@ -30,3 +30,13 @@ func TestDateOfGmtStr(t *testing.T) {
 	r := DateOfGmtStr()
 	fmt.Println(r)
 }
+
+func TestUtcTime2LocalFormat(t *testing.T) {
+	r := UtcTime2LocalFormat("2021-07-29T23:18:07.000Z")
+	fmt.Println(r) // 2021-07-30 07:18:07
+}
+
+func TestLocalTime2UtcFormat(t *testing.T) {
+	r := LocalTime2UtcFormat("2021-07-30 07:18:07")
+	fmt.Println(r) // 2021-07-29T23:18:07.000Z
+}

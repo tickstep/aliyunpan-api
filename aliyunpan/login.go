@@ -108,7 +108,7 @@ func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apier
 		r.AccessToken,
 		r.RefreshToken,
 		r.ExpiresIn,
-		apiutil.UTCTimeFormat(r.ExpireTime),
+		apiutil.UtcTime2LocalFormat(r.ExpireTime),
 	}
 	return result, nil
 }

@@ -65,14 +65,23 @@ func CheckFileNameValid(name string) bool {
 	return !strings.ContainsAny(name, FileNameSpecialChars)
 }
 
-// UTCTimeFormat UTC时间转换为本地时间
-func UTCTimeFormat(timeStr string) string {
+// UtcTime2LocalFormat UTC时间转换为本地时间
+func UtcTime2LocalFormat(timeStr string) string {
 	if timeStr == "" {
 		return ""
 	}
 	t, _ := time.Parse(time.RFC3339, timeStr)
 	timeUint := t.In(time.Local).Unix()
 	return time.Unix(timeUint, 0).Format("2006-01-02 15:04:05")
+}
+
+// LocalTime2UtcFormat 本地时间转换为UTC时间
+func LocalTime2UtcFormat(utcTimeStr string) string {
+	if utcTimeStr == "" {
+		return ""
+	}
+	t, _ := time.ParseInLocation("2006-01-02 15:04:05", utcTimeStr, time.Local)
+	return t.UTC().Format("2006-01-02T15:04:05.000Z07:00")
 }
 
 // 增加公共header
@@ -90,10 +99,7 @@ func AddCommonHeader(headers map[string]string) map[string]string {
 
 	// merge
 	for k,v := range headers {
-		_,ok := commonHeaders[strings.ToLower(k)]
-		if !ok {
-			commonHeaders[k] = v
-		}
+		commonHeaders[strings.ToLower(k)] = v
 	}
 	return commonHeaders
 }
