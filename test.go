@@ -115,13 +115,17 @@ func main() {
 	//fmt.Println(bb)
 
 	// download url
-	//fmt.Println("download url")
-	//dp := &aliyunpan.GetFileDownloadUrlParam{
-	//	DriveId: ui.DefaultDriveId,
-	//	FileId: "60f40b4794573a3eeb4b4e05904cebfc35328732",
-	//}
-	//gfdr,_ := panClient.GetFileDownloadUrl(dp)
-	//fmt.Println(objToJsonStr(gfdr))
+	fmt.Println("download url")
+	dp := &aliyunpan.GetFileDownloadUrlParam{
+		DriveId: ui.FileDriveId,
+		FileId: "60f3c5b938e72352187e4c6da13879adf489267e",
+	}
+	gfdr,_ := panClient.GetFileDownloadUrl(dp)
+	fmt.Println(objToJsonStr(gfdr))
+	fmt.Println(gfdr.Url)
+
+
+
 
 	// batch task
 	//requests := aliyunpan.BatchRequestList{}
@@ -213,14 +217,15 @@ func main() {
 	//slc,_ := panClient.ShareLinkCancel(links)
 	//fmt.Println(objToJsonStr(slc))
 
-	fileIdList := []string{}
-	fileIdList = append(fileIdList, "60f565ffe840c531d96d45cd9fca67a1a2528831")
-	fileIdList = append(fileIdList, "60bc44fb7d68cc31cb024b19a7babe936ecb9af8")
-	slc,_ := panClient.ShareLinkCreate(aliyunpan.ShareCreateParam{
-		DriveId: "19519221",
-		SharePwd: "a123",
-		Expiration: "2021-07-30 07:18:07",
-		FileIdList: fileIdList,
-	})
-	fmt.Println(objToJsonStr(slc))
+	// share create
+	//fileIdList := []string{}
+	//fileIdList = append(fileIdList, "60f565ffe840c531d96d45cd9fca67a1a2528831")
+	//fileIdList = append(fileIdList, "60bc44fb7d68cc31cb024b19a7babe936ecb9af8")
+	//slc,_ := panClient.ShareLinkCreate(aliyunpan.ShareCreateParam{
+	//	DriveId: "19519221",
+	//	SharePwd: "a123",
+	//	Expiration: "2021-07-30 07:18:07",
+	//	FileIdList: fileIdList,
+	//})
+	//fmt.Println(objToJsonStr(slc))
 }

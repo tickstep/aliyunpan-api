@@ -21,6 +21,7 @@ import (
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -28,7 +29,7 @@ import (
 type (
 	DownloadFuncCallback func(httpMethod, fullUrl string, headers map[string]string) (resp *http.Response, err error)
 
-	AppFileDownloadRange struct {
+	FileDownloadRange struct {
 		// 起始值，包含
 		Offset int64
 		// 结束值，包含
@@ -53,6 +54,11 @@ type (
 			PartSize  int `json:"part_size"`
 		} `json:"ratelimit"`
 	}
+)
+
+const(
+	// 资源被屏蔽，提示资源非法链接
+	IllegalDownloadUrl = "https://pds-system-file.oss-cn-beijing.aliyuncs.com/illegal.mp4"
 )
 
 // GetFileDownloadUrl 获取文件下载URL路径
@@ -97,4 +103,37 @@ func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFile
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil
+}
+
+// DownloadFileData 下载文件内容
+func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange FileDownloadRange, downloadFunc DownloadFuncCallback) *apierror.ApiError {
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s", downloadFileUrl)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// header
+	headers := map[string]string {
+		"referer": "https://www.aliyundrive.com/",
+	}
+
+	// download data resume
+	if fileRange.Offset != 0 || fileRange.End != 0 {
+		rangeStr := "bytes=" + strconv.FormatInt(fileRange.Offset, 10) + "-"
+		if fileRange.End != 0 {
+			rangeStr += strconv.FormatInt(fileRange.End, 10)
+		}
+		headers["range"] = rangeStr
+	}
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// request
+	_, err := downloadFunc("GET", fullUrl.String(), apiutil.AddCommonHeader(headers))
+	//resp, err := p.client.Req("GET", fullUrl.String(), nil, headers)
+
+	if err != nil {
+		logger.Verboseln("download file data response failed")
+		return apierror.NewApiErrorWithError(err)
+	}
+	return nil
 }
