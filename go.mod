@@ -9,4 +9,4 @@ require (
 	github.com/tickstep/library-go v0.0.1
 )
 
-replace github.com/tickstep/library-go => D:/smb/feny/goprojects/library-go
+replace github.com/tickstep/library-go => /Users/tickstep/Documents/Workspace/go/projects/library-go

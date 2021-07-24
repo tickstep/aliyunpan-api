@@ -42,6 +42,8 @@ const (
 	ApiCodeAccessTokenInvalid = 18
 	// 被禁止 Forbidden
 	ApiCodeForbidden = 19
+	// RefreshToken已过期
+	ApiCodeRefreshTokenExpiredCode ApiCode = 20
 )
 
 type ApiCode int
@@ -100,6 +102,8 @@ func ParseCommonApiError(data []byte) *ApiError  {
 				return NewApiError(ApiCodeFileAlreadyExisted, errResp.ErrorMsg)
 			} else if "BadRequest" == errResp.ErrorCode {
 				return NewApiError(ApiCodeFailed, errResp.ErrorMsg)
+			} else if "InvalidParameter.RefreshToken" == errResp.ErrorCode {
+				return NewApiError(ApiCodeRefreshTokenExpiredCode, errResp.ErrorMsg)
 			}
 			return NewFailedApiError(errResp.ErrorMsg)
 		}
