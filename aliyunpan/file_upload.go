@@ -7,10 +7,13 @@ import (
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"math"
+	"net/http"
 	"strings"
 )
 
 type(
+	// UploadFunc 上传文件处理函数
+	UploadFunc func(httpMethod, fullUrl string, headers map[string]string) (resp *http.Response, err error)
 
 	// 上传文件分片参数。从1开始，最大为 10000
 	FileUploadPartInfoParam struct {
@@ -56,6 +59,24 @@ type(
 		FileName    string `json:"file_name"`
 		EncryptMode string `json:"encrypt_mode"`
 		Location    string `json:"location"`
+	}
+
+	// 获取上传数据链接参数
+	GetUploadUrlParam struct {
+		DriveId      string `json:"drive_id"`
+		FileId       string `json:"file_id"`
+		PartInfoList    []FileUploadPartInfoParam `json:"part_info_list"`
+		UploadId string `json:"upload_id"`
+	}
+
+	// 获取上传数据链接返回值
+	GetUploadUrlResult struct {
+		DomainId     string `json:"domain_id"`
+		DriveId      string `json:"drive_id"`
+		FileId       string `json:"file_id"`
+		PartInfoList []FileUploadPartInfoResult `json:"part_info_list"`
+		UploadId string    `json:"upload_id"`
+		CreateAt string `json:"create_at"`
 	}
 )
 
@@ -126,5 +147,44 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 		logger.Verboseln("parse create upload file result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
+	return r, nil
+}
+
+// GetUploadUrl 获取上传数据链接参数
+// 因为有些文件过大，或者暂定上传后，然后过段时间再继续上传，这时候之前的上传链接可能已经失效了，所以需要重新获取上传数据的链接
+// 如果该文件已经上传完毕，则该接口返回错误
+func (p *PanClient) GetUploadUrl(param *GetUploadUrlParam) (*GetUploadUrlResult, *apierror.ApiError) {
+	// header
+	header := map[string]string {
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/v2/file/get_upload_url", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// data
+	postData := param
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("get upload url error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &GetUploadUrlResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse get upload url result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	r.CreateAt = apiutil.UtcTime2LocalFormat(r.CreateAt)
 	return r, nil
 }
