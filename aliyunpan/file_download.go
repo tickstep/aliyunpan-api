@@ -19,16 +19,19 @@ import (
 	"fmt"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
+	"github.com/tickstep/library-go/cachepool"
 	"github.com/tickstep/library-go/logger"
+	"github.com/tickstep/library-go/requester"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type (
 	DownloadFuncCallback func(httpMethod, fullUrl string, headers map[string]string) (resp *http.Response, err error)
 
+	// FileDownloadRange 分片。0-100,101-200,201-300...
 	FileDownloadRange struct {
 		// 起始值，包含
 		Offset int64
@@ -47,7 +50,7 @@ type (
 		Url         string    `json:"url"`
 		InternalUrl string    `json:"internal_url"`
 		CdnUrl      string    `json:"cdn_url"`
-		Expiration  time.Time `json:"expiration"`
+		Expiration  string `json:"expiration"`
 		Size        int       `json:"size"`
 		Ratelimit   struct {
 			PartSpeed int `json:"part_speed"`
@@ -102,6 +105,8 @@ func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFile
 		logger.Verboseln("parse file download url result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
+	// time format
+	r.Expiration = apiutil.UtcTime2LocalFormat(r.Expiration)
 	return r, nil
 }
 
@@ -127,13 +132,89 @@ func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange FileDownl
 	}
 	logger.Verboseln("do request url: " + fullUrl.String())
 
-	// request
-	_, err := downloadFunc("GET", fullUrl.String(), apiutil.AddCommonHeader(headers))
+	// request callback
+	_, err := downloadFunc("GET", fullUrl.String(), headers)
 	//resp, err := p.client.Req("GET", fullUrl.String(), nil, headers)
 
 	if err != nil {
 		logger.Verboseln("download file data response failed")
 		return apierror.NewApiErrorWithError(err)
+	}
+	return nil
+}
+
+// DownloadFileDataAndSave 下载文件并存储到指定IO设备里面。该方法是同步阻塞的
+func (p *PanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange FileDownloadRange, writerAt io.WriterAt) *apierror.ApiError {
+	var resp *http.Response
+	var err error
+	var client = requester.NewHTTPClient()
+
+	apierr := p.DownloadFileData(
+		downloadFileUrl,
+		fileRange,
+		func(httpMethod, fullUrl string, headers map[string]string) (*http.Response, error) {
+			resp, err = client.Req(httpMethod, fullUrl, nil, headers)
+			if err != nil {
+				return nil, err
+			}
+			return resp, err
+		})
+
+	if apierr != nil {
+		return apierr
+	}
+
+	// close socket defer
+	if resp != nil {
+		defer func() {
+			resp.Body.Close()
+		}()
+	}
+
+	switch resp.StatusCode {
+	case 200, 206:
+		// do nothing, continue
+		break
+	case 416: //Requested Range Not Satisfiable
+		fallthrough
+	case 403: // Forbidden
+		fallthrough
+	case 406: // Not Acceptable
+		return apierror.NewFailedApiError("")
+	case 404:
+		return apierror.NewFailedApiError("")
+	case 429, 509: // Too Many Requests
+		return apierror.NewFailedApiError("")
+	default:
+		return apierror.NewApiErrorWithError(fmt.Errorf("unexpected http status code, %d, %s", resp.StatusCode, resp.Status))
+	}
+
+	// save data
+	var (
+		buf       = make([]byte, 4096)
+		totalCount, readByteCount     int
+	)
+	defer cachepool.SyncPool.Put(buf)
+
+	var readErr error
+	totalCount = 0
+
+	for true {
+		readByteCount, readErr = resp.Body.Read(buf)
+		logger.Verboseln("get byte piece:", readByteCount)
+		if readErr == io.EOF && readByteCount > 0 {
+			// the last piece
+			writerAt.WriteAt(buf[:readByteCount], fileRange.Offset + int64(totalCount))
+			totalCount += readByteCount
+			break
+		}
+		if readErr != nil {
+			return apierror.NewApiErrorWithError(readErr)
+		}
+
+		// write
+		writerAt.WriteAt(buf[:readByteCount], fileRange.Offset + int64(totalCount))
+		totalCount += readByteCount
 	}
 	return nil
 }
