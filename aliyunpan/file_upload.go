@@ -149,6 +149,9 @@ const(
 
 	// 最大分片数量大小
 	MaxPartNum = 10000
+
+	// 0KB文件默认的SHA1哈希值
+	DefaultZeroSizeFileContentHash = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709"
 )
 
 func (d *FileUploadChunkData) Read(p []byte) (n int, err error) {
