@@ -6,6 +6,8 @@ import (
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
+	"github.com/tickstep/library-go/requester"
+	"io"
 	"math"
 	"net/http"
 	"strings"
@@ -78,6 +80,67 @@ type(
 		UploadId string    `json:"upload_id"`
 		CreateAt string `json:"create_at"`
 	}
+
+	FileUploadRange struct {
+		// 起始值，包含
+		Offset int64
+		// 总上传长度
+		Len int64
+	}
+
+	// 文件上传数据块
+	FileUploadChunkData struct {
+		Reader io.Reader
+		ChunkSize int64
+
+		hasReadCount int64
+	}
+
+	// 提交上传文件传输完成参数
+	CompleteUploadFileParam struct {
+		DriveId     string `json:"drive_id"`
+		FileId      string `json:"file_id"`
+		UploadId    string `json:"upload_id"`
+	}
+
+	CompleteUploadFileResult struct {
+		DriveId         string    `json:"drive_id"`
+		DomainId        string    `json:"domain_id"`
+		FileId          string    `json:"file_id"`
+		Name            string    `json:"name"`
+		Type            string    `json:"type"`
+		Size            int       `json:"size"`
+		UploadId        string    `json:"upload_id"`
+		ParentFileId    string    `json:"parent_file_id"`
+		Crc64Hash       string    `json:"crc64_hash"`
+		ContentHash     string    `json:"content_hash"`
+		ContentHashName string    `json:"content_hash_name"`
+		CreatedAt       string `json:"created_at"`
+	}
+
+	completeUploadFileReqResult struct {
+		DriveId         string    `json:"drive_id"`
+		DomainId        string    `json:"domain_id"`
+		FileId          string    `json:"file_id"`
+		Name            string    `json:"name"`
+		Type            string    `json:"type"`
+		ContentType     string    `json:"content_type"`
+		CreatedAt       string `json:"created_at"`
+		UpdatedAt       string `json:"updated_at"`
+		FileExtension   string    `json:"file_extension"`
+		Hidden          bool      `json:"hidden"`
+		Size            int       `json:"size"`
+		Starred         bool      `json:"starred"`
+		Status          string    `json:"status"`
+		UploadId        string    `json:"upload_id"`
+		ParentFileId    string    `json:"parent_file_id"`
+		Crc64Hash       string    `json:"crc64_hash"`
+		ContentHash     string    `json:"content_hash"`
+		ContentHashName string    `json:"content_hash_name"`
+		Category        string    `json:"category"`
+		EncryptMode     string    `json:"encrypt_mode"`
+		Location        string    `json:"location"`
+	}
 )
 
 const(
@@ -88,15 +151,41 @@ const(
 	MaxPartNum = 10000
 )
 
+func (d *FileUploadChunkData) Read(p []byte) (n int, err error) {
+	realReadCount := int64(0)
+	var buf []byte = p
+	needCopy := false
+	if (d.hasReadCount + int64(len(p))) > d.ChunkSize {
+		realReadCount = d.ChunkSize - d.hasReadCount
+		buf = make([]byte, realReadCount)
+		needCopy = true
+	}
+
+	n,err = d.Reader.Read(buf)
+	if needCopy {
+		copy(p, buf)
+	}
+	d.hasReadCount += int64(n)
+	return n,err
+}
+
+func (d *FileUploadChunkData) Len() int64 {
+	return d.ChunkSize
+}
+
 // GenerateFileUploadPartInfoList 根据文件大小自动生成分片
 func GenerateFileUploadPartInfoList(size int64) []FileUploadPartInfoParam {
+	return GenerateFileUploadPartInfoListWithChunkSize(size, DefaultChunkSize)
+}
+
+func GenerateFileUploadPartInfoListWithChunkSize(size, chunkSize int64) []FileUploadPartInfoParam {
 	r := []FileUploadPartInfoParam{}
-	if size <= DefaultChunkSize {
+	if size <= chunkSize {
 		r = append(r, FileUploadPartInfoParam{
 			PartNumber: 1,
 		})
 	} else {
-		pageSize := int(math.Ceil(float64(size) / float64(DefaultChunkSize)))
+		pageSize := int(math.Ceil(float64(size) / float64(chunkSize)))
 		for i := 1; i <= pageSize; i++ {
 			r = append(r, FileUploadPartInfoParam{
 				PartNumber: i,
@@ -120,6 +209,9 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 
 	// data
 	postData := param
+	if len(postData.PartInfoList) == 0 {
+		postData.PartInfoList = GenerateFileUploadPartInfoList(param.Size)
+	}
 	if postData.ContentHashName == "" {
 		postData.ContentHashName = "sha1"
 	}
@@ -187,4 +279,86 @@ func (p *PanClient) GetUploadUrl(param *GetUploadUrlParam) (*GetUploadUrlResult,
 	}
 	r.CreateAt = apiutil.UtcTime2LocalFormat(r.CreateAt)
 	return r, nil
+}
+
+// UploadDataChunk 上传数据。该方法是同步阻塞的
+func (p *PanClient) UploadDataChunk(url string, data *FileUploadChunkData) *apierror.ApiError {
+	var client = requester.NewHTTPClient()
+
+	// header
+	header := map[string]string {
+		"referer": "https://www.aliyundrive.com/",
+	}
+
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s", url)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// data
+	if data == nil || data.Reader == nil || data.Len() == 0 {
+		return apierror.NewFailedApiError("数据块错误")
+	}
+	// request
+	resp, err := client.Req("PUT", fullUrl.String(), data, header)
+	if err != nil || resp.StatusCode != 200 {
+		logger.Verboseln("upload file data chunk error ", err)
+		return apierror.NewFailedApiError(err.Error())
+	}
+	return nil
+}
+
+// CompleteUploadFile 完成文件上传确认。完成文件数据上传后，需要调用该接口文件才会显示再网盘中
+func (p *PanClient) CompleteUploadFile(param *CompleteUploadFileParam) (*CompleteUploadFileResult, *apierror.ApiError) {
+	// header
+	header := map[string]string {
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/v2/file/complete", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// data
+	postData := map[string]interface{}{
+		"ignoreError": true,
+		"drive_id": param.DriveId,
+		"file_id": param.FileId,
+		"upload_id": param.UploadId,
+	}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("complete upload file error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &completeUploadFileReqResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse complete upload file result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+
+	return &CompleteUploadFileResult{
+		DriveId: r.DriveId,
+		DomainId: r.DomainId,
+		FileId: r.FileId,
+		Name: r.Name,
+		Type: r.Type,
+		Size: r.Size,
+		UploadId: r.UploadId,
+		ParentFileId: r.ParentFileId,
+		Crc64Hash: r.Crc64Hash,
+		ContentHash: r.ContentHash,
+		ContentHashName: r.ContentHashName,
+		CreatedAt: apiutil.UtcTime2LocalFormat(r.CreatedAt),
+	}, nil
 }
