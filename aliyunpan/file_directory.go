@@ -48,7 +48,7 @@ type (
 		// FileName 文件名
 		FileName string `json:"fileName"`
 		// FileSize 文件大小
-		FileSize uint64 `json:"fileSize"`
+		FileSize int64 `json:"fileSize"`
 		// 文件类别 folder / file
 		FileType            string    `json:"fileType"`
 		// 创建时间
@@ -84,7 +84,7 @@ type (
 		MimeType        string    `json:"mime_type"`
 		MimeExtension   string    `json:"mime_extension"`
 		Hidden          bool      `json:"hidden"`
-		Size            uint64       `json:"size"`
+		Size            int64       `json:"size"`
 		Starred         bool      `json:"starred"`
 		Status          string    `json:"status"`
 		UploadId        string    `json:"upload_id"`
@@ -170,8 +170,8 @@ func (f *FileEntity) String() string {
 }
 
 // TotalSize 获取目录下文件的总大小
-func (fl FileList) TotalSize() uint64 {
-	var size uint64
+func (fl FileList) TotalSize() int64 {
+	var size int64
 	for k := range fl {
 		if fl[k] == nil {
 			continue
