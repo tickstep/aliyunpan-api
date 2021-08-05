@@ -284,6 +284,29 @@ func (p *PanClient) GetUploadUrl(param *GetUploadUrlParam) (*GetUploadUrlResult,
 	return r, nil
 }
 
+// UploadFileData 上传文件数据
+func (p *PanClient) UploadFileData(uploadUrl string, uploadFunc UploadFunc) *apierror.ApiError {
+	// header
+	header := map[string]string {
+		"referer": "https://www.aliyundrive.com/",
+	}
+
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s", uploadUrl)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// request
+	if uploadFunc != nil {
+		resp, err := uploadFunc("PUT", fullUrl.String(), header)
+		if err != nil || resp.StatusCode != 200 {
+			logger.Verboseln("upload file data chunk error ", err)
+			return apierror.NewFailedApiError(err.Error())
+		}
+	}
+	return nil
+}
+
 // UploadDataChunk 上传数据。该方法是同步阻塞的
 func (p *PanClient) UploadDataChunk(url string, data *FileUploadChunkData) *apierror.ApiError {
 	var client = requester.NewHTTPClient()
