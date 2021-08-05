@@ -301,7 +301,7 @@ func (p *PanClient) UploadFileData(uploadUrl string, uploadFunc UploadFunc) *api
 		resp, err := uploadFunc("PUT", fullUrl.String(), header)
 		if err != nil || resp.StatusCode != 200 {
 			logger.Verboseln("upload file data chunk error ", err)
-			return apierror.NewFailedApiError(err.Error())
+			return apierror.NewFailedApiError("update data error")
 		}
 	}
 	return nil
