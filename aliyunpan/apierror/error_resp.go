@@ -14,8 +14,16 @@
 
 package apierror
 
+import "encoding/xml"
+
 // ErrorResp 默认的错误信息
 type ErrorResp struct {
 	ErrorCode string `json:"code"`
 	ErrorMsg string `json:"message"`
+}
+
+type ErrorXmlResp struct {
+	XMLName xml.Name `xml:"Error"`
+	Code string `xml:"Code"`
+	Message string `xml:"Message"`
 }
