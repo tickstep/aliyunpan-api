@@ -37,6 +37,10 @@ type(
 		Type            string `json:"type"`
 		// 默认为 auto_rename
 		CheckNameMode   string `json:"check_name_mode"`
+
+		// 分片大小
+		// 不进行json序列化
+		BlockSize       int64    `json:"-"`
 	}
 
 	FileUploadPartInfoResult struct {
@@ -212,8 +216,13 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 
 	// data
 	postData := param
+
 	if len(postData.PartInfoList) == 0 {
-		postData.PartInfoList = GenerateFileUploadPartInfoList(param.Size)
+		blockSize := DefaultChunkSize
+		if param.BlockSize > 0 {
+			blockSize = param.BlockSize
+		}
+		postData.PartInfoList = GenerateFileUploadPartInfoListWithChunkSize(param.Size, blockSize)
 	}
 	if postData.ContentHashName == "" {
 		postData.ContentHashName = "sha1"
@@ -299,7 +308,7 @@ func (p *PanClient) UploadFileData(uploadUrl string, uploadFunc UploadFunc) *api
 	// request
 	if uploadFunc != nil {
 		resp, err := uploadFunc("PUT", fullUrl.String(), header)
-		if err != nil || resp.StatusCode != 200 {
+		if err != nil || (resp != nil && resp.StatusCode != 200) {
 			logger.Verboseln("upload file data chunk error ", err)
 			return apierror.NewFailedApiError("update data error")
 		}
