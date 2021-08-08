@@ -44,3 +44,7 @@ func NewPanClient(webToken WebLoginToken, appToken AppLoginToken) *PanClient {
 		appToken: appToken,
 	}
 }
+
+func (pc *PanClient) UpdateToken(webToken WebLoginToken)  {
+	pc.webToken = webToken
+}
