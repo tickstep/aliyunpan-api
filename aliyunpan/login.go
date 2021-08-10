@@ -90,11 +90,9 @@ func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apier
 		return nil, apierror.NewFailedApiError(err.Error())
 	}
 
-	errResp := &apierror.ErrorResp{}
-	if err := json.Unmarshal(body, errResp); err == nil {
-		if errResp.ErrorCode != "" {
-			return nil, apierror.NewApiError(apierror.ApiCodeFailed, errResp.ErrorMsg)
-		}
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
 	}
 
 	r := &refreshTokenResult{}
