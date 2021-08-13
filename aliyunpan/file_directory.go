@@ -101,6 +101,7 @@ type (
 
 	fileListResult struct {
 		Items []*fileEntityResult `json:"items"`
+		// NextMarker 不为空，说明还有下一页
 		NextMarker string `json:"next_marker"`
 	}
 )
