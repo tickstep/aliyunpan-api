@@ -52,7 +52,7 @@ type(
 		Status        string    `json:"status"`
 		UpdatedAt     string `json:"updated_at"`
 
-		FirstFile     *FileEntity `json:"first_file"`
+		FirstFile     *fileEntityResult `json:"first_file"`
 	}
 
 	shareListResult struct {
@@ -95,7 +95,7 @@ func createShareEntity(item *shareEntityResult) *ShareEntity {
 		Expiration: apiutil.UtcTime2LocalFormat(item.Expiration),
 		UpdatedAt: apiutil.UtcTime2LocalFormat(item.UpdatedAt),
 		CreatedAt: apiutil.UtcTime2LocalFormat(item.CreatedAt),
-		FirstFile: item.FirstFile,
+		FirstFile: createFileEntity(item.FirstFile),
 	}
 }
 

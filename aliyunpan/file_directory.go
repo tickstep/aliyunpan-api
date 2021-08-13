@@ -122,6 +122,9 @@ func NewFileEntityForRootDir() *FileEntity {
 }
 
 func createFileEntity(f *fileEntityResult) *FileEntity {
+	if f == nil {
+		return nil
+	}
 	return &FileEntity{
 		DriveId: f.DriveId,
 		DomainId: f.DomainId,

@@ -44,6 +44,8 @@ const (
 	ApiCodeForbidden = 19
 	// RefreshToken已过期
 	ApiCodeRefreshTokenExpiredCode ApiCode = 20
+	// 文件不允许分享
+	ApiCodeFileShareNotAllowed ApiCode = 21
 )
 
 type ApiCode int
@@ -104,6 +106,8 @@ func ParseCommonApiError(data []byte) *ApiError  {
 				return NewApiError(ApiCodeFailed, errResp.ErrorMsg)
 			} else if "InvalidParameter.RefreshToken" == errResp.ErrorCode {
 				return NewApiError(ApiCodeRefreshTokenExpiredCode, errResp.ErrorMsg)
+			} else if "FileShareNotAllowed" == errResp.ErrorCode {
+				return NewApiError(ApiCodeFileShareNotAllowed, errResp.ErrorMsg)
 			}
 			return NewFailedApiError(errResp.ErrorMsg)
 		}
