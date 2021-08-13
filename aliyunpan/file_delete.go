@@ -93,7 +93,7 @@ func (p *PanClient) doFileBatchRequest(url, actionUrl string, param []*FileBatch
 	for _,item := range result.Responses{
 		r = append(r, &FileBatchActionResult{
 			FileId: item.Id,
-			Success: item.Status == 204,
+			Success: item.Status == 204 || item.Status == 202 || item.Status == 200,
 		})
 	}
 	return r, nil
