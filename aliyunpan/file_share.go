@@ -24,6 +24,8 @@ type(
 		Expiration    string `json:"expiration"`
 		UpdatedAt     string `json:"updated_at"`
 		CreatedAt     string `json:"created_at"`
+		Status        string    `json:"status"`
+		FirstFile     *FileEntity `json:"first_file"`
 	}
 
 	shareEntityResult struct {
@@ -49,6 +51,8 @@ type(
 		ShareUrl      string    `json:"share_url"`
 		Status        string    `json:"status"`
 		UpdatedAt     string `json:"updated_at"`
+
+		FirstFile     *FileEntity `json:"first_file"`
 	}
 
 	shareListResult struct {
@@ -87,9 +91,11 @@ func createShareEntity(item *shareEntityResult) *ShareEntity {
 		ShareUrl: item.ShareUrl,
 		FileIdList: item.FileIdList,
 		SaveCount: item.SaveCount,
+		Status: item.Status,
 		Expiration: apiutil.UtcTime2LocalFormat(item.Expiration),
 		UpdatedAt: apiutil.UtcTime2LocalFormat(item.UpdatedAt),
 		CreatedAt: apiutil.UtcTime2LocalFormat(item.CreatedAt),
+		FirstFile: item.FirstFile,
 	}
 }
 
