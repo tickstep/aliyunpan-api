@@ -33,6 +33,7 @@ type (
 		DriveId               string `json:"drive_id"`
 		ParentFileId          string `json:"parent_file_id"`
 		Limit                 int    `json:"limit"`
+		Marker                string `json:"marker"`
 	}
 
 	FileList []*FileEntity
@@ -247,6 +248,9 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 		"order_by": "updated_at",
 		"order_direction": "DESC",
 	}
+	if len(param.Marker) > 0 {
+		postData["marker"] = param.Marker
+	}
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
@@ -357,7 +361,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 		DriveId: driveId,
 		ParentFileId: parentFileInfo.FileId,
 	}
-	fileResult, err := p.FileList(fileListParam)
+	fileResult, err := p.GetAllFileList(fileListParam)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +406,7 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 		DriveId: driveId,
 		ParentFileId: folderInfo.FileId,
 	}
-	r, apiError := p.FileList(flp)
+	r, apiError := p.GetAllFileList(flp)
 	if apiError != nil {
 		if handleFileDirectoryFunc != nil {
 			handleFileDirectoryFunc(depth, folderInfo.Path, nil, apiError)
@@ -425,4 +429,46 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 		}
 	}
 	return true
+}
+
+// GetAllFileList 获取指定目录下的所有文件列表
+func (p *PanClient) GetAllFileList(param *FileListParam) (FileList, *apierror.ApiError)  {
+	internalParam := &FileListParam{
+		DriveId: param.DriveId,
+		ParentFileId: param.ParentFileId,
+		Limit: param.Limit,
+		Marker: param.Marker,
+	}
+	if internalParam.Limit <= 0 {
+		internalParam.Limit = 100
+	}
+
+	result := FileList{}
+	fileResult, err := p.fileListReq(internalParam)
+	if err != nil {
+		return nil, err
+	}
+	for k := range fileResult.Items {
+		if fileResult.Items[k] == nil {
+			continue
+		}
+		result = append(result, createFileEntity(fileResult.Items[k]))
+	}
+
+	// more page?
+	for len(fileResult.NextMarker) > 0 {
+		internalParam.Marker = fileResult.NextMarker
+		fileResult, err = p.fileListReq(internalParam)
+		if err == nil && fileResult != nil {
+			for k := range fileResult.Items {
+				if fileResult.Items[k] == nil {
+					continue
+				}
+				result = append(result, createFileEntity(fileResult.Items[k]))
+			}
+		}
+	}
+
+	// construct path
+	return result, nil
 }
