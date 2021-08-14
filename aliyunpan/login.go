@@ -81,6 +81,7 @@ func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apier
 	logger.Verboseln("do request url: " + fullUrl.String())
 	postData := map[string]string {
 		"refresh_token": refreshToken,
+		"api_id": "pJZInNHN2dZWk8qg",
 		"grant_type": "refresh_token",
 	}
 
