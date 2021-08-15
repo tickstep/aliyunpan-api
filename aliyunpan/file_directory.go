@@ -33,7 +33,15 @@ type (
 		DriveId               string `json:"drive_id"`
 		ParentFileId          string `json:"parent_file_id"`
 		Limit                 int    `json:"limit"`
+		// Marker 下一页参数
 		Marker                string `json:"marker"`
+	}
+
+	// FileListResult 文件列表返回值
+	FileListResult struct {
+		FileList FileList `json:"file_list"`
+		// NextMarker 不为空代表还有下一页
+		NextMarker string `json:"next_marker"`
 	}
 
 	FileList []*FileEntity
@@ -204,16 +212,20 @@ func (fl FileList) Count() (fileN, directoryN int64) {
 }
 
 // FileList 获取文件列表
-func (p *PanClient) FileList(param *FileListParam) (FileList, *apierror.ApiError) {
-	result := FileList{}
+func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.ApiError) {
+	result := &FileListResult{
+		FileList: FileList{},
+		NextMarker: "",
+	}
 	if flr,err := p.fileListReq(param); err == nil {
 		for k := range flr.Items {
 			if flr.Items[k] == nil {
 				continue
 			}
 
-			result = append(result, createFileEntity(flr.Items[k]))
+			result.FileList = append(result.FileList, createFileEntity(flr.Items[k]))
 		}
+		result.NextMarker = flr.NextMarker
 	}
 	return result, nil
 }
@@ -361,7 +373,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 		DriveId: driveId,
 		ParentFileId: parentFileInfo.FileId,
 	}
-	fileResult, err := p.GetAllFileList(fileListParam)
+	fileResult, err := p.FileListGetAll(fileListParam)
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +418,7 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 		DriveId: driveId,
 		ParentFileId: folderInfo.FileId,
 	}
-	r, apiError := p.GetAllFileList(flp)
+	r, apiError := p.FileListGetAll(flp)
 	if apiError != nil {
 		if handleFileDirectoryFunc != nil {
 			handleFileDirectoryFunc(depth, folderInfo.Path, nil, apiError)
@@ -432,7 +444,7 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 }
 
 // GetAllFileList 获取指定目录下的所有文件列表
-func (p *PanClient) GetAllFileList(param *FileListParam) (FileList, *apierror.ApiError)  {
+func (p *PanClient) FileListGetAll(param *FileListParam) (FileList, *apierror.ApiError)  {
 	internalParam := &FileListParam{
 		DriveId: param.DriveId,
 		ParentFileId: param.ParentFileId,
@@ -443,32 +455,22 @@ func (p *PanClient) GetAllFileList(param *FileListParam) (FileList, *apierror.Ap
 		internalParam.Limit = 100
 	}
 
-	result := FileList{}
-	fileResult, err := p.fileListReq(internalParam)
-	if err != nil {
+	fileList := FileList{}
+	result, err := p.FileList(internalParam)
+	if err != nil || result == nil {
 		return nil, err
 	}
-	for k := range fileResult.Items {
-		if fileResult.Items[k] == nil {
-			continue
-		}
-		result = append(result, createFileEntity(fileResult.Items[k]))
-	}
+	fileList = append(fileList, result.FileList...)
 
 	// more page?
-	for len(fileResult.NextMarker) > 0 {
-		internalParam.Marker = fileResult.NextMarker
-		fileResult, err = p.fileListReq(internalParam)
-		if err == nil && fileResult != nil {
-			for k := range fileResult.Items {
-				if fileResult.Items[k] == nil {
-					continue
-				}
-				result = append(result, createFileEntity(fileResult.Items[k]))
-			}
+	for len(result.NextMarker) > 0 {
+		internalParam.Marker = result.NextMarker
+		result, err = p.FileList(internalParam)
+		if err == nil && result != nil {
+			fileList = append(fileList, result.FileList...)
+		} else {
+			break
 		}
 	}
-
-	// construct path
-	return result, nil
+	return fileList, nil
 }

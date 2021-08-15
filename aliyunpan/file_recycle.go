@@ -13,22 +13,58 @@ type (
 	RecycleBinFileListParam struct {
 		DriveId               string `json:"drive_id"`
 		Limit                 int    `json:"limit"`
+		Marker                string `json:"marker"`
 	}
 )
 
 // RecycleBinFileList 获取回收站文件列表
-func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (FileList, *apierror.ApiError) {
-	result := FileList{}
+func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*FileListResult, *apierror.ApiError) {
+	result := &FileListResult{
+		FileList: FileList{},
+		NextMarker: "",
+	}
 	if flr,err := p.recycleBinFileListReq(param); err == nil {
 		for k := range flr.Items {
 			if flr.Items[k] == nil {
 				continue
 			}
 
-			result = append(result, createFileEntity(flr.Items[k]))
+			result.FileList = append(result.FileList, createFileEntity(flr.Items[k]))
 		}
+		result.NextMarker = flr.NextMarker
 	}
 	return result, nil
+}
+
+// RecycleBinFileListGetAll 获取所有列表文件
+func (p *PanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (FileList, *apierror.ApiError) {
+	internalParam := &RecycleBinFileListParam{
+		DriveId: param.DriveId,
+		Limit:   param.Limit,
+		Marker:  param.Marker,
+	}
+	if internalParam.Limit <= 0 {
+		internalParam.Limit = 100
+	}
+
+	fileList := FileList{}
+	result, err := p.RecycleBinFileList(internalParam)
+	if err != nil || result == nil {
+		return nil, err
+	}
+	fileList = append(fileList, result.FileList...)
+
+	// more page?
+	for len(result.NextMarker) > 0 {
+		internalParam.Marker = result.NextMarker
+		result, err = p.RecycleBinFileList(internalParam)
+		if err == nil && result != nil {
+			fileList = append(fileList, result.FileList...)
+		} else {
+			break
+		}
+	}
+	return fileList, nil
 }
 
 func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*fileListResult, *apierror.ApiError) {
@@ -53,6 +89,9 @@ func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*file
 		"video_thumbnail_process": "video/snapshot,t_0,f_jpg,ar_auto,w_800",
 		"order_by": "name",
 		"order_direction": "DESC",
+	}
+	if len(param.Marker) > 0 {
+		postData["marker"] = param.Marker
 	}
 
 	// request
