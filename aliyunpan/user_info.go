@@ -88,7 +88,7 @@ type (
 			Privileges []struct {
 				FeatureID     string `json:"feature_id"`
 				FeatureAttrID string `json:"feature_attr_id"`
-				Quota         int    `json:"quota"`
+				Quota         int64    `json:"quota"`
 			} `json:"privileges"`
 		} `json:"personal_rights_info"`
 

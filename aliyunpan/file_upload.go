@@ -113,7 +113,7 @@ type(
 		FileId          string    `json:"file_id"`
 		Name            string    `json:"name"`
 		Type            string    `json:"type"`
-		Size            int       `json:"size"`
+		Size            int64       `json:"size"`
 		UploadId        string    `json:"upload_id"`
 		ParentFileId    string    `json:"parent_file_id"`
 		Crc64Hash       string    `json:"crc64_hash"`
@@ -133,7 +133,7 @@ type(
 		UpdatedAt       string `json:"updated_at"`
 		FileExtension   string    `json:"file_extension"`
 		Hidden          bool      `json:"hidden"`
-		Size            int       `json:"size"`
+		Size            int64       `json:"size"`
 		Starred         bool      `json:"starred"`
 		Status          string    `json:"status"`
 		UploadId        string    `json:"upload_id"`

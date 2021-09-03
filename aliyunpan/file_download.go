@@ -51,10 +51,10 @@ type (
 		InternalUrl string    `json:"internal_url"`
 		CdnUrl      string    `json:"cdn_url"`
 		Expiration  string `json:"expiration"`
-		Size        int       `json:"size"`
+		Size        int64       `json:"size"`
 		Ratelimit   struct {
-			PartSpeed int `json:"part_speed"`
-			PartSize  int `json:"part_size"`
+			PartSpeed int64 `json:"part_speed"`
+			PartSize  int64 `json:"part_size"`
 		} `json:"ratelimit"`
 	}
 )
