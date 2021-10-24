@@ -1,14 +1,19 @@
 package aliyunpan
 
 import (
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"github.com/tickstep/library-go/requester"
+	"github.com/tickstep/library-go/requester/rio"
 	"io"
 	"math"
+	"math/big"
 	"net/http"
 	"strings"
 )
@@ -37,6 +42,9 @@ type(
 		Type            string `json:"type"`
 		// 默认为 auto_rename
 		CheckNameMode   string `json:"check_name_mode"`
+
+		ProofCode string `json:"proof_code"`
+		ProofVersion string `json:"proof_version"`
 
 		// 分片大小
 		// 不进行json序列化
@@ -185,6 +193,7 @@ func GenerateFileUploadPartInfoList(size int64) []FileUploadPartInfoParam {
 	return GenerateFileUploadPartInfoListWithChunkSize(size, DefaultChunkSize)
 }
 
+// GenerateFileUploadPartInfoList 根据文件大小和指定的分片大小自动生成分片
 func GenerateFileUploadPartInfoListWithChunkSize(size, chunkSize int64) []FileUploadPartInfoParam {
 	r := []FileUploadPartInfoParam{}
 	if size <= chunkSize {
@@ -202,6 +211,32 @@ func GenerateFileUploadPartInfoListWithChunkSize(size, chunkSize int64) []FileUp
 	return r
 }
 
+// CalcProofCode 计算文件上传防伪码
+func CalcProofCode(accessToken string, reader rio.ReaderAtLen64, fileSize int64) string {
+	if fileSize == 0 { // empty file
+		return ""
+	}
+
+	md5w := md5.New()
+	md5w.Write([]byte(accessToken))
+	md5bytes := md5w.Sum(nil)
+	hashCode := hex.EncodeToString(md5bytes)[0:16]
+	hashInteger, _ := new(big.Int).SetString(hashCode, 16)
+	startPos := hashInteger.Int64() % fileSize
+	endPos := startPos + 8
+	if endPos > fileSize {
+		endPos = fileSize
+	}
+
+	// read byte from file
+	readCount := endPos - startPos
+	proofBytes := make([]byte, readCount)
+	reader.ReadAt(proofBytes, startPos)
+
+	// calc the base64 string for read bytes
+	return base64.StdEncoding.EncodeToString(proofBytes)
+}
+
 // CreateUploadFile 创建上传文件，如果文件已经上传过则会直接秒传
 func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileUploadResult, *apierror.ApiError) {
 	// header
@@ -211,7 +246,7 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 
 	// url
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/v2/file/create", API_URL)
+	fmt.Fprintf(fullUrl, "%s/adrive/v2/file/createWithFolders", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// data
@@ -229,6 +264,9 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 	}
 	if postData.ParentFileId == "" {
 		postData.ParentFileId = DefaultRootParentFileId
+	}
+	if postData.ProofVersion == "" {
+		postData.ProofVersion = "v1"
 	}
 	postData.Type = "file"
 	postData.CheckNameMode = "auto_rename"
