@@ -46,6 +46,8 @@ const (
 	ApiCodeRefreshTokenExpiredCode ApiCode = 20
 	// 文件不允许分享
 	ApiCodeFileShareNotAllowed ApiCode = 21
+	// 文件上传水印码错误
+	ApiCodeInvalidRapidProof ApiCode = 22
 )
 
 type ApiCode int
@@ -108,6 +110,8 @@ func ParseCommonApiError(data []byte) *ApiError  {
 				return NewApiError(ApiCodeRefreshTokenExpiredCode, errResp.ErrorMsg)
 			} else if "FileShareNotAllowed" == errResp.ErrorCode {
 				return NewApiError(ApiCodeFileShareNotAllowed, errResp.ErrorMsg)
+			} else if "InvalidRapidProof" == errResp.ErrorCode {
+				return NewApiError(ApiCodeInvalidRapidProof, errResp.ErrorMsg)
 			}
 			return NewFailedApiError(errResp.ErrorMsg)
 		}
