@@ -222,7 +222,13 @@ func CalcProofCode(accessToken string, reader rio.ReaderAtLen64, fileSize int64)
 	md5bytes := md5w.Sum(nil)
 	hashCode := hex.EncodeToString(md5bytes)[0:16]
 	hashInteger, _ := new(big.Int).SetString(hashCode, 16)
-	startPos := hashInteger.Int64() % fileSize
+
+	z := big.NewInt(0)
+	startPosInteger := big.NewInt(0)
+	z.Div(hashInteger, big.NewInt(fileSize))
+	startPosInteger.Sub(hashInteger, big.NewInt(z.Int64() * fileSize))
+	startPos := startPosInteger.Int64()
+
 	endPos := startPos + 8
 	if endPos > fileSize {
 		endPos = fileSize
