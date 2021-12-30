@@ -105,6 +105,7 @@ func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string
 	}
 
 	listFilePath := &FileListParam{}
+	listFilePath.DriveId = driveId
 	listFilePath.ParentFileId = parentFileId
 	fileResult, err := p.FileListGetAll(listFilePath)
 	if err != nil {
