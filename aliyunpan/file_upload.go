@@ -274,8 +274,10 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 	if postData.ProofVersion == "" {
 		postData.ProofVersion = "v1"
 	}
+	if postData.CheckNameMode == "" {
+		postData.CheckNameMode = "auto_rename"
+	}
 	postData.Type = "file"
-	postData.CheckNameMode = "auto_rename"
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
