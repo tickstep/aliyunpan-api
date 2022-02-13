@@ -30,11 +30,13 @@ type (
 
 	// FileListParam 文件列表参数
 	FileListParam struct {
-		DriveId               string `json:"drive_id"`
-		ParentFileId          string `json:"parent_file_id"`
-		Limit                 int    `json:"limit"`
+		OrderBy        FileOrderBy        `json:"order_by"`
+		OrderDirection FileOrderDirection `json:"order_direction"`
+		DriveId        string             `json:"drive_id"`
+		ParentFileId   string             `json:"parent_file_id"`
+		Limit          int                `json:"limit"`
 		// Marker 下一页参数
-		Marker                string `json:"marker"`
+		Marker string `json:"marker"`
 	}
 
 	// FileListResult 文件列表返回值
@@ -49,9 +51,9 @@ type (
 	// FileEntity 文件/文件夹信息
 	FileEntity struct {
 		// 网盘ID
-		DriveId         string    `json:"driveId"`
+		DriveId string `json:"driveId"`
 		// 域ID
-		DomainId        string    `json:"domainId"`
+		DomainId string `json:"domainId"`
 		// FileId 文件ID
 		FileId string `json:"fileId"`
 		// FileName 文件名
@@ -59,53 +61,53 @@ type (
 		// FileSize 文件大小
 		FileSize int64 `json:"fileSize"`
 		// 文件类别 folder / file
-		FileType            string    `json:"fileType"`
+		FileType string `json:"fileType"`
 		// 创建时间
-		CreatedAt       string `json:"createdAt"`
+		CreatedAt string `json:"createdAt"`
 		// 最后修改时间
-		UpdatedAt       string `json:"updatedAt"`
+		UpdatedAt string `json:"updatedAt"`
 		// 后缀名，例如：dmg
-		FileExtension   string    `json:"fileExtension"`
+		FileExtension string `json:"fileExtension"`
 		// 文件上传ID
-		UploadId        string    `json:"uploadId"`
+		UploadId string `json:"uploadId"`
 		// 父文件夹ID
-		ParentFileId    string    `json:"parentFileId"`
+		ParentFileId string `json:"parentFileId"`
 		// 内容CRC64校验值，只有文件才会有
-		Crc64Hash       string    `json:"crc64Hash"`
+		Crc64Hash string `json:"crc64Hash"`
 		// 内容Hash值，只有文件才会有
-		ContentHash     string    `json:"contentHash"`
+		ContentHash string `json:"contentHash"`
 		// 内容Hash计算方法，只有文件才会有，默认为：sha1
-		ContentHashName string    `json:"contentHashName"`
+		ContentHashName string `json:"contentHashName"`
 		// FilePath 文件的完整路径
 		Path string `json:"path"`
 	}
 
 	fileEntityResult struct {
-		DriveId         string    `json:"drive_id"`
-		DomainId        string    `json:"domain_id"`
-		FileId          string    `json:"file_id"`
-		Name            string    `json:"name"`
-		Type            string    `json:"type"`
-		ContentType     string    `json:"content_type"`
+		DriveId         string `json:"drive_id"`
+		DomainId        string `json:"domain_id"`
+		FileId          string `json:"file_id"`
+		Name            string `json:"name"`
+		Type            string `json:"type"`
+		ContentType     string `json:"content_type"`
 		CreatedAt       string `json:"created_at"`
 		UpdatedAt       string `json:"updated_at"`
-		FileExtension   string    `json:"file_extension"`
-		MimeType        string    `json:"mime_type"`
-		MimeExtension   string    `json:"mime_extension"`
-		Hidden          bool      `json:"hidden"`
-		Size            int64       `json:"size"`
-		Starred         bool      `json:"starred"`
-		Status          string    `json:"status"`
-		UploadId        string    `json:"upload_id"`
-		ParentFileId    string    `json:"parent_file_id"`
-		Crc64Hash       string    `json:"crc64_hash"`
-		ContentHash     string    `json:"content_hash"`
-		ContentHashName string    `json:"content_hash_name"`
-		DownloadUrl     string    `json:"download_Url"`
-		Url             string    `json:"Url"`
-		Category        string    `json:"category"`
-		EncryptMode     string    `json:"encrypt_mode"`
-		PunishFlag      int       `json:"punish_flag"`
+		FileExtension   string `json:"file_extension"`
+		MimeType        string `json:"mime_type"`
+		MimeExtension   string `json:"mime_extension"`
+		Hidden          bool   `json:"hidden"`
+		Size            int64  `json:"size"`
+		Starred         bool   `json:"starred"`
+		Status          string `json:"status"`
+		UploadId        string `json:"upload_id"`
+		ParentFileId    string `json:"parent_file_id"`
+		Crc64Hash       string `json:"crc64_hash"`
+		ContentHash     string `json:"content_hash"`
+		ContentHashName string `json:"content_hash_name"`
+		DownloadUrl     string `json:"download_Url"`
+		Url             string `json:"Url"`
+		Category        string `json:"category"`
+		EncryptMode     string `json:"encrypt_mode"`
+		PunishFlag      int    `json:"punish_flag"`
 	}
 
 	fileListResult struct {
@@ -113,20 +115,33 @@ type (
 		// NextMarker 不为空，说明还有下一页
 		NextMarker string `json:"next_marker"`
 	}
+
+	FileOrderBy        string
+	FileOrderDirection string
 )
 
 const (
 	DefaultRootParentFileId string = "root"
+
+	FileOrderByName      FileOrderBy = "name"
+	FileOrderByCreatedAt FileOrderBy = "created_at"
+	FileOrderByUpdatedAt FileOrderBy = "updated_at"
+	FileOrderBySize      FileOrderBy = "size"
+
+	// FileOrderDirectionDesc 降序
+	FileOrderDirectionDesc FileOrderDirection = "DESC"
+	// FileOrderDirectionAsc 升序
+	FileOrderDirectionAsc FileOrderDirection = "ASC"
 )
 
 // NewFileEntityForRootDir 创建根目录"/"的默认文件信息
 func NewFileEntityForRootDir() *FileEntity {
-	return &FileEntity {
-		FileId: DefaultRootParentFileId,
-		FileType: "folder",
-		FileName: "/",
+	return &FileEntity{
+		FileId:       DefaultRootParentFileId,
+		FileType:     "folder",
+		FileName:     "/",
 		ParentFileId: "",
-		Path: "/",
+		Path:         "/",
 	}
 }
 
@@ -135,21 +150,21 @@ func createFileEntity(f *fileEntityResult) *FileEntity {
 		return nil
 	}
 	return &FileEntity{
-		DriveId: f.DriveId,
-		DomainId: f.DomainId,
-		FileId: f.FileId,
-		FileName: f.Name,
-		FileSize: f.Size,
-		FileType: f.Type,
-		CreatedAt: apiutil.UtcTime2LocalFormat(f.CreatedAt),
-		UpdatedAt: apiutil.UtcTime2LocalFormat(f.UpdatedAt),
-		FileExtension: f.FileExtension,
-		UploadId: f.UploadId,
-		ParentFileId: f.ParentFileId,
-		Crc64Hash: f.Crc64Hash,
-		ContentHash: f.ContentHash,
+		DriveId:         f.DriveId,
+		DomainId:        f.DomainId,
+		FileId:          f.FileId,
+		FileName:        f.Name,
+		FileSize:        f.Size,
+		FileType:        f.Type,
+		CreatedAt:       apiutil.UtcTime2LocalFormat(f.CreatedAt),
+		UpdatedAt:       apiutil.UtcTime2LocalFormat(f.UpdatedAt),
+		FileExtension:   f.FileExtension,
+		UploadId:        f.UploadId,
+		ParentFileId:    f.ParentFileId,
+		Crc64Hash:       f.Crc64Hash,
+		ContentHash:     f.ContentHash,
 		ContentHashName: f.ContentHashName,
-		Path: f.Name,
+		Path:            f.Name,
 	}
 }
 
@@ -214,10 +229,10 @@ func (fl FileList) Count() (fileN, directoryN int64) {
 // FileList 获取文件列表
 func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.ApiError) {
 	result := &FileListResult{
-		FileList: FileList{},
+		FileList:   FileList{},
 		NextMarker: "",
 	}
-	if flr,err := p.fileListReq(param); err == nil {
+	if flr, err := p.fileListReq(param); err == nil {
 		for k := range flr.Items {
 			if flr.Items[k] == nil {
 				continue
@@ -231,7 +246,7 @@ func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.A
 }
 
 func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierror.ApiError) {
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -247,18 +262,24 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 	if limit <= 0 {
 		limit = 100
 	}
-	postData := map[string]interface{} {
-		"drive_id": param.DriveId,
-		"parent_file_id": pFileId,
-		"limit": limit,
-		"all": false,
-		"url_expire_sec": 1600,
+	if param.OrderBy == "" {
+		param.OrderBy = FileOrderByUpdatedAt
+	}
+	if param.OrderDirection == "" {
+		param.OrderDirection = FileOrderDirectionDesc
+	}
+	postData := map[string]interface{}{
+		"drive_id":                param.DriveId,
+		"parent_file_id":          pFileId,
+		"limit":                   limit,
+		"all":                     false,
+		"url_expire_sec":          1600,
 		"image_thumbnail_process": "image/resize,w_400/format,jpeg",
-		"image_url_process": "image/resize,w_1920/format,jpeg",
+		"image_url_process":       "image/resize,w_1920/format,jpeg",
 		"video_thumbnail_process": "video/snapshot,t_0,f_jpg,ar_auto,w_800",
-		"fields": "*",
-		"order_by": "updated_at",
-		"order_direction": "DESC",
+		"fields":                  "*",
+		"order_by":                param.OrderBy,
+		"order_direction":         param.OrderDirection,
 	}
 	if len(param.Marker) > 0 {
 		postData["marker"] = param.Marker
@@ -287,7 +308,7 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 
 // FileInfoById 通过FileId获取文件信息
 func (p *PanClient) FileInfoById(driveId, fileId string) (*FileEntity, *apierror.ApiError) {
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -299,9 +320,9 @@ func (p *PanClient) FileInfoById(driveId, fileId string) (*FileEntity, *apierror
 	if pFileId == "" {
 		pFileId = DefaultRootParentFileId
 	}
-	postData := map[string]interface{} {
+	postData := map[string]interface{}{
 		"drive_id": driveId,
-		"file_id": pFileId,
+		"file_id":  pFileId,
 	}
 
 	// request
@@ -347,14 +368,14 @@ func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *Fi
 			return nil, apierror.NewFailedApiError("pathStr必须是绝对路径")
 		}
 	}
-	fileInfo,error = p.getFileInfoByPath(driveId, 0, &pathSlice, nil)
+	fileInfo, error = p.getFileInfoByPath(driveId, 0, &pathSlice, nil)
 	if fileInfo != nil {
 		fileInfo.Path = pathStr
 	}
 	return fileInfo, error
 }
 
-func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]string, parentFileInfo *FileEntity) (*FileEntity, *apierror.ApiError)  {
+func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]string, parentFileInfo *FileEntity) (*FileEntity, *apierror.ApiError) {
 	if parentFileInfo == nil {
 		// default root "/" entity
 		parentFileInfo = NewFileEntityForRootDir()
@@ -362,7 +383,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 			// root path "/"
 			return parentFileInfo, nil
 		}
-		return p.getFileInfoByPath(driveId, index + 1, pathSlice, parentFileInfo)
+		return p.getFileInfoByPath(driveId, index+1, pathSlice, parentFileInfo)
 	}
 
 	if index >= len(*pathSlice) {
@@ -370,7 +391,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 	}
 
 	fileListParam := &FileListParam{
-		DriveId: driveId,
+		DriveId:      driveId,
 		ParentFileId: parentFileInfo.FileId,
 	}
 	fileResult, err := p.FileListGetAll(fileListParam)
@@ -383,7 +404,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 	}
 	for _, fileEntity := range fileResult {
 		if fileEntity.FileName == (*pathSlice)[index] {
-			return p.getFileInfoByPath(driveId, index + 1, pathSlice, fileEntity)
+			return p.getFileInfoByPath(driveId, index+1, pathSlice, fileEntity)
 		}
 	}
 	return nil, apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, "文件不存在")
@@ -415,7 +436,7 @@ func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, han
 
 func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth int, handleFileDirectoryFunc HandleFileDirectoryFunc, fld *FileList) bool {
 	flp := &FileListParam{
-		DriveId: driveId,
+		DriveId:      driveId,
 		ParentFileId: folderInfo.FileId,
 	}
 	r, apiError := p.FileListGetAll(flp)
@@ -427,7 +448,7 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 	}
 	ok := true
 	for _, fi := range r {
-		fi.Path = strings.ReplaceAll(folderInfo.Path + PathSeparator + fi.FileName, "//", "/")
+		fi.Path = strings.ReplaceAll(folderInfo.Path+PathSeparator+fi.FileName, "//", "/")
 		*fld = append(*fld, fi)
 		if fi.IsFolder() {
 			ok = p.recurseList(driveId, fi, depth+1, handleFileDirectoryFunc, fld)
@@ -444,12 +465,14 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 }
 
 // GetAllFileList 获取指定目录下的所有文件列表
-func (p *PanClient) FileListGetAll(param *FileListParam) (FileList, *apierror.ApiError)  {
+func (p *PanClient) FileListGetAll(param *FileListParam) (FileList, *apierror.ApiError) {
 	internalParam := &FileListParam{
-		DriveId: param.DriveId,
-		ParentFileId: param.ParentFileId,
-		Limit: param.Limit,
-		Marker: param.Marker,
+		OrderBy:        param.OrderBy,
+		OrderDirection: param.OrderDirection,
+		DriveId:        param.DriveId,
+		ParentFileId:   param.ParentFileId,
+		Limit:          param.Limit,
+		Marker:         param.Marker,
 	}
 	if internalParam.Limit <= 0 {
 		internalParam.Limit = 100

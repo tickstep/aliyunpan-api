@@ -24,14 +24,14 @@ import (
 
 type (
 	userpw struct {
-		UserName string `json:"username"`
-		Password string `json:"password"`
+		UserName     string `json:"username"`
+		Password     string `json:"password"`
 		RefreshToken string `json:"refreshToken"`
 	}
 )
 
 func objToJsonStr(v interface{}) string {
-	r,_ := jsoniter.MarshalToString(v)
+	r, _ := jsoniter.MarshalToString(v)
 	return string(r)
 }
 
@@ -59,17 +59,19 @@ func main() {
 
 	// user info
 	fmt.Println(" ")
-	ui,_ := panClient.GetUserInfo()
+	ui, _ := panClient.GetUserInfo()
 	fmt.Println(objToJsonStr(ui))
 
 	// file list
-	//fmt.Println(" ")
-	//fl,_ := panClient.FileList(&aliyunpan.FileListParam{
-	//	DriveId: ui.DefaultDriveId,
-	//	ParentFileId: aliyunpan.DefaultRootParentFileId,
-	//	Limit: 10,
-	//})
-	//fmt.Println(objToJsonStr(fl))
+	fmt.Println(" ")
+	fl, _ := panClient.FileList(&aliyunpan.FileListParam{
+		//OrderBy:        aliyunpan.FileOrderByName,
+		//OrderDirection: aliyunpan.FileOrderDirectionAsc,
+		DriveId:      ui.FileDriveId,
+		ParentFileId: "610dfd8ab42d8eae886c4776927dca2a12dccb6a",
+		Limit:        10,
+	})
+	fmt.Println(objToJsonStr(fl))
 
 	// file info
 	//fmt.Println(" ")
@@ -118,14 +120,11 @@ func main() {
 	fmt.Println("download url")
 	dp := &aliyunpan.GetFileDownloadUrlParam{
 		DriveId: ui.FileDriveId,
-		FileId: "60f3c5b938e72352187e4c6da13879adf489267e",
+		FileId:  "60f3c5b938e72352187e4c6da13879adf489267e",
 	}
-	gfdr,_ := panClient.GetFileDownloadUrl(dp)
+	gfdr, _ := panClient.GetFileDownloadUrl(dp)
 	fmt.Println(objToJsonStr(gfdr))
 	fmt.Println(gfdr.Url)
-
-
-
 
 	// batch task
 	//requests := aliyunpan.BatchRequestList{}
