@@ -67,6 +67,11 @@ type (
 		Description string `json:"description"`
 		Name        string `json:"name"`
 	}
+
+	// AlbumDeleteParam 相簿删除参数
+	AlbumDeleteParam struct {
+		AlbumId string `json:"albumId"`
+	}
 )
 
 const (
@@ -207,6 +212,9 @@ func (p *PanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror.Ap
 	fmt.Fprintf(fullUrl, "%s/adrive/v1/album/update", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
+	if param.AlbumId == "" {
+		return nil, apierror.NewFailedApiError("album id cannot be empty")
+	}
 	if param.Name == "" {
 		return nil, apierror.NewFailedApiError("album name cannot be empty")
 	}
@@ -236,4 +244,37 @@ func (p *PanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror.Ap
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil
+}
+
+// AlbumDelete 相簿删除
+func (p *PanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/album/delete", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	if param.AlbumId == "" {
+		return false, apierror.NewFailedApiError("album id cannot be empty")
+	}
+
+	postData := map[string]interface{}{
+		"album_id": param.AlbumId,
+	}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("delete album error ", err)
+		return false, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return false, err1
+	}
+
+	return true, nil
 }
