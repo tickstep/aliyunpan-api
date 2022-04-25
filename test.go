@@ -232,7 +232,7 @@ func main() {
 	//	OrderBy:        aliyunpan.AlbumOrderByFileCount,
 	//	OrderDirection: aliyunpan.AlbumOrderDirectionDesc,
 	//	Limit:          2,
-	//	Marker:         "WyI0ZDAwMWQ0ODU2NGY0M2IzYmM1NjYyODc0ZjA0YmJlNiIsIm4iLDAsImJqMjkjYzJhM2MyNmNmMDVjNDMxYmFkMzJjZDE3NmIyOTRmNjY2MjY1MTcyZiJd",
+	//	Marker:         "",
 	//})
 	//fmt.Println(objToJsonStr(albumList))
 
@@ -249,8 +249,16 @@ func main() {
 	//fmt.Println(e)
 	//fmt.Println(objToJsonStr(r))
 
-	r1, e := panClient.AlbumGet(&aliyunpan.AlbumGetParam{
-		AlbumId: "4c0fb4c5875f40ff8aceba07f41a41f162651bd9",
+	//r1, e := panClient.AlbumGet(&aliyunpan.AlbumGetParam{
+	//	AlbumId: "4c0fb4c5875f40ff8aceba07f41a41f162651bd9",
+	//})
+	//fmt.Println(e)
+	//fmt.Println(objToJsonStr(r1))
+
+	r1, e := panClient.AlbumShareCreate(&aliyunpan.AlbumShareCreateParam{
+		AlbumId:    "70a961cc1e1e40309f3217c99738f68662624f62",
+		SharePwd:   "u897",
+		Expiration: "2022-05-25 14:00:00",
 	})
 	fmt.Println(e)
 	fmt.Println(objToJsonStr(r1))
