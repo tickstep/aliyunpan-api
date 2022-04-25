@@ -40,3 +40,8 @@ func TestLocalTime2UtcFormat(t *testing.T) {
 	r := LocalTime2UtcFormat("2021-07-30 07:18:07")
 	fmt.Println(r) // 2021-07-29T23:18:07.000Z
 }
+
+func TestUnixTime2LocalFormat(t *testing.T) {
+	r := UnixTime2LocalFormat(1650793433058)
+	fmt.Println(r) // 2022-04-24 17:43:53
+}

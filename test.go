@@ -57,21 +57,21 @@ func main() {
 	// pan client
 	panClient := aliyunpan.NewPanClient(*webToken, aliyunpan.AppLoginToken{})
 
-	// user info
-	fmt.Println(" ")
-	ui, _ := panClient.GetUserInfo()
-	fmt.Println(objToJsonStr(ui))
-
-	// file list
-	fmt.Println(" ")
-	fl, _ := panClient.FileList(&aliyunpan.FileListParam{
-		//OrderBy:        aliyunpan.FileOrderByName,
-		//OrderDirection: aliyunpan.FileOrderDirectionAsc,
-		DriveId:      ui.FileDriveId,
-		ParentFileId: "610dfd8ab42d8eae886c4776927dca2a12dccb6a",
-		Limit:        10,
-	})
-	fmt.Println(objToJsonStr(fl))
+	//// user info
+	//fmt.Println(" ")
+	//ui, _ := panClient.GetUserInfo()
+	//fmt.Println(objToJsonStr(ui))
+	//
+	//// file list
+	//fmt.Println(" ")
+	//fl, _ := panClient.FileList(&aliyunpan.FileListParam{
+	//	//OrderBy:        aliyunpan.FileOrderByName,
+	//	//OrderDirection: aliyunpan.FileOrderDirectionAsc,
+	//	DriveId:      ui.FileDriveId,
+	//	ParentFileId: "610dfd8ab42d8eae886c4776927dca2a12dccb6a",
+	//	Limit:        10,
+	//})
+	//fmt.Println(objToJsonStr(fl))
 
 	// file info
 	//fmt.Println(" ")
@@ -117,14 +117,14 @@ func main() {
 	//fmt.Println(bb)
 
 	// download url
-	fmt.Println("download url")
-	dp := &aliyunpan.GetFileDownloadUrlParam{
-		DriveId: ui.FileDriveId,
-		FileId:  "60f3c5b938e72352187e4c6da13879adf489267e",
-	}
-	gfdr, _ := panClient.GetFileDownloadUrl(dp)
-	fmt.Println(objToJsonStr(gfdr))
-	fmt.Println(gfdr.Url)
+	//fmt.Println("download url")
+	//dp := &aliyunpan.GetFileDownloadUrlParam{
+	//	DriveId: ui.FileDriveId,
+	//	FileId:  "60f3c5b938e72352187e4c6da13879adf489267e",
+	//}
+	//gfdr, _ := panClient.GetFileDownloadUrl(dp)
+	//fmt.Println(objToJsonStr(gfdr))
+	//fmt.Println(gfdr.Url)
 
 	// batch task
 	//requests := aliyunpan.BatchRequestList{}
@@ -227,4 +227,12 @@ func main() {
 	//	FileIdList: fileIdList,
 	//})
 	//fmt.Println(objToJsonStr(slc))
+
+	albumList, _ := panClient.AlbumList(&aliyunpan.AlbumListParam{
+		OrderBy:        aliyunpan.AlbumOrderByFileCount,
+		OrderDirection: aliyunpan.AlbumOrderDirectionDesc,
+		Limit:          2,
+		Marker:         "WyI0ZDAwMWQ0ODU2NGY0M2IzYmM1NjYyODc0ZjA0YmJlNiIsIm4iLDAsImJqMjkjYzJhM2MyNmNmMDVjNDMxYmFkMzJjZDE3NmIyOTRmNjY2MjY1MTcyZiJd",
+	})
+	fmt.Println(objToJsonStr(albumList))
 }

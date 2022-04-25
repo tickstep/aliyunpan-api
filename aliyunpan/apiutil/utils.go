@@ -84,21 +84,26 @@ func LocalTime2UtcFormat(utcTimeStr string) string {
 	return t.UTC().Format("2006-01-02T15:04:05.000Z07:00")
 }
 
-// 增加公共header
+// UnixTime2LocalFormat 时间戳转换为本地时间字符串
+func UnixTime2LocalFormat(unixTime int64) string {
+	return time.UnixMilli(unixTime).Format("2006-01-02 15:04:05")
+}
+
+// AddCommonHeader 增加公共header
 func AddCommonHeader(headers map[string]string) map[string]string {
-	commonHeaders := map[string]string {
-		"accept": "application/json, text/plain, */*",
-		"referer": "https://www.aliyundrive.com/",
-		"origin": "https://www.aliyundrive.com",
+	commonHeaders := map[string]string{
+		"accept":       "application/json, text/plain, */*",
+		"referer":      "https://www.aliyundrive.com/",
+		"origin":       "https://www.aliyundrive.com",
 		"content-type": "application/json;charset=UTF-8",
-		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+		"user-agent":   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 	}
 	if headers == nil {
 		return commonHeaders
 	}
 
 	// merge
-	for k,v := range headers {
+	for k, v := range headers {
 		commonHeaders[strings.ToLower(k)] = v
 	}
 	return commonHeaders
@@ -109,7 +114,7 @@ func GetMapSet(param interface{}) map[string]interface{} {
 		return nil
 	}
 
-	r,_ := jsoniter.MarshalToString(param)
+	r, _ := jsoniter.MarshalToString(param)
 	m := map[string]interface{}{}
 	jsoniter.Unmarshal([]byte(r), &m)
 	return m
