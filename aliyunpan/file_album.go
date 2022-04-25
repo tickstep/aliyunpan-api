@@ -111,6 +111,12 @@ type (
 		AlbumId       string                 `json:"album_id"`
 		DriveFileList []FileBatchActionParam `json:"drive_file_list"`
 	}
+
+	// AlbumAddFileParam 相簿增加文件参数
+	AlbumAddFileParam struct {
+		AlbumId       string                 `json:"album_id"`
+		DriveFileList []FileBatchActionParam `json:"drive_file_list"`
+	}
 )
 
 const (
@@ -519,4 +525,50 @@ func (p *PanClient) AlbumDeleteFile(param *AlbumDeleteFileParam) (bool, *apierro
 	}
 
 	return true, nil
+}
+
+// AlbumAddFile 相簿增加文件列表
+func (p *PanClient) AlbumAddFile(param *AlbumAddFileParam) (*FileList, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/album/add_files", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	if param.AlbumId == "" {
+		return nil, apierror.NewFailedApiError("album id cannot be empty")
+	}
+	postData := param
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("add album file error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	type fileListResult struct {
+		Items []*fileEntityResult `json:"file_list"`
+	}
+	r := &fileListResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse add album file result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	fileList := FileList{}
+	for k := range r.Items {
+		if r.Items[k] == nil {
+			continue
+		}
+		fileList = append(fileList, createFileEntity(r.Items[k]))
+	}
+	return &fileList, nil
 }
