@@ -48,17 +48,19 @@ const (
 	ApiCodeFileShareNotAllowed ApiCode = 21
 	// 文件上传水印码错误
 	ApiCodeInvalidRapidProof ApiCode = 22
+	// 资源不存在
+	ApiCodeNotFoundView ApiCode = 23
 )
 
 type ApiCode int
 
 type ApiError struct {
 	Code ApiCode
-	Err string
+	Err  string
 }
 
 func NewApiError(code ApiCode, err string) *ApiError {
-	return &ApiError {
+	return &ApiError{
 		code,
 		err,
 	}
@@ -94,7 +96,7 @@ func (a *ApiError) ErrCode() ApiCode {
 }
 
 // ParseCommonApiError 解析公共错误，如果没有错误则返回nil
-func ParseCommonApiError(data []byte) *ApiError  {
+func ParseCommonApiError(data []byte) *ApiError {
 	errResp := &ErrorResp{}
 	if err := json.Unmarshal(data, errResp); err == nil {
 		if errResp.ErrorCode != "" {
@@ -112,6 +114,8 @@ func ParseCommonApiError(data []byte) *ApiError  {
 				return NewApiError(ApiCodeFileShareNotAllowed, errResp.ErrorMsg)
 			} else if "InvalidRapidProof" == errResp.ErrorCode {
 				return NewApiError(ApiCodeInvalidRapidProof, errResp.ErrorMsg)
+			} else if "NotFound.View" == errResp.ErrorCode {
+				return NewApiError(ApiCodeNotFoundView, errResp.ErrorMsg)
 			}
 			return NewFailedApiError(errResp.ErrorMsg)
 		}

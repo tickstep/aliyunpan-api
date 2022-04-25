@@ -237,14 +237,21 @@ func main() {
 	//fmt.Println(objToJsonStr(albumList))
 
 	//r, _ := panClient.AlbumEdit(&aliyunpan.AlbumEditParam{
-	//	AlbumId:     "7caa2962f1ea4da398c4696ab70e7a636202512b",
+	//	AlbumId:     "c2a3c26cf05c431bad32cd176b294f666265172f",
 	//	Description: "古代诗歌",
 	//	Name:        "663333",
 	//})
 	//fmt.Println(objToJsonStr(r))
 
-	r, _ := panClient.AlbumDelete(&aliyunpan.AlbumDeleteParam{
-		AlbumId: "c2a3c26cf05c431bad32cd176b294f666265172f",
+	//r, e := panClient.AlbumDelete(&aliyunpan.AlbumDeleteParam{
+	//	AlbumId: "c2a3c26cf05c431bad32cd176b294f666265172f",
+	//})
+	//fmt.Println(e)
+	//fmt.Println(objToJsonStr(r))
+
+	r1, e := panClient.AlbumGet(&aliyunpan.AlbumGetParam{
+		AlbumId: "4c0fb4c5875f40ff8aceba07f41a41f162651bd9",
 	})
-	fmt.Println(objToJsonStr(r))
+	fmt.Println(e)
+	fmt.Println(objToJsonStr(r1))
 }

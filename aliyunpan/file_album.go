@@ -72,6 +72,11 @@ type (
 	AlbumDeleteParam struct {
 		AlbumId string `json:"albumId"`
 	}
+
+	// AlbumGetParam 相簿查询参数
+	AlbumGetParam struct {
+		AlbumId string `json:"albumId"`
+	}
 )
 
 const (
@@ -277,4 +282,43 @@ func (p *PanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.ApiErr
 	}
 
 	return true, nil
+}
+
+// AlbumGet 相簿删除
+func (p *PanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/album/get", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	if param.AlbumId == "" {
+		return nil, apierror.NewFailedApiError("album id cannot be empty")
+	}
+
+	postData := map[string]interface{}{
+		"album_id": param.AlbumId,
+	}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("get album error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &AlbumEntity{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse album get result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
 }
