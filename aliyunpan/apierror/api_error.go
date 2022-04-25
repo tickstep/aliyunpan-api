@@ -50,6 +50,8 @@ const (
 	ApiCodeInvalidRapidProof ApiCode = 22
 	// 资源不存在
 	ApiCodeNotFoundView ApiCode = 23
+	// ApiCodeBadRequest 请求非法
+	ApiCodeBadRequest ApiCode = 24
 )
 
 type ApiCode int
@@ -116,6 +118,8 @@ func ParseCommonApiError(data []byte) *ApiError {
 				return NewApiError(ApiCodeInvalidRapidProof, errResp.ErrorMsg)
 			} else if "NotFound.View" == errResp.ErrorCode {
 				return NewApiError(ApiCodeNotFoundView, errResp.ErrorMsg)
+			} else if "BadRequest" == errResp.ErrorCode {
+				return NewApiError(ApiCodeBadRequest, errResp.ErrorMsg)
 			}
 			return NewFailedApiError(errResp.ErrorMsg)
 		}

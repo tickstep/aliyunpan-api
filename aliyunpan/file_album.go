@@ -106,11 +106,10 @@ type (
 		Marker string `json:"marker"`
 	}
 
-	// AlbumListFileResult 文件列表返回值
-	albumListFileResult struct {
-		Items []*fileEntityResult `json:"items"`
-		// NextMarker 不为空，说明还有下一页
-		NextMarker string `json:"next_marker"`
+	// AlbumDeleteFileParam 相簿删除文件参数
+	AlbumDeleteFileParam struct {
+		AlbumId       string                 `json:"album_id"`
+		DriveFileList []FileBatchActionParam `json:"drive_file_list"`
 	}
 )
 
@@ -308,7 +307,7 @@ func (p *PanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.ApiErr
 	return true, nil
 }
 
-// AlbumGet 相簿删除
+// AlbumGet 获取相簿信息
 func (p *PanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -490,4 +489,34 @@ func (p *PanClient) albumListFileReq(param *AlbumListFileParam) (*fileListResult
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil
+}
+
+// AlbumDeleteFile 相簿删除文件列表
+func (p *PanClient) AlbumDeleteFile(param *AlbumDeleteFileParam) (bool, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/album/delete_files", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	if param.AlbumId == "" {
+		return false, apierror.NewFailedApiError("album id cannot be empty")
+	}
+	postData := param
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("delete album file error ", err)
+		return false, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return false, err1
+	}
+
+	return true, nil
 }

@@ -263,10 +263,23 @@ func main() {
 	//fmt.Println(e)
 	//fmt.Println(objToJsonStr(r1))
 
-	r1, e := panClient.AlbumListFileGetAll(&aliyunpan.AlbumListFileParam{
+	//r1, e := panClient.AlbumListFileGetAll(&aliyunpan.AlbumListFileParam{
+	//	AlbumId: "70a961cc1e1e40309f3217c99738f68662624f62",
+	//	Limit:   2,
+	//	Marker:  "",
+	//})
+	//fmt.Println(e)
+	//fmt.Println(objToJsonStr(r1))
+
+	r1, e := panClient.AlbumDeleteFile(&aliyunpan.AlbumDeleteFileParam{
 		AlbumId: "70a961cc1e1e40309f3217c99738f68662624f62",
-		Limit:   2,
-		Marker:  "",
+		DriveFileList: []aliyunpan.FileBatchActionParam{{
+			DriveId: "63309221",
+			FileId:  "60f9092cd9be069cc2a84b77beec0c7dcc41f6d8",
+		}, {
+			DriveId: "63309211",
+			FileId:  "60f9092b367a420a5f8543a2b4ee295b1a8902b8",
+		}},
 	})
 	fmt.Println(e)
 	fmt.Println(objToJsonStr(r1))
