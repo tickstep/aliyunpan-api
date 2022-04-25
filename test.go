@@ -228,11 +228,18 @@ func main() {
 	//})
 	//fmt.Println(objToJsonStr(slc))
 
-	albumList, _ := panClient.AlbumList(&aliyunpan.AlbumListParam{
-		OrderBy:        aliyunpan.AlbumOrderByFileCount,
-		OrderDirection: aliyunpan.AlbumOrderDirectionDesc,
-		Limit:          2,
-		Marker:         "WyI0ZDAwMWQ0ODU2NGY0M2IzYmM1NjYyODc0ZjA0YmJlNiIsIm4iLDAsImJqMjkjYzJhM2MyNmNmMDVjNDMxYmFkMzJjZDE3NmIyOTRmNjY2MjY1MTcyZiJd",
+	//albumList, _ := panClient.AlbumList(&aliyunpan.AlbumListParam{
+	//	OrderBy:        aliyunpan.AlbumOrderByFileCount,
+	//	OrderDirection: aliyunpan.AlbumOrderDirectionDesc,
+	//	Limit:          2,
+	//	Marker:         "WyI0ZDAwMWQ0ODU2NGY0M2IzYmM1NjYyODc0ZjA0YmJlNiIsIm4iLDAsImJqMjkjYzJhM2MyNmNmMDVjNDMxYmFkMzJjZDE3NmIyOTRmNjY2MjY1MTcyZiJd",
+	//})
+	//fmt.Println(objToJsonStr(albumList))
+
+	r, _ := panClient.AlbumEdit(&aliyunpan.AlbumEditParam{
+		AlbumId:     "7caa2962f1ea4da398c4696ab70e7a636202512b",
+		Description: "古代诗歌",
+		Name:        "663333",
 	})
-	fmt.Println(objToJsonStr(albumList))
+	fmt.Println(objToJsonStr(r))
 }
