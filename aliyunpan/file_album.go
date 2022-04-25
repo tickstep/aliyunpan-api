@@ -97,6 +97,21 @@ type (
 		FullShareMsg      string       `json:"full_share_msg"`
 		DisplayName       string       `json:"display_name"`
 	}
+
+	// AlbumListFileParam 相簿查询包含的文件列表
+	AlbumListFileParam struct {
+		AlbumId string `json:"albumId"`
+		Limit   int    `json:"limit"`
+		// Marker 下一页参数
+		Marker string `json:"marker"`
+	}
+
+	// AlbumListFileResult 文件列表返回值
+	albumListFileResult struct {
+		Items []*fileEntityResult `json:"items"`
+		// NextMarker 不为空，说明还有下一页
+		NextMarker string `json:"next_marker"`
+	}
 )
 
 const (
@@ -374,6 +389,104 @@ func (p *PanClient) AlbumShareCreate(param *AlbumShareCreateParam) (*AlbumShareC
 	r := &AlbumShareCreateResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse album share result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
+}
+
+// AlbumListFileGetAll 获取指定相簿下的所有文件列表
+func (p *PanClient) AlbumListFileGetAll(param *AlbumListFileParam) (FileList, *apierror.ApiError) {
+	internalParam := &AlbumListFileParam{
+		AlbumId: param.AlbumId,
+		Limit:   param.Limit,
+		Marker:  param.Marker,
+	}
+	if internalParam.Limit <= 0 {
+		internalParam.Limit = 100
+	}
+
+	fileList := FileList{}
+	result, err := p.AlbumListFile(internalParam)
+	if err != nil || result == nil {
+		return nil, err
+	}
+	fileList = append(fileList, result.FileList...)
+
+	// more page?
+	for len(result.NextMarker) > 0 {
+		internalParam.Marker = result.NextMarker
+		result, err = p.AlbumListFile(internalParam)
+		if err == nil && result != nil {
+			fileList = append(fileList, result.FileList...)
+		} else {
+			break
+		}
+	}
+	return fileList, nil
+}
+
+// AlbumListFile 获取相簿下的文件列表
+func (p *PanClient) AlbumListFile(param *AlbumListFileParam) (*FileListResult, *apierror.ApiError) {
+	result := &FileListResult{
+		FileList:   FileList{},
+		NextMarker: "",
+	}
+	if flr, err := p.albumListFileReq(param); err == nil {
+		for k := range flr.Items {
+			if flr.Items[k] == nil {
+				continue
+			}
+			result.FileList = append(result.FileList, createFileEntity(flr.Items[k]))
+		}
+		result.NextMarker = flr.NextMarker
+	}
+	return result, nil
+}
+
+func (p *PanClient) albumListFileReq(param *AlbumListFileParam) (*fileListResult, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/album/list_files", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 100
+	}
+	postData := map[string]interface{}{
+		"album_id":                param.AlbumId,
+		"image_thumbnail_process": "image/resize,w_400/format,jpeg",
+		"video_thumbnail_process": "video/snapshot,t_0,f_jpg,ar_auto,w_1000",
+		"image_url_process":       "image/resize,w_1920/format,jpeg",
+		"filter":                  "",
+		"fields":                  "*",
+		"limit":                   param.Limit,
+		"order_by":                "joined_at",
+		"order_direction":         "DESC",
+	}
+	if len(param.Marker) > 0 {
+		postData["marker"] = param.Marker
+	}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("get album file list error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &fileListResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse album file list result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil

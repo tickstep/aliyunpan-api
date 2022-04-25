@@ -255,10 +255,18 @@ func main() {
 	//fmt.Println(e)
 	//fmt.Println(objToJsonStr(r1))
 
-	r1, e := panClient.AlbumShareCreate(&aliyunpan.AlbumShareCreateParam{
-		AlbumId:    "70a961cc1e1e40309f3217c99738f68662624f62",
-		SharePwd:   "u897",
-		Expiration: "2022-05-25 14:00:00",
+	//r1, e := panClient.AlbumShareCreate(&aliyunpan.AlbumShareCreateParam{
+	//	AlbumId:    "70a961cc1e1e40309f3217c99738f68662624f62",
+	//	SharePwd:   "u897",
+	//	Expiration: "2022-05-25 14:00:00",
+	//})
+	//fmt.Println(e)
+	//fmt.Println(objToJsonStr(r1))
+
+	r1, e := panClient.AlbumListFileGetAll(&aliyunpan.AlbumListFileParam{
+		AlbumId: "70a961cc1e1e40309f3217c99738f68662624f62",
+		Limit:   2,
+		Marker:  "",
 	})
 	fmt.Println(e)
 	fmt.Println(objToJsonStr(r1))
