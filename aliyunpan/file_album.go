@@ -43,6 +43,12 @@ type (
 	AlbumOrderBy        string
 	AlbumOrderDirection string
 
+	// AlbumCreateParam 相簿创建参数
+	AlbumCreateParam struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+
 	// AlbumEditParam 相簿编辑参数
 	AlbumEditParam struct {
 		AlbumId     string `json:"albumId"`
@@ -231,6 +237,46 @@ func (p *PanClient) albumListReq(param *AlbumListParam) (*AlbumListResult, *apie
 	r := &AlbumListResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse album list result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
+}
+
+// AlbumEdit 相簿编辑
+func (p *PanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/album/create", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	if param.Name == "" {
+		return nil, apierror.NewFailedApiError("album name cannot be empty")
+	}
+
+	postData := map[string]interface{}{
+		"name":        param.Name,
+		"description": param.Description,
+	}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("create album error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &AlbumEntity{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse album create result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil
