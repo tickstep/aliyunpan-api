@@ -143,6 +143,26 @@ func (a *AlbumEntity) UpdatedAtStr() string {
 	return apiutil.UnixTime2LocalFormat(a.UpdatedAt)
 }
 
+func (a *AlbumDeleteFileParam) AddFileItem(driveId, fileId string) {
+	if a.DriveFileList == nil {
+		a.DriveFileList = []FileBatchActionParam{}
+	}
+	a.DriveFileList = append(a.DriveFileList, FileBatchActionParam{
+		DriveId: driveId,
+		FileId:  fileId,
+	})
+}
+
+func (a *AlbumAddFileParam) AddFileItem(driveId, fileId string) {
+	if a.DriveFileList == nil {
+		a.DriveFileList = []FileBatchActionParam{}
+	}
+	a.DriveFileList = append(a.DriveFileList, FileBatchActionParam{
+		DriveId: driveId,
+		FileId:  fileId,
+	})
+}
+
 // AlbumListGetAll 获取所有相册列表
 func (p *PanClient) AlbumListGetAll(param *AlbumListParam) (AlbumList, *apierror.ApiError) {
 	internalParam := &AlbumListParam{

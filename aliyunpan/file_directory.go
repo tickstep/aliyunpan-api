@@ -80,6 +80,8 @@ type (
 		ContentHashName string `json:"contentHashName"`
 		// FilePath 文件的完整路径
 		Path string `json:"path"`
+		// Category 文件分类，例如：image/video/doc/others
+		Category string `json:"category"`
 	}
 
 	fileEntityResult struct {
@@ -165,6 +167,7 @@ func createFileEntity(f *fileEntityResult) *FileEntity {
 		ContentHash:     f.ContentHash,
 		ContentHashName: f.ContentHashName,
 		Path:            f.Name,
+		Category:        f.Category,
 	}
 }
 
