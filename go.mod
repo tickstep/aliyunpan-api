@@ -1,6 +1,6 @@
 module github.com/tickstep/aliyunpan-api
 
-go 1.12
+go 1.16
 
 require (
 	github.com/json-iterator/go v1.1.10

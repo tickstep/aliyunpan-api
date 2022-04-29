@@ -86,7 +86,7 @@ func LocalTime2UtcFormat(utcTimeStr string) string {
 
 // UnixTime2LocalFormat 时间戳转换为本地时间字符串
 func UnixTime2LocalFormat(unixTime int64) string {
-	return time.UnixMilli(unixTime).Format("2006-01-02 15:04:05")
+	return time.Unix(unixTime/1000, 0).Format("2006-01-02 15:04:05")
 }
 
 // AddCommonHeader 增加公共header
