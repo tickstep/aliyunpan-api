@@ -82,6 +82,10 @@ type (
 		Path string `json:"path"`
 		// Category 文件分类，例如：image/video/doc/others
 		Category string `json:"category"`
+		// SyncFlag 同步盘标记，该文件夹是否是同步盘的文件
+		SyncFlag bool `json:"syncFlag"`
+		// SyncMeta 如果是同步盘的文件夹，则这里会记录该文件对应的同步机器和目录等信息
+		SyncMeta string `json:"syncMeta"`
 	}
 
 	fileEntityResult struct {
@@ -106,10 +110,12 @@ type (
 		ContentHash     string `json:"content_hash"`
 		ContentHashName string `json:"content_hash_name"`
 		DownloadUrl     string `json:"download_Url"`
-		Url             string `json:"Url"`
+		Url             string `json:"url"`
 		Category        string `json:"category"`
 		EncryptMode     string `json:"encrypt_mode"`
 		PunishFlag      int    `json:"punish_flag"`
+		SyncFlag        bool   `json:"sync_flag"`
+		SyncMeta        string `json:"sync_meta"`
 	}
 
 	fileListResult struct {
@@ -168,6 +174,8 @@ func createFileEntity(f *fileEntityResult) *FileEntity {
 		ContentHashName: f.ContentHashName,
 		Path:            f.Name,
 		Category:        f.Category,
+		SyncFlag:        f.SyncFlag,
+		SyncMeta:        f.SyncMeta,
 	}
 }
 
