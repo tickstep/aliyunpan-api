@@ -430,7 +430,13 @@ func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, han
 		}
 		return nil
 	}
-	if !targetFileInfo.IsFolder() {
+	if targetFileInfo.IsFolder() {
+		// folder
+		if handleFileDirectoryFunc != nil {
+			handleFileDirectoryFunc(0, path, targetFileInfo, nil)
+		}
+	} else {
+		// file
 		if handleFileDirectoryFunc != nil {
 			handleFileDirectoryFunc(0, path, targetFileInfo, nil)
 		}
@@ -462,6 +468,9 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 		fi.Path = strings.ReplaceAll(folderInfo.Path+PathSeparator+fi.FileName, "//", "/")
 		*fld = append(*fld, fi)
 		if fi.IsFolder() {
+			if handleFileDirectoryFunc != nil {
+				ok = handleFileDirectoryFunc(depth, fi.Path, fi, nil)
+			}
 			ok = p.recurseList(driveId, fi, depth+1, handleFileDirectoryFunc, fld)
 		} else {
 			if handleFileDirectoryFunc != nil {
