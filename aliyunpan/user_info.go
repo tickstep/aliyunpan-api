@@ -25,7 +25,7 @@ import (
 )
 
 type (
-	UserRole string
+	UserRole   string
 	UserStatus string
 
 	// UserInfo 用户信息
@@ -41,17 +41,17 @@ type (
 		// 用户UID
 		UserId string `json:"userId"`
 		// UserName 用户名
-		UserName       string `json:"userName"`
+		UserName string `json:"userName"`
 		// CreatedAt 创建时间
-		CreatedAt      string  `json:"createdAt"`
+		CreatedAt string `json:"createdAt"`
 		// Email 邮箱
-		Email          string `json:"email"`
+		Email string `json:"email"`
 		// Phone 手机
-		Phone          string `json:"phone"`
+		Phone string `json:"phone"`
 		// Role 角色，默认是user
-		Role           UserRole `json:"role"`
+		Role UserRole `json:"role"`
 		// Status 是否被禁用，enable / disable
-		Status         UserStatus `json:"status"`
+		Status UserStatus `json:"status"`
 		// Nickname 昵称，如果没有设置则为空
 		Nickname string `json:"nickname"`
 		// TotalSize 网盘空间总大小
@@ -62,8 +62,8 @@ type (
 
 	// userInfoResult 用户信息返回实体
 	userInfoResult struct {
-		DomainId    string `json:"domain_id"`
-		UserId      string `json:"user_id"`
+		DomainId                    string `json:"domain_id"`
+		UserId                      string `json:"user_id"`
 		Avatar                      string `json:"avatar"`
 		CreatedAt                   int64  `json:"created_at"`
 		UpdatedAt                   int64  `json:"updated_at"`
@@ -88,20 +88,20 @@ type (
 			Privileges []struct {
 				FeatureID     string `json:"feature_id"`
 				FeatureAttrID string `json:"feature_attr_id"`
-				Quota         int64    `json:"quota"`
+				Quota         int64  `json:"quota"`
 			} `json:"privileges"`
 		} `json:"personal_rights_info"`
 
 		// quota配额
 		PersonalSpaceInfo struct {
-			UsedSize  uint64   `json:"used_size"`
+			UsedSize  uint64 `json:"used_size"`
 			TotalSize uint64 `json:"total_size"`
 		} `json:"personal_space_info"`
 	}
 
 	safeBoxInfoResult struct {
-		DriveId         string `json:"drive_id"`
-		SboxUsedSize     int64    `json:"sbox_used_size"`
+		DriveId          string `json:"drive_id"`
+		SboxUsedSize     int64  `json:"sbox_used_size"`
 		SboxTotalSize    int64  `json:"sbox_total_size"`
 		RecommendVip     string `json:"recommend_vip"`
 		PinSetup         bool   `json:"pin_setup"`
@@ -118,13 +118,26 @@ type (
 		} `json:"data"`
 		ResultCode string `json:"resultCode"`
 	}
+
+	vipInfoResult struct {
+		Identity string `json:"identity"`
+		Icon     string `json:"icon"`
+		VipList  []struct {
+			Name string `json:"name"`
+			Code string `json:"code"`
+			// PromotedAt 生效时间
+			PromotedAt int `json:"promotedAt"`
+			// Expire 过期时间
+			Expire int `json:"expire"`
+		} `json:"vipList"`
+	}
 )
 
 const (
-	User UserRole = "user"
+	User        UserRole = "user"
 	UnknownRole UserRole = "unknown"
 
-	Enabled UserStatus = "enable"
+	Enabled       UserStatus = "enable"
 	UnknownStatus UserStatus = "unknown"
 )
 
@@ -148,12 +161,12 @@ func parseUserStatus(status string) UserStatus {
 func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 	userInfo := &UserInfo{}
 
-	if r,err := p.getUserInfoReq(); err == nil {
+	if r, err := p.getUserInfoReq(); err == nil {
 		userInfo.DomainId = r.DomainId
 		userInfo.FileDriveId = r.DefaultDriveId
 		userInfo.UserId = r.UserId
 		userInfo.UserName = r.UserName
-		userInfo.CreatedAt = time.Unix(r.CreatedAt / 1000, 0).Format("2006-01-02 15:04:05")
+		userInfo.CreatedAt = time.Unix(r.CreatedAt/1000, 0).Format("2006-01-02 15:04:05")
 		userInfo.Email = r.Email
 		userInfo.Phone = r.Email
 		userInfo.Role = parseUserRole(r.Role)
@@ -163,20 +176,20 @@ func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 		return nil, err
 	}
 
-	if r,err := p.getPersonalInfoReq(); err == nil {
+	if r, err := p.getPersonalInfoReq(); err == nil {
 		userInfo.TotalSize = r.PersonalSpaceInfo.TotalSize
 		userInfo.UsedSize = r.PersonalSpaceInfo.UsedSize
 	} else {
 		return nil, err
 	}
 
-	if r,err := p.getSafeBoxInfoReq(); err == nil {
+	if r, err := p.getSafeBoxInfoReq(); err == nil {
 		userInfo.SafeBoxDriveId = r.DriveId
 	} else {
 		return nil, err
 	}
 
-	if r,err := p.getAlbumInfoReq(); err == nil {
+	if r, err := p.getAlbumInfoReq(); err == nil {
 		userInfo.AlbumDriveId = r.Data.DriveId
 	} else {
 		return nil, err
@@ -187,14 +200,14 @@ func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 
 // getUserInfoReq 获取用户基本信息
 func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/v2/user/get", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
-	postData := map[string]string {}
+	postData := map[string]string{}
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
@@ -219,14 +232,14 @@ func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 
 // getPersonalInfoReq 获取用户网盘基本信息，包括配额，上传下载等权限限制
 func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiError) {
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/v2/databox/get_personal_info", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
-	postData := map[string]string {}
+	postData := map[string]string{}
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
@@ -251,14 +264,14 @@ func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiErro
 
 // getSafeBoxInfoReq 获取保险箱信息
 func (p *PanClient) getSafeBoxInfoReq() (*safeBoxInfoResult, *apierror.ApiError) {
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/v2/sbox/get", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
-	postData := map[string]string {}
+	postData := map[string]string{}
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
@@ -282,14 +295,14 @@ func (p *PanClient) getSafeBoxInfoReq() (*safeBoxInfoResult, *apierror.ApiError)
 }
 
 func (p *PanClient) getAlbumInfoReq() (*albumInfoResult, *apierror.ApiError) {
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v1/user/albums_info", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
-	postData := map[string]string {}
+	postData := map[string]string{}
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
@@ -302,6 +315,32 @@ func (p *PanClient) getAlbumInfoReq() (*albumInfoResult, *apierror.ApiError) {
 	r := &albumInfoResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse album info result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
+}
+
+func (p *PanClient) getVipInfoReq() (*vipInfoResult, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/business/v1.0/users/vip/info", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+	postData := map[string]string{}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	if err != nil {
+		logger.Verboseln("get vip info error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// parse result
+	r := &vipInfoResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse vip info result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil
