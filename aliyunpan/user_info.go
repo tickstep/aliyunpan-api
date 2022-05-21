@@ -120,10 +120,14 @@ type (
 	}
 
 	vipInfoResult struct {
+		// Identity 身份标记，member-普通用户，vip-会员用户
 		Identity string `json:"identity"`
-		Icon     string `json:"icon"`
-		VipList  []struct {
+		// Icon 图标URL路径
+		Icon    string `json:"icon"`
+		VipList []struct {
+			// Name 名称，例如：会员
 			Name string `json:"name"`
+			// Code 代码，例如：vip
 			Code string `json:"code"`
 			// PromotedAt 生效时间
 			PromotedAt int `json:"promotedAt"`
