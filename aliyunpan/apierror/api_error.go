@@ -26,7 +26,7 @@ const (
 	ApiCodeNeedCaptchaCode ApiCode = 10
 	// 会话/Token已过期
 	ApiCodeTokenExpiredCode ApiCode = 11
-	// 文件不存在 NotFound.File
+	// 文件不存在 NotFound.File / NotFound.FileId
 	ApiCodeFileNotFoundCode ApiCode = 12
 	// 上传文件失败
 	ApiCodeUploadFileStatusVerifyFailed = 13
@@ -104,7 +104,7 @@ func ParseCommonApiError(data []byte) *ApiError {
 		if errResp.ErrorCode != "" {
 			if "AccessTokenInvalid" == errResp.ErrorCode {
 				return NewApiError(ApiCodeAccessTokenInvalid, errResp.ErrorMsg)
-			} else if "NotFound.File" == errResp.ErrorCode {
+			} else if "NotFound.File" == errResp.ErrorCode || "NotFound.FileId" == errResp.ErrorCode {
 				return NewApiError(ApiCodeFileNotFoundCode, errResp.ErrorMsg)
 			} else if "AlreadyExist.File" == errResp.ErrorCode {
 				return NewApiError(ApiCodeFileAlreadyExisted, errResp.ErrorMsg)
