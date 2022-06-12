@@ -18,37 +18,37 @@ import (
 	"strings"
 )
 
-type(
+type (
 	// UploadFunc 上传文件处理函数
 	UploadFunc func(httpMethod, fullUrl string, headers map[string]string) (resp *http.Response, err error)
 
 	// 上传文件分片参数。从1开始，最大为 10000
 	FileUploadPartInfoParam struct {
-		PartNumber        int    `json:"part_number"`
+		PartNumber int `json:"part_number"`
 	}
 
 	// 创建上传文件参数
 	CreateFileUploadParam struct {
-		Name            string `json:"name"`
-		DriveId         string `json:"drive_id"`
-		ParentFileId    string `json:"parent_file_id"`
-		Size            int64    `json:"size"`
+		Name         string `json:"name"`
+		DriveId      string `json:"drive_id"`
+		ParentFileId string `json:"parent_file_id"`
+		Size         int64  `json:"size"`
 		// 上传文件分片参数，最大为 10000
-		PartInfoList    []FileUploadPartInfoParam `json:"part_info_list"`
-		ContentHash     string `json:"content_hash"`
-		// 默认为 sha1
+		PartInfoList []FileUploadPartInfoParam `json:"part_info_list"`
+		ContentHash  string                    `json:"content_hash"`
+		// 默认为 sha1。可选：sha1，none
 		ContentHashName string `json:"content_hash_name"`
 		// 默认为 file
-		Type            string `json:"type"`
-		// 默认为 auto_rename
-		CheckNameMode   string `json:"check_name_mode"`
+		Type string `json:"type"`
+		// 默认为 auto_rename。可选：overwrite-覆盖网盘同名文件，auto_rename-自动重命名，refuse-无需检测
+		CheckNameMode string `json:"check_name_mode"`
 
-		ProofCode string `json:"proof_code"`
+		ProofCode    string `json:"proof_code"`
 		ProofVersion string `json:"proof_version"`
 
 		// 分片大小
 		// 不进行json序列化
-		BlockSize       int64    `json:"-"`
+		BlockSize int64 `json:"-"`
 	}
 
 	FileUploadPartInfoResult struct {
@@ -60,9 +60,9 @@ type(
 
 	// 创建上传文件返回值
 	CreateFileUploadResult struct {
-		ParentFileId string `json:"parent_file_id"`
+		ParentFileId string                     `json:"parent_file_id"`
 		PartInfoList []FileUploadPartInfoResult `json:"part_info_list"`
-		UploadId    string `json:"upload_id"`
+		UploadId     string                     `json:"upload_id"`
 		// RapidUpload 是否秒传。true-已秒传，false-没有秒传，需要手动上传
 		RapidUpload bool   `json:"rapid_upload"`
 		Type        string `json:"type"`
@@ -77,20 +77,20 @@ type(
 
 	// 获取上传数据链接参数
 	GetUploadUrlParam struct {
-		DriveId      string `json:"drive_id"`
-		FileId       string `json:"file_id"`
-		PartInfoList    []FileUploadPartInfoParam `json:"part_info_list"`
-		UploadId string `json:"upload_id"`
+		DriveId      string                    `json:"drive_id"`
+		FileId       string                    `json:"file_id"`
+		PartInfoList []FileUploadPartInfoParam `json:"part_info_list"`
+		UploadId     string                    `json:"upload_id"`
 	}
 
 	// 获取上传数据链接返回值
 	GetUploadUrlResult struct {
-		DomainId     string `json:"domain_id"`
-		DriveId      string `json:"drive_id"`
-		FileId       string `json:"file_id"`
+		DomainId     string                     `json:"domain_id"`
+		DriveId      string                     `json:"drive_id"`
+		FileId       string                     `json:"file_id"`
 		PartInfoList []FileUploadPartInfoResult `json:"part_info_list"`
-		UploadId string    `json:"upload_id"`
-		CreateAt string `json:"create_at"`
+		UploadId     string                     `json:"upload_id"`
+		CreateAt     string                     `json:"create_at"`
 	}
 
 	FileUploadRange struct {
@@ -102,7 +102,7 @@ type(
 
 	// 文件上传数据块
 	FileUploadChunkData struct {
-		Reader io.Reader
+		Reader    io.Reader
 		ChunkSize int64
 
 		hasReadCount int64
@@ -110,52 +110,52 @@ type(
 
 	// 提交上传文件传输完成参数
 	CompleteUploadFileParam struct {
-		DriveId     string `json:"drive_id"`
-		FileId      string `json:"file_id"`
-		UploadId    string `json:"upload_id"`
+		DriveId  string `json:"drive_id"`
+		FileId   string `json:"file_id"`
+		UploadId string `json:"upload_id"`
 	}
 
 	CompleteUploadFileResult struct {
-		DriveId         string    `json:"drive_id"`
-		DomainId        string    `json:"domain_id"`
-		FileId          string    `json:"file_id"`
-		Name            string    `json:"name"`
-		Type            string    `json:"type"`
-		Size            int64       `json:"size"`
-		UploadId        string    `json:"upload_id"`
-		ParentFileId    string    `json:"parent_file_id"`
-		Crc64Hash       string    `json:"crc64_hash"`
-		ContentHash     string    `json:"content_hash"`
-		ContentHashName string    `json:"content_hash_name"`
+		DriveId         string `json:"drive_id"`
+		DomainId        string `json:"domain_id"`
+		FileId          string `json:"file_id"`
+		Name            string `json:"name"`
+		Type            string `json:"type"`
+		Size            int64  `json:"size"`
+		UploadId        string `json:"upload_id"`
+		ParentFileId    string `json:"parent_file_id"`
+		Crc64Hash       string `json:"crc64_hash"`
+		ContentHash     string `json:"content_hash"`
+		ContentHashName string `json:"content_hash_name"`
 		CreatedAt       string `json:"created_at"`
 	}
 
 	completeUploadFileReqResult struct {
-		DriveId         string    `json:"drive_id"`
-		DomainId        string    `json:"domain_id"`
-		FileId          string    `json:"file_id"`
-		Name            string    `json:"name"`
-		Type            string    `json:"type"`
-		ContentType     string    `json:"content_type"`
+		DriveId         string `json:"drive_id"`
+		DomainId        string `json:"domain_id"`
+		FileId          string `json:"file_id"`
+		Name            string `json:"name"`
+		Type            string `json:"type"`
+		ContentType     string `json:"content_type"`
 		CreatedAt       string `json:"created_at"`
 		UpdatedAt       string `json:"updated_at"`
-		FileExtension   string    `json:"file_extension"`
-		Hidden          bool      `json:"hidden"`
-		Size            int64       `json:"size"`
-		Starred         bool      `json:"starred"`
-		Status          string    `json:"status"`
-		UploadId        string    `json:"upload_id"`
-		ParentFileId    string    `json:"parent_file_id"`
-		Crc64Hash       string    `json:"crc64_hash"`
-		ContentHash     string    `json:"content_hash"`
-		ContentHashName string    `json:"content_hash_name"`
-		Category        string    `json:"category"`
-		EncryptMode     string    `json:"encrypt_mode"`
-		Location        string    `json:"location"`
+		FileExtension   string `json:"file_extension"`
+		Hidden          bool   `json:"hidden"`
+		Size            int64  `json:"size"`
+		Starred         bool   `json:"starred"`
+		Status          string `json:"status"`
+		UploadId        string `json:"upload_id"`
+		ParentFileId    string `json:"parent_file_id"`
+		Crc64Hash       string `json:"crc64_hash"`
+		ContentHash     string `json:"content_hash"`
+		ContentHashName string `json:"content_hash_name"`
+		Category        string `json:"category"`
+		EncryptMode     string `json:"encrypt_mode"`
+		Location        string `json:"location"`
 	}
 )
 
-const(
+const (
 	// 默认分片大小，512KB
 	DefaultChunkSize = int64(524288)
 
@@ -176,12 +176,12 @@ func (d *FileUploadChunkData) Read(p []byte) (n int, err error) {
 		needCopy = true
 	}
 
-	n,err = d.Reader.Read(buf)
+	n, err = d.Reader.Read(buf)
 	if needCopy {
 		copy(p, buf)
 	}
 	d.hasReadCount += int64(n)
-	return n,err
+	return n, err
 }
 
 func (d *FileUploadChunkData) Len() int64 {
@@ -226,7 +226,7 @@ func CalcProofCode(accessToken string, reader rio.ReaderAtLen64, fileSize int64)
 	z := big.NewInt(0)
 	startPosInteger := big.NewInt(0)
 	z.Div(hashInteger, big.NewInt(fileSize))
-	startPosInteger.Sub(hashInteger, big.NewInt(z.Int64() * fileSize))
+	startPosInteger.Sub(hashInteger, big.NewInt(z.Int64()*fileSize))
 	startPos := startPosInteger.Int64()
 
 	endPos := startPos + 8
@@ -246,7 +246,7 @@ func CalcProofCode(accessToken string, reader rio.ReaderAtLen64, fileSize int64)
 // CreateUploadFile 创建上传文件，如果文件已经上传过则会直接秒传
 func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileUploadResult, *apierror.ApiError) {
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -305,7 +305,7 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 // 如果该文件已经上传完毕，则该接口返回错误
 func (p *PanClient) GetUploadUrl(param *GetUploadUrlParam) (*GetUploadUrlResult, *apierror.ApiError) {
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -342,7 +342,7 @@ func (p *PanClient) GetUploadUrl(param *GetUploadUrlParam) (*GetUploadUrlResult,
 // UploadFileData 上传文件数据
 func (p *PanClient) UploadFileData(uploadUrl string, uploadFunc UploadFunc) *apierror.ApiError {
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"referer": "https://www.aliyundrive.com/",
 	}
 
@@ -367,7 +367,7 @@ func (p *PanClient) UploadDataChunk(url string, data *FileUploadChunkData) *apie
 	var client = requester.NewHTTPClient()
 
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"referer": "https://www.aliyundrive.com/",
 	}
 
@@ -392,7 +392,7 @@ func (p *PanClient) UploadDataChunk(url string, data *FileUploadChunkData) *apie
 // CompleteUploadFile 完成文件上传确认。完成文件数据上传后，需要调用该接口文件才会显示再网盘中
 func (p *PanClient) CompleteUploadFile(param *CompleteUploadFileParam) (*CompleteUploadFileResult, *apierror.ApiError) {
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -404,9 +404,9 @@ func (p *PanClient) CompleteUploadFile(param *CompleteUploadFileParam) (*Complet
 	// data
 	postData := map[string]interface{}{
 		"ignoreError": true,
-		"drive_id": param.DriveId,
-		"file_id": param.FileId,
-		"upload_id": param.UploadId,
+		"drive_id":    param.DriveId,
+		"file_id":     param.FileId,
+		"upload_id":   param.UploadId,
 	}
 
 	// request
@@ -429,17 +429,17 @@ func (p *PanClient) CompleteUploadFile(param *CompleteUploadFileParam) (*Complet
 	}
 
 	return &CompleteUploadFileResult{
-		DriveId: r.DriveId,
-		DomainId: r.DomainId,
-		FileId: r.FileId,
-		Name: r.Name,
-		Type: r.Type,
-		Size: r.Size,
-		UploadId: r.UploadId,
-		ParentFileId: r.ParentFileId,
-		Crc64Hash: r.Crc64Hash,
-		ContentHash: r.ContentHash,
+		DriveId:         r.DriveId,
+		DomainId:        r.DomainId,
+		FileId:          r.FileId,
+		Name:            r.Name,
+		Type:            r.Type,
+		Size:            r.Size,
+		UploadId:        r.UploadId,
+		ParentFileId:    r.ParentFileId,
+		Crc64Hash:       r.Crc64Hash,
+		ContentHash:     r.ContentHash,
 		ContentHashName: r.ContentHashName,
-		CreatedAt: apiutil.UtcTime2LocalFormat(r.CreatedAt),
+		CreatedAt:       apiutil.UtcTime2LocalFormat(r.CreatedAt),
 	}, nil
 }
