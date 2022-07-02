@@ -23,32 +23,28 @@ const (
 	PathSeparator = "/"
 )
 
-var (
-)
-
 type (
 	PanClient struct {
-		client     *requester.HTTPClient // http 客户端
+		client   *requester.HTTPClient // http 客户端
 		webToken WebLoginToken
 		appToken AppLoginToken
 	}
 )
 
-
 func NewPanClient(webToken WebLoginToken, appToken AppLoginToken) *PanClient {
 	client := requester.NewHTTPClient()
 
 	return &PanClient{
-		client: client,
+		client:   client,
 		webToken: webToken,
 		appToken: appToken,
 	}
 }
 
-func (pc *PanClient) UpdateToken(webToken WebLoginToken)  {
-	pc.webToken = webToken
+func (p *PanClient) UpdateToken(webToken WebLoginToken) {
+	p.webToken = webToken
 }
 
-func (pc *PanClient) GetAccessToken() string {
-	return pc.webToken.AccessToken
+func (p *PanClient) GetAccessToken() string {
+	return p.webToken.AccessToken
 }

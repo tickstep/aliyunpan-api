@@ -41,7 +41,7 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 		// 默认根目录
 		parentFileId = DefaultRootParentFileId
 	}
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -49,12 +49,12 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 	fmt.Fprintf(fullUrl, "%s/adrive/v2/file/createWithFolders", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
-	postData := map[string]interface{} {
-		"drive_id": driveId,
-		"parent_file_id": parentFileId,
-		"name": dirName,
+	postData := map[string]interface{}{
+		"drive_id":        driveId,
+		"parent_file_id":  parentFileId,
+		"name":            dirName,
 		"check_name_mode": "refuse",
-		"type": "folder",
+		"type":            "folder",
 	}
 
 	// request
@@ -81,7 +81,7 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 func (p *PanClient) MkdirByFullPath(driveId, fullPath string) (*MkdirResult, *apierror.ApiError) {
 	fullPath = strings.ReplaceAll(fullPath, "//", "/")
 	pathSlice := strings.Split(fullPath, "/")
-	return p.MkdirRecursive(driveId,"", "", 0, pathSlice)
+	return p.MkdirRecursive(driveId, "", "", 0, pathSlice)
 }
 
 func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string, index int, pathSlice []string) (*MkdirResult, *apierror.ApiError) {
@@ -96,7 +96,7 @@ func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string
 		}
 
 		fullPath = ""
-		return p.MkdirRecursive(driveId, parentFileId, fullPath, index + 1, pathSlice)
+		return p.MkdirRecursive(driveId, parentFileId, fullPath, index+1, pathSlice)
 	}
 
 	if index >= len(pathSlice) {
@@ -107,7 +107,7 @@ func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string
 	listFilePath := &FileListParam{}
 	listFilePath.DriveId = driveId
 	listFilePath.ParentFileId = parentFileId
-	fileResult, err := p.FileListGetAll(listFilePath)
+	fileResult, err := p.FileListGetAll(listFilePath, 0)
 	if err != nil {
 		r.FileId = ""
 		return r, err
@@ -116,7 +116,7 @@ func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string
 	// existed?
 	for _, fileEntity := range fileResult {
 		if fileEntity.FileName == pathSlice[index] {
-			return p.MkdirRecursive(driveId, fileEntity.FileId, fullPath + "/" + pathSlice[index], index + 1, pathSlice)
+			return p.MkdirRecursive(driveId, fileEntity.FileId, fullPath+"/"+pathSlice[index], index+1, pathSlice)
 		}
 	}
 
@@ -133,9 +133,9 @@ func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string
 		return r, err
 	}
 
-	if (index+1) >= len(pathSlice) {
+	if (index + 1) >= len(pathSlice) {
 		return rs, nil
 	} else {
-		return p.MkdirRecursive(driveId, rs.FileId, fullPath + "/" + pathSlice[index], index + 1, pathSlice)
+		return p.MkdirRecursive(driveId, rs.FileId, fullPath+"/"+pathSlice[index], index+1, pathSlice)
 	}
 }

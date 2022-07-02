@@ -11,19 +11,19 @@ import (
 
 type (
 	RecycleBinFileListParam struct {
-		DriveId               string `json:"drive_id"`
-		Limit                 int    `json:"limit"`
-		Marker                string `json:"marker"`
+		DriveId string `json:"drive_id"`
+		Limit   int    `json:"limit"`
+		Marker  string `json:"marker"`
 	}
 )
 
 // RecycleBinFileList 获取回收站文件列表
 func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*FileListResult, *apierror.ApiError) {
 	result := &FileListResult{
-		FileList: FileList{},
+		FileList:   FileList{},
 		NextMarker: "",
 	}
-	if flr,err := p.recycleBinFileListReq(param); err == nil {
+	if flr, err := p.recycleBinFileListReq(param); err == nil {
 		for k := range flr.Items {
 			if flr.Items[k] == nil {
 				continue
@@ -68,10 +68,10 @@ func (p *PanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (Fi
 }
 
 func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*fileListResult, *apierror.ApiError) {
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
-		"referer": "https://www.aliyundrive.com/",
-		"origin": "https://www.aliyundrive.com",
+		"referer":       "https://www.aliyundrive.com/",
+		"origin":        "https://www.aliyundrive.com",
 	}
 
 	fullUrl := &strings.Builder{}
@@ -82,13 +82,13 @@ func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*file
 	if limit <= 0 {
 		limit = 100
 	}
-	postData := map[string]interface{} {
-		"drive_id": param.DriveId,
-		"limit": limit,
+	postData := map[string]interface{}{
+		"drive_id":                param.DriveId,
+		"limit":                   limit,
 		"image_thumbnail_process": "image/resize,w_400/format,jpeg",
 		"video_thumbnail_process": "video/snapshot,t_0,f_jpg,ar_auto,w_800",
-		"order_by": "name",
-		"order_direction": "DESC",
+		"order_by":                "name",
+		"order_direction":         "DESC",
 	}
 	if len(param.Marker) > 0 {
 		postData["marker"] = param.Marker

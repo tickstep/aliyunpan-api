@@ -22,6 +22,7 @@ import (
 	"github.com/tickstep/library-go/logger"
 	"path"
 	"strings"
+	"time"
 )
 
 type (
@@ -407,7 +408,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 		DriveId:      driveId,
 		ParentFileId: parentFileInfo.FileId,
 	}
-	fileResult, err := p.FileListGetAll(fileListParam)
+	fileResult, err := p.FileListGetAll(fileListParam, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -458,7 +459,7 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 		DriveId:      driveId,
 		ParentFileId: folderInfo.FileId,
 	}
-	r, apiError := p.FileListGetAll(flp)
+	r, apiError := p.FileListGetAll(flp, 0)
 	if apiError != nil {
 		if handleFileDirectoryFunc != nil {
 			handleFileDirectoryFunc(depth, folderInfo.Path, nil, apiError)
@@ -486,8 +487,8 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 	return true
 }
 
-// GetAllFileList 获取指定目录下的所有文件列表
-func (p *PanClient) FileListGetAll(param *FileListParam) (FileList, *apierror.ApiError) {
+// FileListGetAll 获取指定目录下的所有文件列表
+func (p *PanClient) FileListGetAll(param *FileListParam, delayMilliseconds int) (FileList, *apierror.ApiError) {
 	internalParam := &FileListParam{
 		OrderBy:        param.OrderBy,
 		OrderDirection: param.OrderDirection,
@@ -509,6 +510,9 @@ func (p *PanClient) FileListGetAll(param *FileListParam) (FileList, *apierror.Ap
 
 	// more page?
 	for len(result.NextMarker) > 0 {
+		if delayMilliseconds > 0 {
+			time.Sleep(time.Duration(delayMilliseconds) * time.Millisecond)
+		}
 		internalParam.Marker = result.NextMarker
 		result, err = p.FileList(internalParam)
 		if err == nil && result != nil {
