@@ -14,41 +14,54 @@
 
 package apierror
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+)
 
 const (
-	// 成功
+	/* ------------------------------- 默认错误码 -------------------------------*/
+
+	// ApiCodeOk 成功
 	ApiCodeOk ApiCode = 0
-	// 失败
+	// ApiCodeFailed 失败
 	ApiCodeFailed ApiCode = 999
 
-	// 验证码
+	/* ------------------------------- 系统错误码(800-899) -------------------------------*/
+
+	// ApiCodeNetError 网络错误
+	ApiCodeNetError ApiCode = 800
+
+	/* ------------------------------- 阿里云盘错误码(10-799) -------------------------------*/
+
+	// ApiCodeNeedCaptchaCode 验证码
 	ApiCodeNeedCaptchaCode ApiCode = 10
-	// 会话/Token已过期
+	// ApiCodeTokenExpiredCode 会话/Token已过期
 	ApiCodeTokenExpiredCode ApiCode = 11
-	// 文件不存在 NotFound.File / NotFound.FileId
+	// ApiCodeFileNotFoundCode 文件不存在 NotFound.File / NotFound.FileId
 	ApiCodeFileNotFoundCode ApiCode = 12
-	// 上传文件失败
+	// ApiCodeUploadFileStatusVerifyFailed 上传文件失败
 	ApiCodeUploadFileStatusVerifyFailed = 13
-	// 上传文件数据偏移值校验失败
+	// ApiCodeUploadOffsetVerifyFailed 上传文件数据偏移值校验失败
 	ApiCodeUploadOffsetVerifyFailed = 14
-	// 服务器上传文件不存在
+	// ApiCodeUploadFileNotFound 服务器上传文件不存在
 	ApiCodeUploadFileNotFound = 15
-	// 文件已存在 AlreadyExist.File
+	// ApiCodeFileAlreadyExisted 文件已存在 AlreadyExist.File
 	ApiCodeFileAlreadyExisted = 16
-	// 上传达到日数量上限
+	// ApiCodeUserDayFlowOverLimited 上传达到日数量上限
 	ApiCodeUserDayFlowOverLimited = 17
-	// Token无效或者已过期 AccessTokenInvalid
+	// ApiCodeAccessTokenInvalid Token无效或者已过期 AccessTokenInvalid
 	ApiCodeAccessTokenInvalid = 18
-	// 被禁止 Forbidden
+	// ApiCodeForbidden 被禁止 Forbidden
 	ApiCodeForbidden = 19
-	// RefreshToken已过期
+	// ApiCodeRefreshTokenExpiredCode RefreshToken已过期
 	ApiCodeRefreshTokenExpiredCode ApiCode = 20
-	// 文件不允许分享
+	// ApiCodeFileShareNotAllowed 文件不允许分享
 	ApiCodeFileShareNotAllowed ApiCode = 21
-	// 文件上传水印码错误
+	// ApiCodeInvalidRapidProof 文件上传水印码错误
 	ApiCodeInvalidRapidProof ApiCode = 22
-	// 资源不存在
+	// ApiCodeNotFoundView 资源不存在
 	ApiCodeNotFoundView ApiCode = 23
 	// ApiCodeBadRequest 请求非法
 	ApiCodeBadRequest ApiCode = 24
@@ -72,6 +85,9 @@ func NewApiErrorWithError(err error) *ApiError {
 	if err == nil {
 		return NewApiError(ApiCodeOk, "")
 	} else {
+		if IsNetErr(err) {
+			return NewApiError(ApiCodeNetError, err.Error())
+		}
 		return NewApiError(ApiCodeFailed, err.Error())
 	}
 }
@@ -97,7 +113,13 @@ func (a *ApiError) ErrCode() ApiCode {
 	return a.Code
 }
 
-// ParseCommonApiError 解析公共错误，如果没有错误则返回nil
+func (a *ApiError) String() string {
+	sb := &strings.Builder{}
+	fmt.Fprintf(sb, "Code=%d, Err=%s", a.Code, a.Err)
+	return sb.String()
+}
+
+// ParseCommonApiError 解析阿里云盘错误，如果没有错误则返回nil
 func ParseCommonApiError(data []byte) *ApiError {
 	errResp := &ErrorResp{}
 	if err := json.Unmarshal(data, errResp); err == nil {

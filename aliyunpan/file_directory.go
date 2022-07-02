@@ -252,6 +252,8 @@ func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.A
 			result.FileList = append(result.FileList, createFileEntity(flr.Items[k]))
 		}
 		result.NextMarker = flr.NextMarker
+	} else {
+		return nil, err
 	}
 	return result, nil
 }
@@ -300,7 +302,7 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get file list error ", err)
-		return nil, apierror.NewFailedApiError(err.Error())
+		return nil, apierror.NewApiErrorWithError(err)
 	}
 
 	// handler common error
@@ -512,7 +514,7 @@ func (p *PanClient) FileListGetAll(param *FileListParam) (FileList, *apierror.Ap
 		if err == nil && result != nil {
 			fileList = append(fileList, result.FileList...)
 		} else {
-			break
+			return nil, err
 		}
 	}
 	return fileList, nil
