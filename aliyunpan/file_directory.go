@@ -301,6 +301,7 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 
 	// request
 	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	//logger.Verboseln("get file list response: ", string(body))
 	if err != nil {
 		logger.Verboseln("get file list error ", err)
 		return nil, apierror.NewApiErrorWithError(err)
@@ -373,6 +374,11 @@ func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *Fi
 		pathStr = path.Clean(pathStr)
 	}
 
+	// try cache
+	if v := p.loadFilePathFromCache(driveId, pathStr); v != nil {
+		return v, nil
+	}
+
 	var pathSlice []string
 	if pathStr == "/" {
 		pathSlice = []string{""}
@@ -386,6 +392,7 @@ func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *Fi
 	if fileInfo != nil {
 		fileInfo.Path = pathStr
 	}
+	p.storeFilePathToCache(driveId, pathStr, fileInfo)
 	return fileInfo, error
 }
 
@@ -404,6 +411,18 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 		return parentFileInfo, nil
 	}
 
+	curPathStr := ""
+	for idx := 0; idx <= index; idx++ {
+		if (*pathSlice)[idx] == "" {
+			continue
+		}
+		curPathStr += "/" + (*pathSlice)[idx]
+	}
+	// try cache
+	if v := p.loadFilePathFromCache(driveId, curPathStr); v != nil {
+		return p.getFileInfoByPath(driveId, index+1, pathSlice, v)
+	}
+
 	fileListParam := &FileListParam{
 		DriveId:      driveId,
 		ParentFileId: parentFileInfo.FileId,
@@ -416,10 +435,27 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 	if fileResult == nil || len(fileResult) == 0 {
 		return nil, apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, "文件不存在")
 	}
-	for _, fileEntity := range fileResult {
-		if fileEntity.FileName == (*pathSlice)[index] {
-			return p.getFileInfoByPath(driveId, index+1, pathSlice, fileEntity)
+	var targetFile *FileEntity = nil
+	curParentPathStr := ""
+	for idx := 0; idx <= (index - 1); idx++ {
+		if (*pathSlice)[idx] == "" {
+			continue
 		}
+		curParentPathStr += "/" + (*pathSlice)[idx]
+	}
+	for _, fileEntity := range fileResult {
+		// cache all
+		fileEntity.Path = curParentPathStr + "/" + fileEntity.FileName
+		p.storeFilePathToCache(driveId, fileEntity.Path, fileEntity)
+
+		// find target file
+		if fileEntity.FileName == (*pathSlice)[index] {
+			targetFile = fileEntity
+		}
+	}
+	if targetFile != nil {
+		// return
+		return p.getFileInfoByPath(driveId, index+1, pathSlice, targetFile)
 	}
 	return nil, apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, "文件不存在")
 }
