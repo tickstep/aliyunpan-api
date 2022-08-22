@@ -127,6 +127,28 @@ type (
 
 	FileOrderBy        string
 	FileOrderDirection string
+
+	// FileGetPathResult 文件路径详情信息结果
+	FileGetPathResult struct {
+		// 每一个item对应一个目录，最顶层的目录是root放在最后
+		// 例如路径：/myphoto/photo2022/photo01，则对应顺序为item[0]={"photo01"}, item[1]={"photo2022"}, item[2]={"myphoto"}, item[3]={"root"}(只有root目录下的子文件夹才会有)
+		Items []struct {
+			Trashed      bool      `json:"trashed"`
+			DriveId      string    `json:"drive_id"`
+			FileId       string    `json:"file_id"`
+			CreatedAt    time.Time `json:"created_at"`
+			DomainId     string    `json:"domain_id"`
+			EncryptMode  string    `json:"encrypt_mode"`
+			Hidden       bool      `json:"hidden"`
+			Name         string    `json:"name"`
+			ParentFileId string    `json:"parent_file_id"`
+			Starred      bool      `json:"starred"`
+			Status       string    `json:"status"`
+			Type         string    `json:"type"`
+			UpdatedAt    string    `json:"updated_at"`
+			UserMeta     string    `json:"user_meta"`
+		} `json:"items"`
+	}
 )
 
 const (
@@ -558,4 +580,41 @@ func (p *PanClient) FileListGetAll(param *FileListParam, delayMilliseconds int) 
 		}
 	}
 	return fileList, nil
+}
+
+// FileGetPath 通过fileId获取对应的目录层级信息
+func (p *PanClient) FileGetPath(driveId, fileId string) (*FileGetPathResult, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/file/get_path", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	postData := map[string]interface{}{
+		"drive_id": driveId,
+		"file_id":  fileId,
+	}
+
+	// request
+	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	logger.Verboseln("get file path response: ", string(body))
+	if err != nil {
+		logger.Verboseln("get file path error ", err)
+		return nil, apierror.NewApiErrorWithError(err)
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &FileGetPathResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file path result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
 }
