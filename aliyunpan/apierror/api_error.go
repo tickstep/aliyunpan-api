@@ -65,6 +65,10 @@ const (
 	ApiCodeNotFoundView ApiCode = 23
 	// ApiCodeBadRequest 请求非法
 	ApiCodeBadRequest ApiCode = 24
+	// ApiCodeInvalidResource 请求无效资源
+	ApiCodeInvalidResource ApiCode = 25
+	// ApiCodeVideoPreviewInfoNotFound 视频预览信息不存在
+	ApiCodeVideoPreviewInfoNotFound ApiCode = 26
 )
 
 type ApiCode int
@@ -142,6 +146,10 @@ func ParseCommonApiError(data []byte) *ApiError {
 				return NewApiError(ApiCodeNotFoundView, errResp.ErrorMsg)
 			} else if "BadRequest" == errResp.ErrorCode {
 				return NewApiError(ApiCodeBadRequest, errResp.ErrorMsg)
+			} else if "InvalidResource.FileTypeFolder" == errResp.ErrorCode {
+				return NewApiError(ApiCodeInvalidResource, errResp.ErrorMsg)
+			} else if "NotFound.VideoPreviewInfo" == errResp.ErrorCode {
+				return NewApiError(ApiCodeVideoPreviewInfoNotFound, errResp.ErrorMsg)
 			}
 			return NewFailedApiError(errResp.ErrorMsg)
 		}
