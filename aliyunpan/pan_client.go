@@ -19,6 +19,7 @@ import (
 	"github.com/tickstep/library-go/requester"
 	"strings"
 	"sync"
+	"time"
 )
 
 const (
@@ -106,6 +107,13 @@ func (p *PanClient) loadFilePathFromCache(driveId, pathStr string) *FileEntity {
 		return v.(*FileEntity)
 	}
 	return nil
+}
+
+// SetTimeout 设置 http 请求超时时间
+func (p *PanClient) SetTimeout(t time.Duration) {
+	if p.client != nil {
+		p.client.Timeout = t
+	}
 }
 
 func formatPathStyle(pathStr string) string {
