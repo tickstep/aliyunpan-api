@@ -18,12 +18,20 @@ import "encoding/xml"
 
 // ErrorResp 默认的错误信息
 type ErrorResp struct {
-	ErrorCode string `json:"code"`
-	ErrorMsg string `json:"message"`
+	ErrorCode       string `json:"code"`
+	ErrorMsg        string `json:"message"`
+	ErrorDisplayMsg string `json:"display_message"`
 }
 
 type ErrorXmlResp struct {
 	XMLName xml.Name `xml:"Error"`
-	Code string `xml:"Code"`
-	Message string `xml:"Message"`
+	Code    string   `xml:"Code"`
+	Message string   `xml:"Message"`
+}
+
+func (e *ErrorResp) GetErrorMsg() string {
+	if e.ErrorDisplayMsg != "" {
+		return e.ErrorDisplayMsg
+	}
+	return e.ErrorMsg
 }

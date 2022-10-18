@@ -69,6 +69,8 @@ const (
 	ApiCodeInvalidResource ApiCode = 25
 	// ApiCodeVideoPreviewInfoNotFound 视频预览信息不存在
 	ApiCodeVideoPreviewInfoNotFound ApiCode = 26
+	// ApiCodeFeatureTemporaryDisabled 功能维护中
+	ApiCodeFeatureTemporaryDisabled ApiCode = 27
 )
 
 type ApiCode int
@@ -129,29 +131,31 @@ func ParseCommonApiError(data []byte) *ApiError {
 	if err := json.Unmarshal(data, errResp); err == nil {
 		if errResp.ErrorCode != "" {
 			if "AccessTokenInvalid" == errResp.ErrorCode {
-				return NewApiError(ApiCodeAccessTokenInvalid, errResp.ErrorMsg)
+				return NewApiError(ApiCodeAccessTokenInvalid, errResp.GetErrorMsg())
 			} else if "NotFound.File" == errResp.ErrorCode || "NotFound.FileId" == errResp.ErrorCode {
-				return NewApiError(ApiCodeFileNotFoundCode, errResp.ErrorMsg)
+				return NewApiError(ApiCodeFileNotFoundCode, errResp.GetErrorMsg())
 			} else if "AlreadyExist.File" == errResp.ErrorCode {
-				return NewApiError(ApiCodeFileAlreadyExisted, errResp.ErrorMsg)
+				return NewApiError(ApiCodeFileAlreadyExisted, errResp.GetErrorMsg())
 			} else if "BadRequest" == errResp.ErrorCode {
-				return NewApiError(ApiCodeFailed, errResp.ErrorMsg)
+				return NewApiError(ApiCodeFailed, errResp.GetErrorMsg())
 			} else if "InvalidParameter.RefreshToken" == errResp.ErrorCode {
-				return NewApiError(ApiCodeRefreshTokenExpiredCode, errResp.ErrorMsg)
+				return NewApiError(ApiCodeRefreshTokenExpiredCode, errResp.GetErrorMsg())
 			} else if "FileShareNotAllowed" == errResp.ErrorCode {
-				return NewApiError(ApiCodeFileShareNotAllowed, errResp.ErrorMsg)
+				return NewApiError(ApiCodeFileShareNotAllowed, errResp.GetErrorMsg())
 			} else if "InvalidRapidProof" == errResp.ErrorCode {
-				return NewApiError(ApiCodeInvalidRapidProof, errResp.ErrorMsg)
+				return NewApiError(ApiCodeInvalidRapidProof, errResp.GetErrorMsg())
 			} else if "NotFound.View" == errResp.ErrorCode {
-				return NewApiError(ApiCodeNotFoundView, errResp.ErrorMsg)
+				return NewApiError(ApiCodeNotFoundView, errResp.GetErrorMsg())
 			} else if "BadRequest" == errResp.ErrorCode {
-				return NewApiError(ApiCodeBadRequest, errResp.ErrorMsg)
+				return NewApiError(ApiCodeBadRequest, errResp.GetErrorMsg())
 			} else if "InvalidResource.FileTypeFolder" == errResp.ErrorCode {
-				return NewApiError(ApiCodeInvalidResource, errResp.ErrorMsg)
+				return NewApiError(ApiCodeInvalidResource, errResp.GetErrorMsg())
 			} else if "NotFound.VideoPreviewInfo" == errResp.ErrorCode {
-				return NewApiError(ApiCodeVideoPreviewInfoNotFound, errResp.ErrorMsg)
+				return NewApiError(ApiCodeVideoPreviewInfoNotFound, errResp.GetErrorMsg())
+			} else if "FeatureTemporaryDisabled" == errResp.ErrorCode {
+				return NewApiError(ApiCodeFeatureTemporaryDisabled, errResp.GetErrorMsg())
 			}
-			return NewFailedApiError(errResp.ErrorMsg)
+			return NewFailedApiError(errResp.GetErrorMsg())
 		}
 	}
 	return nil
