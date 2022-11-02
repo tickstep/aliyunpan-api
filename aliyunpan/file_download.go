@@ -41,17 +41,17 @@ type (
 
 	GetFileDownloadUrlParam struct {
 		DriveId   string `json:"drive_id"`
-		FileId   string `json:"file_id"`
+		FileId    string `json:"file_id"`
 		ExpireSec int    `json:"expire_sec"`
 	}
 
 	GetFileDownloadUrlResult struct {
-		Method      string    `json:"method"`
-		Url         string    `json:"url"`
-		InternalUrl string    `json:"internal_url"`
-		CdnUrl      string    `json:"cdn_url"`
+		Method      string `json:"method"`
+		Url         string `json:"url"`
+		InternalUrl string `json:"internal_url"`
+		CdnUrl      string `json:"cdn_url"`
 		Expiration  string `json:"expiration"`
-		Size        int64       `json:"size"`
+		Size        int64  `json:"size"`
 		Ratelimit   struct {
 			PartSpeed int64 `json:"part_speed"`
 			PartSize  int64 `json:"part_size"`
@@ -59,15 +59,15 @@ type (
 	}
 )
 
-const(
+const (
 	// 资源被屏蔽，提示资源非法链接
-	IllegalDownloadUrl = "https://pds-system-file.oss-cn-beijing.aliyuncs.com/illegal.mp4"
+	IllegalDownloadUrlPrefix = "https://pds-system-file.oss-cn-beijing.aliyuncs.com/illegal"
 )
 
 // GetFileDownloadUrl 获取文件下载URL路径
 func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFileDownloadUrlResult, *apierror.ApiError) {
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -81,9 +81,9 @@ func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFile
 	if sec <= 0 {
 		sec = 14400
 	}
-	postData := map[string]interface{} {
-		"drive_id": param.DriveId,
-		"file_id": param.FileId,
+	postData := map[string]interface{}{
+		"drive_id":   param.DriveId,
+		"file_id":    param.FileId,
 		"expire_sec": sec,
 	}
 
@@ -118,9 +118,9 @@ func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange FileDownl
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// header
-	headers := map[string]string {
+	headers := map[string]string{
 		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-		"referer": "https://www.aliyundrive.com/",
+		"referer":    "https://www.aliyundrive.com/",
 	}
 
 	// download data resume
@@ -192,8 +192,8 @@ func (p *PanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange Fi
 
 	// save data
 	var (
-		buf       = make([]byte, 4096)
-		totalCount, readByteCount     int
+		buf                       = make([]byte, 4096)
+		totalCount, readByteCount int
 	)
 	defer cachepool.SyncPool.Put(buf)
 
@@ -205,7 +205,7 @@ func (p *PanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange Fi
 		logger.Verboseln("get byte piece:", readByteCount)
 		if readErr == io.EOF && readByteCount > 0 {
 			// the last piece
-			writerAt.WriteAt(buf[:readByteCount], fileRange.Offset + int64(totalCount))
+			writerAt.WriteAt(buf[:readByteCount], fileRange.Offset+int64(totalCount))
 			totalCount += readByteCount
 			break
 		}
@@ -214,7 +214,7 @@ func (p *PanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange Fi
 		}
 
 		// write
-		writerAt.WriteAt(buf[:readByteCount], fileRange.Offset + int64(totalCount))
+		writerAt.WriteAt(buf[:readByteCount], fileRange.Offset+int64(totalCount))
 		totalCount += readByteCount
 	}
 	return nil
