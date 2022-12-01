@@ -71,6 +71,8 @@ const (
 	ApiCodeVideoPreviewInfoNotFound ApiCode = 26
 	// ApiCodeFeatureTemporaryDisabled 功能维护中
 	ApiCodeFeatureTemporaryDisabled ApiCode = 27
+	// ApiCodeForbiddenFileInTheRecycleBin 文件已经被删除
+	ApiCodeForbiddenFileInTheRecycleBin ApiCode = 28
 )
 
 type ApiCode int
@@ -154,6 +156,8 @@ func ParseCommonApiError(data []byte) *ApiError {
 				return NewApiError(ApiCodeVideoPreviewInfoNotFound, errResp.GetErrorMsg())
 			} else if "FeatureTemporaryDisabled" == errResp.ErrorCode {
 				return NewApiError(ApiCodeFeatureTemporaryDisabled, errResp.GetErrorMsg())
+			} else if "ForbiddenFileInTheRecycleBin" == errResp.ErrorCode {
+				return NewApiError(ApiCodeForbiddenFileInTheRecycleBin, errResp.GetErrorMsg())
 			}
 			return NewFailedApiError(errResp.GetErrorMsg())
 		}
