@@ -259,6 +259,13 @@ func (fl FileList) Count() (fileN, directoryN int64) {
 	}
 	return
 }
+func (fl FileList) ItemCount() int {
+	return len(fl)
+}
+
+func (fl FileList) Item(index int) *FileEntity {
+	return fl[index]
+}
 
 // FileList 获取文件列表
 func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.ApiError) {

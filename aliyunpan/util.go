@@ -33,7 +33,7 @@ func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pa
 	}
 
 	if !strings.ContainsAny((*pathSlice)[index], ShellPatternCharacters) {
-		// 不是通配符，先查缓存
+		// 不包含通配符，先查缓存
 		curPathStr := path.Clean(parentFileInfo.Path + "/" + (*pathSlice)[index])
 
 		// try cache
@@ -65,13 +65,28 @@ func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pa
 	if curParentPathStr == "/" {
 		curParentPathStr = ""
 	}
+
+	// 先检测是否满足文件名全量匹配
 	for _, fileEntity := range fileResult {
-		// cache all
+		// cache item
 		fileEntity.Path = curParentPathStr + "/" + fileEntity.FileName
 		p.storeFilePathToCache(driveId, fileEntity.Path, fileEntity)
 
-		// find target file
-		// 支持通配符
+		// 阿里云盘文件名支持*?[]等特殊符号，先排除文件名完全一致匹配的情况，这种情况下不能开启通配符匹配
+		if fileEntity.FileName == (*pathSlice)[index] {
+			// 匹配一个就直接返回
+			p.recurseMatchPathByShellPattern(driveId, index+1, pathSlice, fileEntity, resultList)
+			return
+		}
+	}
+
+	// 使用通配符匹配
+	for _, fileEntity := range fileResult {
+		// cache item
+		fileEntity.Path = curParentPathStr + "/" + fileEntity.FileName
+		p.storeFilePathToCache(driveId, fileEntity.Path, fileEntity)
+
+		// 使用通配符
 		if matched, _ := path.Match((*pathSlice)[index], fileEntity.FileName); matched {
 			p.recurseMatchPathByShellPattern(driveId, index+1, pathSlice, fileEntity, resultList)
 		}
@@ -96,7 +111,7 @@ func (p *PanClient) MatchPathByShellPattern(driveId string, pattern string) (res
 	}()
 
 	parentFile := NewFileEntityForRootDir()
-	if strings.TrimSpace(pattern) == "/" {
+	if path.Clean(strings.TrimSpace(pattern)) == "/" {
 		*resultList = append(*resultList, parentFile)
 		return resultList, nil
 	}
