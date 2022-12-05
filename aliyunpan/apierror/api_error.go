@@ -73,6 +73,8 @@ const (
 	ApiCodeFeatureTemporaryDisabled ApiCode = 27
 	// ApiCodeForbiddenFileInTheRecycleBin 文件已经被删除
 	ApiCodeForbiddenFileInTheRecycleBin ApiCode = 28
+	// ApiCodeBadGateway 502网关错误，一般代表请求被限流了
+	ApiCodeBadGateway ApiCode = 29
 )
 
 type ApiCode int
@@ -129,6 +131,10 @@ func (a *ApiError) String() string {
 
 // ParseCommonApiError 解析阿里云盘错误，如果没有错误则返回nil
 func ParseCommonApiError(data []byte) *ApiError {
+	if string(data) == "Bad Gateway" {
+		// 	HTTP/1.1 502 Bad Gateway
+		return NewApiError(ApiCodeBadGateway, "网关错误，你的请求可能被临时限流了")
+	}
 	errResp := &ErrorResp{}
 	if err := json.Unmarshal(data, errResp); err == nil {
 		if errResp.ErrorCode != "" {
