@@ -17,6 +17,8 @@ package apierror
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strings"
 )
 
@@ -75,6 +77,8 @@ const (
 	ApiCodeForbiddenFileInTheRecycleBin ApiCode = 28
 	// ApiCodeBadGateway 502网关错误，一般代表请求被限流了
 	ApiCodeBadGateway ApiCode = 29
+	// ApiCodeTooManyRequests 429 Too Many Requests错误，一般代表请求被限流了
+	ApiCodeTooManyRequests ApiCode = 30
 )
 
 type ApiCode int
@@ -169,4 +173,23 @@ func ParseCommonApiError(data []byte) *ApiError {
 		}
 	}
 	return nil
+}
+
+// ParseCommonResponseApiError 解析阿里云盘错误，如果没有错误则返回nil
+func ParseCommonResponseApiError(resp *http.Response) ([]byte, *ApiError) {
+	if resp == nil {
+		return nil, nil
+	}
+
+	switch resp.StatusCode {
+	case 502:
+		return nil, NewApiError(ApiCodeBadGateway, "网关错误，你的请求可能被临时限流了")
+	case 429:
+		return nil, NewApiError(ApiCodeTooManyRequests, "太频繁请求错误，你的请求可能被临时限流了")
+	}
+	data, e := ioutil.ReadAll(resp.Body)
+	if e != nil {
+		return nil, NewFailedApiError(e.Error())
+	}
+	return data, ParseCommonApiError(data)
 }

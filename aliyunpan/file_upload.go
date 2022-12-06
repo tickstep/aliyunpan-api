@@ -280,14 +280,15 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 	postData.Type = "file"
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	resp, err := client.Req("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("create upload file error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
 	}
 
 	// handler common error
-	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+	body, err1 := apierror.ParseCommonResponseApiError(resp)
+	if err1 != nil {
 		return nil, err1
 	}
 
