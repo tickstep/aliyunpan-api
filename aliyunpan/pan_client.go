@@ -41,10 +41,10 @@ type (
 )
 
 func NewPanClient(webToken WebLoginToken, appToken AppLoginToken) *PanClient {
-	client := requester.NewHTTPClient()
+	myclient := requester.NewHTTPClient()
 
 	return &PanClient{
-		client:           client,
+		client:           myclient,
 		webToken:         webToken,
 		appToken:         appToken,
 		cacheMutex:       &sync.Mutex{},

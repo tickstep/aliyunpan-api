@@ -214,7 +214,7 @@ func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 	postData := map[string]string{}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get user info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -246,7 +246,7 @@ func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiErro
 	postData := map[string]string{}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get person info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -278,7 +278,7 @@ func (p *PanClient) getSafeBoxInfoReq() (*safeBoxInfoResult, *apierror.ApiError)
 	postData := map[string]string{}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get safe box info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -309,7 +309,7 @@ func (p *PanClient) getAlbumInfoReq() (*albumInfoResult, *apierror.ApiError) {
 	postData := map[string]string{}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get album info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -335,7 +335,7 @@ func (p *PanClient) getVipInfoReq() (*vipInfoResult, *apierror.ApiError) {
 	postData := map[string]string{}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get vip info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

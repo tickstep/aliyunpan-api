@@ -47,7 +47,7 @@ func (p *PanClient) FileRename(driveId, renameFileId, newName string) (bool, *ap
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get rename error ", err)
 		return false, apierror.NewFailedApiError(err.Error())

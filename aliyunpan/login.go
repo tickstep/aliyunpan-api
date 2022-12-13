@@ -55,10 +55,6 @@ type (
 	}
 )
 
-var (
-	client = requester.NewHTTPClient()
-)
-
 func (w *WebLoginToken) GetAuthorizationStr() string {
 	return w.AccessTokenType + " " + w.AccessToken
 }
@@ -72,7 +68,7 @@ func (w *WebLoginToken) IsAccessTokenExpired() bool {
 }
 
 func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apierror.ApiError) {
-	client := requester.NewHTTPClient()
+	myclient := requester.NewHTTPClient()
 
 	header := map[string]string {}
 
@@ -85,7 +81,7 @@ func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apier
 		"grant_type": "refresh_token",
 	}
 
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := myclient.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get access token error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

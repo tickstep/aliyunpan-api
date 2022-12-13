@@ -63,7 +63,7 @@ func (p *PanClient) VideoGetPreviewPlayInfo(param *VideoGetPreviewPlayInfoParam)
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	logger.Verboseln("response: " + string(body))
 	if err != nil {
 		logger.Verboseln("get video preview play info error ", err)

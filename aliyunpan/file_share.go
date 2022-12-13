@@ -206,7 +206,7 @@ func (p *PanClient) ShareLinkCreate(param ShareCreateParam) (*ShareEntity, *apie
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("create share list error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -255,7 +255,7 @@ func (p *PanClient) GetShareLinkListReq(param ShareListParam) (*ShareListResult,
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	logger.Verboseln(string(body))
 	if err != nil {
 		logger.Verboseln("get share list error ", err)

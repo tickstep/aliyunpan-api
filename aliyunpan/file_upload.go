@@ -280,7 +280,7 @@ func (p *PanClient) CreateUploadFile(param *CreateFileUploadParam) (*CreateFileU
 	postData.Type = "file"
 
 	// request
-	resp, err := client.Req("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	resp, err := p.client.Req("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("create upload file error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -319,7 +319,7 @@ func (p *PanClient) GetUploadUrl(param *GetUploadUrlParam) (*GetUploadUrlResult,
 	postData := param
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get upload url error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -411,7 +411,7 @@ func (p *PanClient) CompleteUploadFile(param *CompleteUploadFileParam) (*Complet
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("complete upload file error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

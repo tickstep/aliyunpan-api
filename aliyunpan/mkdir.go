@@ -58,7 +58,7 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get file info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

@@ -329,7 +329,7 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	//logger.Verboseln("get file list response: ", string(body))
 	if err != nil {
 		logger.Verboseln("get file list error ", err)
@@ -370,7 +370,7 @@ func (p *PanClient) FileInfoById(driveId, fileId string) (*FileEntity, *apierror
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	if err != nil {
 		logger.Verboseln("get file info error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -605,7 +605,7 @@ func (p *PanClient) FileGetPath(driveId, fileId string) (*FileGetPathResult, *ap
 	}
 
 	// request
-	body, err := client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
 	logger.Verboseln("get file path response: ", string(body))
 	if err != nil {
 		logger.Verboseln("get file path error ", err)
