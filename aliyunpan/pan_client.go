@@ -28,10 +28,21 @@ const (
 )
 
 type (
+	// AppConfig 存储客户端相关配置参数，目前主要是签名需要用的参数
+	AppConfig struct {
+		AppId         string `json:"appId"`
+		DeviceId      string `json:"deviceId"`
+		UserId        string `json:"userId"`
+		Nonce         int    `json:"nonce"`
+		PublicKey     string `json:"publicKey"`
+		SignatureData string `json:"signatureData"`
+	}
+
 	PanClient struct {
-		client   *requester.HTTPClient // http 客户端
-		webToken WebLoginToken
-		appToken AppLoginToken
+		client    *requester.HTTPClient // http 客户端
+		webToken  WebLoginToken
+		appToken  AppLoginToken
+		appConfig AppConfig
 
 		cacheMutex *sync.Mutex
 		useCache   bool
@@ -40,13 +51,14 @@ type (
 	}
 )
 
-func NewPanClient(webToken WebLoginToken, appToken AppLoginToken) *PanClient {
+func NewPanClient(webToken WebLoginToken, appToken AppLoginToken, appConfig AppConfig) *PanClient {
 	myclient := requester.NewHTTPClient()
 
 	return &PanClient{
 		client:           myclient,
 		webToken:         webToken,
 		appToken:         appToken,
+		appConfig:        appConfig,
 		cacheMutex:       &sync.Mutex{},
 		useCache:         false,
 		filePathCacheMap: sync.Map{},
@@ -55,6 +67,10 @@ func NewPanClient(webToken WebLoginToken, appToken AppLoginToken) *PanClient {
 
 func (p *PanClient) UpdateToken(webToken WebLoginToken) {
 	p.webToken = webToken
+}
+
+func (p *PanClient) UpdateAppConfig(appConfig AppConfig) {
+	p.appConfig = appConfig
 }
 
 func (p *PanClient) GetAccessToken() string {

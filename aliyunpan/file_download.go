@@ -88,7 +88,7 @@ func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFile
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("get file download url error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
