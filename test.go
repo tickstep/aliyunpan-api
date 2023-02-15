@@ -55,7 +55,31 @@ func main() {
 	fmt.Println(objToJsonStr(webToken))
 
 	// pan client
-	panClient := aliyunpan.NewPanClient(*webToken, aliyunpan.AppLoginToken{})
+	appConfig := aliyunpan.AppConfig{
+		AppId:     "25dzX3vbYqktVxyX",
+		DeviceId:  "878BFxxxxxxx092E1C7sT",
+		UserId:    "4d001d48xxxx662874f04bbe6",
+		Nonce:     0,
+		PublicKey: "",
+	}
+	panClient := aliyunpan.NewPanClient(*webToken, aliyunpan.AppLoginToken{}, appConfig)
+
+	// create session
+	r, e := panClient.CreateSession(&aliyunpan.CreateSessionParam{
+		DeviceName: "Edge浏览器",
+		ModelName:  "Windows网页版",
+	})
+	fmt.Println(e)
+	fmt.Println(r)
+
+	// get download url
+	r1, e1 := panClient.GetFileDownloadUrl(&aliyunpan.GetFileDownloadUrlParam{
+		DriveId:   "19519221",
+		FileId:    "60bc44f855814e19692a4958b4a8823a1a06e5de",
+		ExpireSec: 14400,
+	})
+	fmt.Println(e1)
+	fmt.Println(r1)
 
 	//// user info
 	//fmt.Println(" ")
@@ -271,19 +295,19 @@ func main() {
 	//fmt.Println(e)
 	//fmt.Println(objToJsonStr(r1))
 
-	r1, e := panClient.AlbumAddFile(&aliyunpan.AlbumAddFileParam{
-		AlbumId: "70a961cc1e1e40309f3217c99738f68662624f62",
-		DriveFileList: []aliyunpan.FileBatchActionParam{{
-			DriveId: "63309221",
-			FileId:  "60f43bbc135cf45c024646a6b33374c913a722da",
-		}, {
-			DriveId: "19519221",
-			FileId:  "60fbc14d6ad3dd66cc2c45ec893b1dd28fa90484",
-		}, {
-			DriveId: "19519221",
-			FileId:  "60fbc192ba61c1527b3844168b408af6d156ff9c",
-		}},
-	})
-	fmt.Println(e)
-	fmt.Println(objToJsonStr(r1))
+	//r1, e := panClient.AlbumAddFile(&aliyunpan.AlbumAddFileParam{
+	//	AlbumId: "70a961cc1e1e40309f3217c99738f68662624f62",
+	//	DriveFileList: []aliyunpan.FileBatchActionParam{{
+	//		DriveId: "63309221",
+	//		FileId:  "60f43bbc135cf45c024646a6b33374c913a722da",
+	//	}, {
+	//		DriveId: "19519221",
+	//		FileId:  "60fbc14d6ad3dd66cc2c45ec893b1dd28fa90484",
+	//	}, {
+	//		DriveId: "19519221",
+	//		FileId:  "60fbc192ba61c1527b3844168b408af6d156ff9c",
+	//	}},
+	//})
+	//fmt.Println(e)
+	//fmt.Println(objToJsonStr(r1))
 }
