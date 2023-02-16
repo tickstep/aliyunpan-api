@@ -242,7 +242,7 @@ func (p *PanClient) albumListReq(param *AlbumListParam) (*AlbumListResult, *apie
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("get album list error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -282,7 +282,7 @@ func (p *PanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apierro
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("create album error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -326,7 +326,7 @@ func (p *PanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror.Ap
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("edit album error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -365,7 +365,7 @@ func (p *PanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.ApiErr
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("delete album error ", err)
 		return false, apierror.NewFailedApiError(err.Error())
@@ -398,7 +398,7 @@ func (p *PanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.ApiE
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("get album error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -444,7 +444,7 @@ func (p *PanClient) AlbumShareCreate(param *AlbumShareCreateParam) (*AlbumShareC
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("create album share error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -543,7 +543,7 @@ func (p *PanClient) albumListFileReq(param *AlbumListFileParam) (*fileListResult
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("get album file list error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -579,7 +579,7 @@ func (p *PanClient) AlbumDeleteFile(param *AlbumDeleteFileParam) (bool, *apierro
 	postData := param
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("delete album file error ", err)
 		return false, apierror.NewFailedApiError(err.Error())
@@ -609,7 +609,7 @@ func (p *PanClient) AlbumAddFile(param *AlbumAddFileParam) (*FileList, *apierror
 	postData := param
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("add album file error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

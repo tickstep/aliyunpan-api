@@ -79,6 +79,8 @@ const (
 	ApiCodeBadGateway ApiCode = 29
 	// ApiCodeTooManyRequests 429 Too Many Requests错误，一般代表请求被限流了
 	ApiCodeTooManyRequests ApiCode = 30
+	// ApiCodeUserDeviceOffline 客户端离线，阿里云盘单账户最多只允许同时登录 10 台设备
+	ApiCodeUserDeviceOffline ApiCode = 31
 )
 
 type ApiCode int
@@ -168,6 +170,8 @@ func ParseCommonApiError(data []byte) *ApiError {
 				return NewApiError(ApiCodeFeatureTemporaryDisabled, errResp.GetErrorMsg())
 			} else if "ForbiddenFileInTheRecycleBin" == errResp.ErrorCode {
 				return NewApiError(ApiCodeForbiddenFileInTheRecycleBin, errResp.GetErrorMsg())
+			} else if "UserDeviceOffline" == errResp.ErrorCode {
+				return NewApiError(ApiCodeUserDeviceOffline, "你账号已超出最大登录设备数量，请先下线一台设备，然后重启本应用，才可以继续使用")
 			}
 			return NewFailedApiError(errResp.GetErrorMsg())
 		}

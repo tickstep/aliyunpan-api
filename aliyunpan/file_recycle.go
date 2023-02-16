@@ -95,7 +95,7 @@ func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*file
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("get recycle bin file list error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

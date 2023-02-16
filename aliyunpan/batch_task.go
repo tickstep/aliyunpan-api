@@ -16,22 +16,22 @@ type (
 		Method string `json:"method"`
 		Url    string `json:"url"`
 
-		Headers map[string]string `json:"headers"`
-		Body map[string]interface{} `json:"body"`
+		Headers map[string]string      `json:"headers"`
+		Body    map[string]interface{} `json:"body"`
 	}
-	BatchRequestList []*BatchRequest
+	BatchRequestList  []*BatchRequest
 	BatchRequestParam struct {
 		Requests BatchRequestList `json:"requests"`
-		Resource string `json:"resource"`
+		Resource string           `json:"resource"`
 	}
 
 	// 响应结果
 	BatchResponse struct {
-		Id     string `json:"id"`
-		Status int `json:"status"`
-		Body map[string]interface{} `json:"body"`
+		Id     string                 `json:"id"`
+		Status int                    `json:"status"`
+		Body   map[string]interface{} `json:"body"`
 	}
-	BatchResponseList []*BatchResponse
+	BatchResponseList   []*BatchResponse
 	BatchResponseResult struct {
 		Responses BatchResponseList `json:"responses"`
 	}
@@ -44,7 +44,7 @@ func (p *PanClient) BatchTask(url string, param *BatchRequestParam) (*BatchRespo
 	}
 
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -57,7 +57,7 @@ func (p *PanClient) BatchTask(url string, param *BatchRequestParam) (*BatchRespo
 	postData := param
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("batch request error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())

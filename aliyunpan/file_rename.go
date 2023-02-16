@@ -29,7 +29,7 @@ func (p *PanClient) FileRename(driveId, renameFileId, newName string) (bool, *ap
 		return false, apierror.NewFailedApiError("请指定命名的文件")
 	}
 	// header
-	header := map[string]string {
+	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
 
@@ -39,15 +39,15 @@ func (p *PanClient) FileRename(driveId, renameFileId, newName string) (bool, *ap
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// data
-	postData := map[string]interface{} {
-		"drive_id": driveId,
-		"file_id": renameFileId,
-		"name": newName,
+	postData := map[string]interface{}{
+		"drive_id":        driveId,
+		"file_id":         renameFileId,
+		"name":            newName,
 		"check_name_mode": "refuse",
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	if err != nil {
 		logger.Verboseln("get rename error ", err)
 		return false, apierror.NewFailedApiError(err.Error())

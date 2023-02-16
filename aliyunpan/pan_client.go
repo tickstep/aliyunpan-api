@@ -15,6 +15,8 @@
 package aliyunpan
 
 import (
+	"github.com/tickstep/library-go/crypto"
+	"github.com/tickstep/library-go/crypto/secp256k1"
 	"github.com/tickstep/library-go/logger"
 	"github.com/tickstep/library-go/requester"
 	"strings"
@@ -30,12 +32,16 @@ const (
 type (
 	// AppConfig 存储客户端相关配置参数，目前主要是签名需要用的参数
 	AppConfig struct {
-		AppId         string `json:"appId"`
+		AppId string `json:"appId"`
+		// DeviceId标识登录客户端，阿里限制：为了保障你的数据隐私安全，阿里云盘最多只允许你同时登录 10 台设备。你已超出最大设备数量，请先选择一台设备下线，才可以继续使用
 		DeviceId      string `json:"deviceId"`
 		UserId        string `json:"userId"`
-		Nonce         int    `json:"nonce"`
+		Nonce         int32  `json:"nonce"`
 		PublicKey     string `json:"publicKey"`
 		SignatureData string `json:"signatureData"`
+
+		PrivKey *secp256k1.PrivKey `json:"-"`
+		PubKey  *crypto.PubKey     `json:"-"`
 	}
 
 	PanClient struct {
