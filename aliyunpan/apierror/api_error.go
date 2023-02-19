@@ -81,6 +81,8 @@ const (
 	ApiCodeTooManyRequests ApiCode = 30
 	// ApiCodeUserDeviceOffline 客户端离线，阿里云盘单账户最多只允许同时登录 10 台设备
 	ApiCodeUserDeviceOffline ApiCode = 31
+	// ApiCodeDeviceSessionSignatureInvalid 签名过期，需要更新签名密钥
+	ApiCodeDeviceSessionSignatureInvalid ApiCode = 32
 )
 
 type ApiCode int
@@ -172,6 +174,8 @@ func ParseCommonApiError(data []byte) *ApiError {
 				return NewApiError(ApiCodeForbiddenFileInTheRecycleBin, errResp.GetErrorMsg())
 			} else if "UserDeviceOffline" == errResp.ErrorCode {
 				return NewApiError(ApiCodeUserDeviceOffline, "你账号已超出最大登录设备数量，请先下线一台设备，然后重启本应用，才可以继续使用")
+			} else if "DeviceSessionSignatureInvalid" == errResp.ErrorCode {
+				return NewApiError(ApiCodeDeviceSessionSignatureInvalid, "签名过期，需要更新签名密钥")
 			}
 			return NewFailedApiError(errResp.GetErrorMsg())
 		}

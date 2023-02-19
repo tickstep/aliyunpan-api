@@ -55,7 +55,7 @@ func getNextNonce(nonce int32) int32 {
 	}
 }
 
-// CalcSignature 计算接口签名
+// CalcSignature 生成新的密钥并计算接口签名
 func (p *PanClient) CalcSignature() error {
 	max := 32
 	key := randomString(max)
@@ -74,7 +74,7 @@ func (p *PanClient) CalcSignature() error {
 	return nil
 }
 
-// CalcNextSignature 计算接口新的签名
+// CalcNextSignature 使用已有的密钥并生成新的签名
 func (p *PanClient) CalcNextSignature() error {
 	p.appConfig.Nonce = getNextNonce(p.appConfig.Nonce)
 	data := fmt.Sprintf("%s:%s:%s:%d", p.appConfig.AppId, p.appConfig.DeviceId, p.appConfig.UserId, p.appConfig.Nonce)
@@ -147,7 +147,6 @@ func (p *PanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResu
 }
 
 // RenewSession 刷新签名秘钥，如果刷新失败则需要调用CreateSession重新上传新秘钥
-// {"code":"DeviceSessionSignatureInvalid","message":"device session signature error","requestId":"0a0080e316765165980623028ee416"}
 func (p *PanClient) RenewSession() (*CreateSessionResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
