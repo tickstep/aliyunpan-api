@@ -56,7 +56,7 @@ func getNextNonce(nonce int32) int32 {
 }
 
 // CalcSignature 生成新的密钥并计算接口签名
-func (p *PanClient) CalcSignature() error {
+func (p *PanClient) calcSignature() error {
 	max := 32
 	key := randomString(max)
 	p.appConfig.Nonce = 0
@@ -75,23 +75,19 @@ func (p *PanClient) CalcSignature() error {
 }
 
 // CalcNextSignature 使用已有的密钥并生成新的签名
-func (p *PanClient) CalcNextSignature() error {
-	p.appConfig.Nonce = getNextNonce(p.appConfig.Nonce)
-	data := fmt.Sprintf("%s:%s:%s:%d", p.appConfig.AppId, p.appConfig.DeviceId, p.appConfig.UserId, p.appConfig.Nonce)
-	signature, err := p.appConfig.PrivKey.Sign([]byte(data))
-	if err != nil {
-		return err
-	}
-	p.appConfig.SignatureData = hex.EncodeToString(signature) + "01"
-	return nil
-}
+//func (p *PanClient) CalcNextSignature() error {
+//	p.appConfig.Nonce = getNextNonce(p.appConfig.Nonce)
+//	data := fmt.Sprintf("%s:%s:%s:%d", p.appConfig.AppId, p.appConfig.DeviceId, p.appConfig.UserId, p.appConfig.Nonce)
+//	signature, err := p.appConfig.PrivKey.Sign([]byte(data))
+//	if err != nil {
+//		return err
+//	}
+//	p.appConfig.SignatureData = hex.EncodeToString(signature) + "01"
+//	return nil
+//}
 
 // AddSignatureHeader 增加接口签名header
 func (p *PanClient) AddSignatureHeader(headers map[string]string) map[string]string {
-	if p.appConfig.PublicKey == "" {
-		p.CalcSignature()
-	}
-
 	if headers == nil {
 		return headers
 	}
@@ -105,6 +101,9 @@ func (p *PanClient) AddSignatureHeader(headers map[string]string) map[string]str
 
 // CreateSession 上传会话签名秘钥给服务器
 func (p *PanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResult, *apierror.ApiError) {
+	// 计算密钥
+	p.calcSignature()
+
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -116,9 +115,6 @@ func (p *PanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResu
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// data
-	if p.appConfig.PublicKey == "" {
-		p.CalcSignature()
-	}
 	postData := map[string]interface{}{
 		"deviceName": param.DeviceName,
 		"modelName":  param.ModelName,
@@ -147,35 +143,35 @@ func (p *PanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResu
 }
 
 // RenewSession 刷新签名秘钥，如果刷新失败则需要调用CreateSession重新上传新秘钥
-func (p *PanClient) RenewSession() (*CreateSessionResult, *apierror.ApiError) {
-	// header
-	header := map[string]string{
-		"authorization": p.webToken.GetAuthorizationStr(),
-	}
-
-	// url
-	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/users/v1/users/device/renew_session", API_URL)
-	logger.Verboseln("do request url: " + fullUrl.String())
-
-	// request
-	data := map[string]string{}
-	body, err := p.client.Fetch("POST", fullUrl.String(), data, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
-	if err != nil {
-		logger.Verboseln("do renew session error ", err)
-		return nil, apierror.NewFailedApiError(err.Error())
-	}
-
-	// handler common error
-	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
-		return nil, err1
-	}
-
-	// parse result
-	r := &CreateSessionResult{}
-	if err2 := json.Unmarshal(body, r); err2 != nil {
-		logger.Verboseln("parse renew session result json error ", err2)
-		return nil, apierror.NewFailedApiError(err2.Error())
-	}
-	return r, nil
-}
+//func (p *PanClient) RenewSession() (*CreateSessionResult, *apierror.ApiError) {
+//	// header
+//	header := map[string]string{
+//		"authorization": p.webToken.GetAuthorizationStr(),
+//	}
+//
+//	// url
+//	fullUrl := &strings.Builder{}
+//	fmt.Fprintf(fullUrl, "%s/users/v1/users/device/renew_session", API_URL)
+//	logger.Verboseln("do request url: " + fullUrl.String())
+//
+//	// request
+//	data := map[string]string{}
+//	body, err := p.client.Fetch("POST", fullUrl.String(), data, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
+//	if err != nil {
+//		logger.Verboseln("do renew session error ", err)
+//		return nil, apierror.NewFailedApiError(err.Error())
+//	}
+//
+//	// handler common error
+//	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+//		return nil, err1
+//	}
+//
+//	// parse result
+//	r := &CreateSessionResult{}
+//	if err2 := json.Unmarshal(body, r); err2 != nil {
+//		logger.Verboseln("parse renew session result json error ", err2)
+//		return nil, apierror.NewFailedApiError(err2.Error())
+//	}
+//	return r, nil
+//}
