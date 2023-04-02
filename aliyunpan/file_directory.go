@@ -295,6 +295,16 @@ retry:
 				retryCount++
 				goto retry
 			}
+		} else if err.Code == apierror.ApiCodeDeviceSessionSignatureInvalid {
+			logger.Verboseln("device session signature invalid, updating new session signature")
+			time.Sleep(time.Duration(2 * time.Second))
+			if r, e := p.CreateSession(nil); e != nil {
+				logger.Verboseln("update session signature error")
+				logger.Verboseln(r)
+			} else {
+				logger.Verboseln("update session signature success")
+				goto retry
+			}
 		}
 		return nil, err
 	}
