@@ -101,6 +101,13 @@ func (p *PanClient) AddSignatureHeader(headers map[string]string) map[string]str
 
 // CreateSession 上传会话签名秘钥给服务器
 func (p *PanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResult, *apierror.ApiError) {
+	if param == nil {
+		param = &CreateSessionParam{
+			DeviceName: p.sessionConfig.DeviceName,
+			ModelName:  p.sessionConfig.ModelName,
+		}
+	}
+
 	// 计算密钥
 	p.calcSignature()
 

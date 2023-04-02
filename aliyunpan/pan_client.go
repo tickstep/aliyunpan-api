@@ -43,12 +43,17 @@ type (
 		PrivKey *secp256k1.PrivKey `json:"-"`
 		PubKey  *crypto.PubKey     `json:"-"`
 	}
+	SessionConfig struct {
+		DeviceName string `json:"deviceName"`
+		ModelName  string `json:"modelName"`
+	}
 
 	PanClient struct {
-		client    *requester.HTTPClient // http 客户端
-		webToken  WebLoginToken
-		appToken  AppLoginToken
-		appConfig AppConfig
+		client        *requester.HTTPClient // http 客户端
+		webToken      WebLoginToken
+		appToken      AppLoginToken
+		appConfig     AppConfig
+		sessionConfig SessionConfig
 
 		cacheMutex *sync.Mutex
 		useCache   bool
@@ -57,7 +62,7 @@ type (
 	}
 )
 
-func NewPanClient(webToken WebLoginToken, appToken AppLoginToken, appConfig AppConfig) *PanClient {
+func NewPanClient(webToken WebLoginToken, appToken AppLoginToken, appConfig AppConfig, sessionConfig SessionConfig) *PanClient {
 	myclient := requester.NewHTTPClient()
 
 	return &PanClient{
@@ -65,6 +70,7 @@ func NewPanClient(webToken WebLoginToken, appToken AppLoginToken, appConfig AppC
 		webToken:         webToken,
 		appToken:         appToken,
 		appConfig:        appConfig,
+		sessionConfig:    sessionConfig,
 		cacheMutex:       &sync.Mutex{},
 		useCache:         false,
 		filePathCacheMap: sync.Map{},
@@ -77,6 +83,10 @@ func (p *PanClient) UpdateToken(webToken WebLoginToken) {
 
 func (p *PanClient) UpdateAppConfig(appConfig AppConfig) {
 	p.appConfig = appConfig
+}
+
+func (p *PanClient) UpdateSessionConfig(sessionConfig SessionConfig) {
+	p.sessionConfig = sessionConfig
 }
 
 func (p *PanClient) GetAccessToken() string {

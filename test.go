@@ -19,7 +19,10 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/library-go/jsonhelper"
+	"math/rand"
 	"os"
+	"strings"
+	"time"
 )
 
 type (
@@ -33,6 +36,17 @@ type (
 func objToJsonStr(v interface{}) string {
 	r, _ := jsoniter.MarshalToString(v)
 	return string(r)
+}
+
+func RandomDeviceId() string {
+	count := 24
+	STR_SET := "abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ1234567890"
+	rand.Seed(time.Now().UnixNano())
+	str := strings.Builder{}
+	for i := 0; i < count; i++ {
+		str.WriteByte(byte(STR_SET[rand.Intn(len(STR_SET))]))
+	}
+	return str.String()
 }
 
 func main() {
@@ -56,17 +70,23 @@ func main() {
 
 	// pan client
 	appConfig := aliyunpan.AppConfig{
-		AppId:     "25dzX3vbYqktVxyX",
-		DeviceId:  "878BFxxxxxxx092E1C7sT",
-		UserId:    "4d001d48xxxx662874f04bbe6",
+		AppId: "25dzX3vbYqktVxyX",
+		//DeviceId: "878BF0KXVmMCAXF092E1C7sT",
+		DeviceId: "T6ZJyY7JqX6EN2cDzLCxMVYZ",
+		//DeviceId:  RandomDeviceId(),
+		UserId:    "4d001d48564f43b3bc5662874f04bbe6",
 		Nonce:     0,
 		PublicKey: "",
 	}
-	panClient := aliyunpan.NewPanClient(*webToken, aliyunpan.AppLoginToken{}, appConfig)
+	panClient := aliyunpan.NewPanClient(*webToken, aliyunpan.AppLoginToken{}, appConfig, aliyunpan.SessionConfig{
+		DeviceName: "Chrome浏览器",
+		ModelName:  "Windows网页版",
+	})
 
 	// create session
+	fmt.Println("CreateSession")
 	r, e := panClient.CreateSession(&aliyunpan.CreateSessionParam{
-		DeviceName: "Edge浏览器",
+		DeviceName: "Chrome浏览器",
 		ModelName:  "Windows网页版",
 	})
 	fmt.Println(e)
@@ -80,6 +100,24 @@ func main() {
 	})
 	fmt.Println(e1)
 	fmt.Println(r1)
+
+	//panClient.CalcNextSignature()
+	//r, e = panClient.CreateSession(&aliyunpan.CreateSessionParam{
+	//	DeviceName: "Chrome浏览器",
+	//	ModelName:  "Windows网页版",
+	//})
+	////fmt.Println("RenewSession")
+	//////panClient.CalcNextSignature()
+	////r, e = panClient.RenewSession()
+	//fmt.Println(e)
+	//fmt.Println(r)
+	//r1, e1 = panClient.GetFileDownloadUrl(&aliyunpan.GetFileDownloadUrlParam{
+	//	DriveId:   "19519221",
+	//	FileId:    "60bc44f855814e19692a4958b4a8823a1a06e5de",
+	//	ExpireSec: 14400,
+	//})
+	//fmt.Println(e1)
+	//fmt.Println(r1)
 
 	//// user info
 	//fmt.Println(" ")
