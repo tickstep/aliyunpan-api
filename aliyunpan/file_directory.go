@@ -163,6 +163,9 @@ const (
 	FileOrderDirectionDesc FileOrderDirection = "DESC"
 	// FileOrderDirectionAsc 升序
 	FileOrderDirectionAsc FileOrderDirection = "ASC"
+
+	// 最大重试次数（应对请求频繁的错误限制）
+	MaxRequestRetryCount = int64(10)
 )
 
 // NewFileEntityForRootDir 创建根目录"/"的默认文件信息
@@ -273,6 +276,8 @@ func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.A
 		FileList:   FileList{},
 		NextMarker: "",
 	}
+	retryCount := int64(1)
+retry:
 	if flr, err := p.fileListReq(param); err == nil {
 		for k := range flr.Items {
 			if flr.Items[k] == nil {
@@ -283,6 +288,14 @@ func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.A
 		}
 		result.NextMarker = flr.NextMarker
 	} else {
+		if err.Code == apierror.ApiCodeTooManyRequests {
+			if retryCount <= MaxRequestRetryCount {
+				logger.Verboseln("too many request error, sleep and retry later")
+				time.Sleep(time.Duration(retryCount*2) * time.Second)
+				retryCount++
+				goto retry
+			}
+		}
 		return nil, err
 	}
 	return result, nil
@@ -329,7 +342,7 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 	}
 
 	// request
-	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
+	resp, err := p.client.Req("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
 	//logger.Verboseln("get file list response: ", string(body))
 	if err != nil {
 		logger.Verboseln("get file list error ", err)
@@ -337,7 +350,8 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 	}
 
 	// handler common error
-	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+	body, err1 := apierror.ParseCommonResponseApiError(resp)
+	if err1 != nil {
 		return nil, err1
 	}
 

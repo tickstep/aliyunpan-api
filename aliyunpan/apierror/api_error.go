@@ -191,9 +191,9 @@ func ParseCommonResponseApiError(resp *http.Response) ([]byte, *ApiError) {
 
 	switch resp.StatusCode {
 	case 502:
-		return nil, NewApiError(ApiCodeBadGateway, "网关错误，你的请求可能被临时限流了")
+		return nil, NewApiError(ApiCodeBadGateway, "网关错误，可能是请求的参数有误")
 	case 429:
-		return nil, NewApiError(ApiCodeTooManyRequests, "太频繁请求错误，你的请求可能被临时限流了")
+		return nil, NewApiError(ApiCodeTooManyRequests, "请求太频繁，已被阿里云盘临时限流")
 	}
 	data, e := ioutil.ReadAll(resp.Body)
 	if e != nil {
