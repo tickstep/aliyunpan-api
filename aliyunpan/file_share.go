@@ -25,6 +25,7 @@ type (
 		Expiration string      `json:"expiration"`
 		UpdatedAt  string      `json:"updated_at"`
 		CreatedAt  string      `json:"created_at"`
+		// forbidden-已违规，enabled-正常
 		Status     string      `json:"status"`
 		FirstFile  *FileEntity `json:"first_file"`
 	}
