@@ -32,12 +32,14 @@ type (
 	UserInfo struct {
 		// DomainId 域ID
 		DomainId string `json:"domainId"`
-		// DefaultDriveId 文件网盘ID
+		// FileDriveId 备份（文件）网盘ID
 		FileDriveId string `json:"fileDriveId"`
 		// SafeBoxDriveId 保险箱网盘ID
 		SafeBoxDriveId string `json:"safeBoxDriveId"`
 		// AlbumDriveId 相册网盘ID
 		AlbumDriveId string `json:"albumDriveId"`
+		// ResourceDriveId 资源库网盘ID
+		ResourceDriveId string `json:"resourceDriveId"`
 		// 用户UID
 		UserId string `json:"userId"`
 		// UserName 用户名
@@ -62,21 +64,21 @@ type (
 
 	// userInfoResult 用户信息返回实体
 	userInfoResult struct {
-		DomainId                    string `json:"domain_id"`
-		UserId                      string `json:"user_id"`
-		Avatar                      string `json:"avatar"`
-		CreatedAt                   int64  `json:"created_at"`
-		UpdatedAt                   int64  `json:"updated_at"`
-		Email                       string `json:"email"`
-		NickName                    string `json:"nick_name"`
-		Phone                       string `json:"phone"`
-		Role                        string `json:"role"`
-		Status                      string `json:"status"`
-		UserName                    string `json:"user_name"`
-		Description                 string `json:"description"`
-		DefaultDriveId              string `json:"default_drive_id"`
-		DenyChangePasswordBySelf    bool   `json:"deny_change_password_by_self"`
-		NeedChangePasswordNextLogin bool   `json:"need_change_password_next_login"`
+		DomainId        string `json:"domain_id"`
+		UserId          string `json:"user_id"`
+		Avatar          string `json:"avatar"`
+		CreatedAt       int64  `json:"created_at"`
+		UpdatedAt       int64  `json:"updated_at"`
+		Email           string `json:"email"`
+		NickName        string `json:"nick_name"`
+		Phone           string `json:"phone"`
+		Role            string `json:"role"`
+		Status          string `json:"status"`
+		UserName        string `json:"user_name"`
+		Description     string `json:"description"`
+		DefaultDriveId  string `json:"default_drive_id"`  // 默认是备份盘，以前叫文件盘
+		BackupDriveId   string `json:"backup_drive_id"`   // 备份盘
+		ResourceDriveId string `json:"resource_drive_id"` // 资源库
 	}
 
 	personalInfoResult struct {
@@ -168,6 +170,7 @@ func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
 	if r, err := p.getUserInfoReq(); err == nil {
 		userInfo.DomainId = r.DomainId
 		userInfo.FileDriveId = r.DefaultDriveId
+		userInfo.ResourceDriveId = r.ResourceDriveId
 		userInfo.UserId = r.UserId
 		userInfo.UserName = r.UserName
 		userInfo.CreatedAt = time.Unix(r.CreatedAt/1000, 0).Format("2006-01-02 15:04:05")
@@ -209,7 +212,7 @@ func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 	}
 
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/v2/user/get", API_URL)
+	fmt.Fprintf(fullUrl, "%s/v2/user/get", USER_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 	postData := map[string]string{}
 

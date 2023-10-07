@@ -15,7 +15,8 @@
 package aliyunpan
 
 const (
-	WEB_URL string = "https://www.aliyundrive.com"
+	WEB_URL  string = "https://www.aliyundrive.com"
 	AUTH_URL string = "https://auth.aliyundrive.com"
-	API_URL string = "https://api.aliyundrive.com"
+	API_URL  string = "https://api.aliyundrive.com"
+	USER_URL string = "https://user.aliyundrive.com"
 )
