@@ -22,12 +22,12 @@ type (
 		FileIdList []string `json:"file_id_list"`
 		SaveCount  int      `json:"save_count"`
 		// Expiration 过期时间，为空代表永不过期
-		Expiration string      `json:"expiration"`
-		UpdatedAt  string      `json:"updated_at"`
-		CreatedAt  string      `json:"created_at"`
+		Expiration string `json:"expiration"`
+		UpdatedAt  string `json:"updated_at"`
+		CreatedAt  string `json:"created_at"`
 		// forbidden-已违规，enabled-正常
-		Status     string      `json:"status"`
-		FirstFile  *FileEntity `json:"first_file"`
+		Status    string      `json:"status"`
+		FirstFile *FileEntity `json:"first_file"`
 	}
 
 	shareEntityResult struct {
@@ -75,7 +75,7 @@ type (
 		Success bool
 	}
 
-	// 创建分享
+	// ShareCreateParam 创建分享
 	ShareCreateParam struct {
 		DriveId string `json:"drive_id"`
 		// 分享密码，4个字符，为空代码公开分享
@@ -83,6 +83,30 @@ type (
 		// 过期时间，为空代表永不过期。时间格式必须是这种：2021-07-23 09:22:19
 		Expiration string   `json:"expiration"`
 		FileIdList []string `json:"file_id_list"`
+	}
+
+	// FastShareCreateParam 创建快传分享
+	FastShareCreateParam struct {
+		DriveId    string   `json:"drive_id"`
+		FileIdList []string `json:"file_id_list"`
+	}
+
+	FastShareFileItem struct {
+		DriveId string `json:"drive_id"`
+		FileId  string `json:"file_id"`
+	}
+
+	FastShareCreateResult struct {
+		Expiration    string              `json:"expiration"`
+		Thumbnail     string              `json:"thumbnail"`
+		ShareName     string              `json:"share_name"`
+		ShareId       string              `json:"share_id"`
+		ShareUrl      string              `json:"share_url"`
+		DriveFileList []FastShareFileItem `json:"drive_file_list"`
+		FullShareMsg  string              `json:"full_share_msg"`
+		ShareTitle    string              `json:"share_title"`
+		ShareSubtitle string              `json:"share_subtitle"`
+		Expired       bool                `json:"expired"`
 	}
 )
 
@@ -274,5 +298,49 @@ func (p *PanClient) GetShareLinkListReq(param ShareListParam) (*ShareListResult,
 		logger.Verboseln("parse share list result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
+	return r, nil
+}
+
+// FastShareLinkCreate 创建快传分享
+func (p *PanClient) FastShareLinkCreate(param FastShareCreateParam) (*FastShareCreateResult, *apierror.ApiError) {
+	// header
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+
+	// url
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1/share/create", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// data
+	var fileList []FastShareFileItem
+	for _, fileId := range param.FileIdList {
+		fileList = append(fileList, FastShareFileItem{DriveId: param.DriveId, FileId: fileId})
+	}
+	postData := struct {
+		DriveFileList []FastShareFileItem `json:"drive_file_list"`
+	}{DriveFileList: fileList}
+
+	// request
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
+	if err != nil {
+		logger.Verboseln("create fast share list error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+	logger.Verboseln("response: ", string(body))
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &FastShareCreateResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse fast share create result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	r.Expiration = apiutil.UtcTime2LocalFormat(r.Expiration)
 	return r, nil
 }
