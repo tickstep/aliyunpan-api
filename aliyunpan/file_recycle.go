@@ -75,7 +75,7 @@ func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*file
 	}
 
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/v2/recyclebin/list", API_URL)
+	fmt.Fprintf(fullUrl, "%s/adrive/v2/recyclebin/list", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	limit := param.Limit
