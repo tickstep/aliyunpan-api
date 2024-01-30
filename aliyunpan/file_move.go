@@ -22,14 +22,14 @@ import (
 	"strings"
 )
 
-type(
+type (
 	FileMoveParam struct {
 		// 源网盘ID
-		DriveId        string `json:"drive_id"`
+		DriveId string `json:"drive_id"`
 		// 源文件ID
-		FileId        string `json:"file_id"`
+		FileId string `json:"file_id"`
 		// 目标网盘ID
-		ToDriveId     string `json:"to_drive_id"`
+		ToDriveId string `json:"to_drive_id"`
 		// 目标文件夹ID
 		ToParentFileId string `json:"to_parent_file_id"`
 	}
@@ -46,11 +46,11 @@ type(
 func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/v3/batch", API_URL)
+	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// data
-	requests,e := p.getFileMoveBatchRequestList(param)
+	requests, e := p.getFileMoveBatchRequestList(param)
 	if e != nil {
 		return nil, e
 	}
@@ -60,7 +60,7 @@ func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierr
 	}
 
 	// request
-	result,err := p.BatchTask(fullUrl.String(), &batchParam)
+	result, err := p.BatchTask(fullUrl.String(), &batchParam)
 	if err != nil {
 		logger.Verboseln("file move error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
@@ -68,10 +68,10 @@ func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierr
 
 	// parse result
 	r := []*FileMoveResult{}
-	for _,item := range result.Responses{
+	for _, item := range result.Responses {
 		r = append(r, &FileMoveResult{
-			FileId: item.Id,
-			Success:     item.Status == 200,
+			FileId:  item.Id,
+			Success: item.Status == 200,
 		})
 	}
 	return r, nil
@@ -83,15 +83,15 @@ func (p *PanClient) getFileMoveBatchRequestList(param []*FileMoveParam) (BatchRe
 	}
 
 	r := BatchRequestList{}
-	for _,item := range param {
+	for _, item := range param {
 		r = append(r, &BatchRequest{
-			Id:      item.FileId,
-			Method:  "POST",
-			Url:     "/file/move",
+			Id:     item.FileId,
+			Method: "POST",
+			Url:    "/file/move",
 			Headers: map[string]string{
 				"Content-Type": "application/json",
 			},
-			Body:    apiutil.GetMapSet(item),
+			Body: apiutil.GetMapSet(item),
 		})
 	}
 	return r, nil
