@@ -163,7 +163,7 @@ func (p *PanClient) ShareLinkList(userId string) ([]*ShareEntity, *apierror.ApiE
 func (p *PanClient) ShareLinkCancel(shareIdList []string) ([]*ShareCancelResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/adrive/v2/batch", API_URL)
+	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// param
