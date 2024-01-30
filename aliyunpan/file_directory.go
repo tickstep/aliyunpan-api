@@ -317,7 +317,7 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 	}
 
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/v2/file/list", API_URL)
+	fmt.Fprintf(fullUrl, "%s/adrive/v3/file/list", API_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	pFileId := param.ParentFileId
