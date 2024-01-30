@@ -15,6 +15,16 @@ type (
 		Limit   int    `json:"limit"`
 		Marker  string `json:"marker"`
 	}
+
+	RecycleBinFileClearParam struct {
+		DriveId string `json:"drive_id"`
+	}
+	RecycleBinFileClearResult struct {
+		DomainId    string `json:"domain_id"`
+		DriveId     string `json:"drive_id"`
+		TaskId      string `json:"task_id"`
+		AsyncTaskId string `json:"async_task_id"`
+	}
 )
 
 // RecycleBinFileList 获取回收站文件列表
@@ -110,6 +120,42 @@ func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*file
 	r := &fileListResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse recycle bin file list result json error ", err2)
+		return nil, apierror.NewFailedApiError(err2.Error())
+	}
+	return r, nil
+}
+
+// RecycleBinFileClear 清空回收站
+func (p *PanClient) RecycleBinFileClear(param *RecycleBinFileClearParam) (*RecycleBinFileClearResult, *apierror.ApiError) {
+	header := map[string]string{
+		"authorization": p.webToken.GetAuthorizationStr(),
+		"referer":       "https://www.aliyundrive.com/",
+		"origin":        "https://www.aliyundrive.com",
+	}
+
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/v2/recyclebin/clear", API_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	postData := map[string]interface{}{
+		"drive_id": param.DriveId,
+	}
+	// request
+	body, err := p.client.Fetch("POST", fullUrl.String(), postData, p.AddSignatureHeader(apiutil.AddCommonHeader(header)))
+	if err != nil {
+		logger.Verboseln("clear recycle bin file error ", err)
+		return nil, apierror.NewFailedApiError(err.Error())
+	}
+
+	// handler common error
+	if err1 := apierror.ParseCommonApiError(body); err1 != nil {
+		return nil, err1
+	}
+
+	// parse result
+	r := &RecycleBinFileClearResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse recycle bin file clear result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
 	return r, nil
