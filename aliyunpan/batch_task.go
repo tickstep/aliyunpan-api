@@ -3,10 +3,11 @@ package aliyunpan
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
-	"strings"
 )
 
 type (
@@ -38,7 +39,7 @@ type (
 )
 
 // BatchTask 批量请求任务。多选操作基本都是批量任务
-func (p *PanClient) BatchTask(url string, param *BatchRequestParam) (*BatchResponseResult, *apierror.ApiError) {
+func (p *PanClient) BatchTask(url string, param *BatchRequestParam, headers ...[2]string) (*BatchResponseResult, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}
@@ -46,6 +47,9 @@ func (p *PanClient) BatchTask(url string, param *BatchRequestParam) (*BatchRespo
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
+	}
+	for _, v := range headers {
+		header[v[0]] = v[1]
 	}
 
 	// url
