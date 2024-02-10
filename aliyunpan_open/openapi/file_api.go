@@ -113,6 +113,42 @@ type (
 		// Type all | file | folder，默认所有类型
 		Type string `json:"type"`
 	}
+
+	// FileIdentityPair 文件唯一标识对
+	FileIdentityPair struct {
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FileId 文件ID
+		FileId string `json:"file_id"`
+	}
+
+	// FilePathPair 文件路径唯一标识对
+	FilePathPair struct {
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FilePath 文件绝对路径，文件或者文件夹。 例子： 1. 根目录下有 a.jepg 文件，传 /a.jpeg 获取文件属性 2. 根目录下有 bb 文件夹，传 /bb 获取文件夹属性
+		FilePath string `json:"file_path"`
+	}
+
+	// FileDownloadUrlParam 获取文件下载链接参数
+	FileDownloadUrlParam struct {
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FileId 文件ID
+		FileId string `json:"file_id"`
+		// ExpireSec 下载地址过期时间，单位为秒，默认为 900 秒,最长4h（14400秒，需要申请）
+		ExpireSec int64 `json:"expire_sec"`
+	}
+	FileDownloadUrlResult struct {
+		Method          string `json:"method"`
+		Url             string `json:"url"`
+		Expiration      string `json:"expiration"`
+		Size            int64  `json:"size"`
+		StreamsUrl      string `json:"streamsUrl"`
+		ContentHash     string `json:"content_hash"`
+		ContentHashName string `json:"content_hash_name"`
+		FileId          string `json:"file_id"`
+	}
 )
 
 // FileList 获取文件列表
@@ -215,6 +251,139 @@ func (a *AliPanClient) FileStarredList(param *FileStarredListParam) (*FileListRe
 	r := &FileListResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file starred list result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileGetDetailInfo 获取文件详情
+func (a *AliPanClient) FileGetDetailInfo(param *FileIdentityPair) (*FileItem, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/get", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("get file detail info error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileItem{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file detail info result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileGetDetailInfoByPath 文件路径查找文件
+func (a *AliPanClient) FileGetDetailInfoByPath(param *FilePathPair) (*FileItem, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/get_by_path", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("get file detail by path error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileItem{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file detail info by path result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileGetDetailInfoBatch 批量获取文件详情
+func (a *AliPanClient) FileGetDetailInfoBatch(param []*FileIdentityPair) (*FileListResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/batch/get", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := map[string]interface{}{
+		"file_list": param,
+	}
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("batch get file detail info error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileListResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse batch file detail info result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileGetDownloadUrl 获取文件下载链接
+func (a *AliPanClient) FileGetDownloadUrl(param *FileDownloadUrlParam) (*FileDownloadUrlResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/getDownloadUrl", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+	if postData.ExpireSec <= 0 || postData.ExpireSec >= 14400 {
+		postData.ExpireSec = 14400
+	}
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("get file download url error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileDownloadUrlResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse get file download url result json error ", err2)
 		return nil, NewAliApiAppError(err2.Error())
 	}
 	return r, nil
