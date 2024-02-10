@@ -139,6 +139,7 @@ type (
 		// ExpireSec 下载地址过期时间，单位为秒，默认为 900 秒,最长4h（14400秒，需要申请）
 		ExpireSec int64 `json:"expire_sec"`
 	}
+	// FileDownloadUrlResult 文件下载链接返回值
 	FileDownloadUrlResult struct {
 		Method          string `json:"method"`
 		Url             string `json:"url"`
@@ -148,6 +149,68 @@ type (
 		ContentHash     string `json:"content_hash"`
 		ContentHashName string `json:"content_hash_name"`
 		FileId          string `json:"file_id"`
+	}
+
+	// FileUpdateParam 文件更新参数
+	FileUpdateParam struct {
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FileId 文件ID
+		FileId string `json:"file_id"`
+		// Name 新的文件名，支持后缀名更改
+		Name string `json:"name"`
+		// CheckNameMode auto_rename-自动重命名 refuse-同名不创建 ignore-同名文件可创建。 默认ignore
+		CheckNameMode string `json:"check_name_mode"`
+		// Starred 收藏 true，移除收藏 false
+		Starred bool `json:"starred"`
+	}
+
+	// FileMoveParam 文件移动参数
+	FileMoveParam struct {
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FileId 文件ID
+		FileId string `json:"file_id"`
+		// ToParentFileId 目标目录ID、根目录为 root
+		ToParentFileId string `json:"to_parent_file_id"`
+		// CheckNameMode auto_rename-自动重命名 refuse-同名不创建 ignore-同名文件可创建。 默认ignore
+		CheckNameMode string `json:"check_name_mode"`
+		// NewName 当云端存在同名文件时，使用的新名字
+		NewName string `json:"new_name"`
+	}
+	// FileMoveResult 文件移动返回值
+	FileMoveResult struct {
+		// Exist 文件是否已存在
+		Exist bool `json:"exist"`
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FileId 文件ID
+		FileId string `json:"file_id"`
+		// AsyncTaskId 异步任务id。 如果返回为空字符串，表示直接移动成功。 如果返回非空字符串，表示需要经过异步处理。
+		AsyncTaskId string `json:"async_task_id"`
+	}
+
+	// FileCopyParam 文件复制参数
+	FileCopyParam struct {
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FileId 文件ID
+		FileId string `json:"file_id"`
+		// ToDriveId 目标网盘id
+		ToDriveId string `json:"to_drive_id"`
+		// ToParentFileId 目标目录ID、根目录为 root
+		ToParentFileId string `json:"to_parent_file_id"`
+		// AutoRename 当目标文件夹下存在同名文件时，是否自动重命名，默认为 false，默认允许同名文件
+		AutoRename bool `json:"auto_rename"`
+	}
+	// FileCopyResult 文件复制返回值
+	FileCopyResult struct {
+		// DriveId 网盘id
+		DriveId string `json:"drive_id"`
+		// FileId 文件ID
+		FileId string `json:"file_id"`
+		// AsyncTaskId 异步任务id。 如果返回为空字符串，表示直接移动成功。 如果返回非空字符串，表示需要经过异步处理。
+		AsyncTaskId string `json:"async_task_id"`
 	}
 )
 
@@ -384,6 +447,117 @@ func (a *AliPanClient) FileGetDownloadUrl(param *FileDownloadUrlParam) (*FileDow
 	r := &FileDownloadUrlResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse get file download url result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileUpdate 文件更新
+func (a *AliPanClient) FileUpdate(param *FileUpdateParam) (*FileItem, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/update", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := map[string]interface{}{
+		"drive_id": param.DriveId,
+		"file_id":  param.FileId,
+	}
+	if len(param.Name) > 0 {
+		postData["name"] = param.Name
+		postData["check_name_mode"] = param.CheckNameMode
+		if len(param.CheckNameMode) == 0 {
+			postData["check_name_mode"] = "refuse"
+		}
+	} else {
+		postData["starred"] = param.Starred
+	}
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file update error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileItem{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file update result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileMove 移动文件或文件夹
+func (a *AliPanClient) FileMove(param *FileMoveParam) (*FileMoveResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/move", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+	if len(postData.CheckNameMode) == 0 {
+		postData.CheckNameMode = "auto_rename"
+	}
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file move error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileMoveResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file move result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileCopy 复制文件或文件夹
+func (a *AliPanClient) FileCopy(param *FileCopyParam) (*FileCopyResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/copy", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file copy error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileCopyResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file copy result json error ", err2)
 		return nil, NewAliApiAppError(err2.Error())
 	}
 	return r, nil
