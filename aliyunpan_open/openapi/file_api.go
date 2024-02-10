@@ -203,8 +203,9 @@ type (
 		// AutoRename 当目标文件夹下存在同名文件时，是否自动重命名，默认为 false，默认允许同名文件
 		AutoRename bool `json:"auto_rename"`
 	}
-	// FileCopyResult 文件复制返回值
-	FileCopyResult struct {
+
+	// FileAsyncTaskResult 文件异步操作返回值
+	FileAsyncTaskResult struct {
 		// DriveId 网盘id
 		DriveId string `json:"drive_id"`
 		// FileId 文件ID
@@ -532,7 +533,7 @@ func (a *AliPanClient) FileMove(param *FileMoveParam) (*FileMoveResult, *AliApiE
 }
 
 // FileCopy 复制文件或文件夹
-func (a *AliPanClient) FileCopy(param *FileCopyParam) (*FileCopyResult, *AliApiErrResult) {
+func (a *AliPanClient) FileCopy(param *FileCopyParam) (*FileAsyncTaskResult, *AliApiErrResult) {
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/copy", OPENAPI_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
@@ -555,9 +556,73 @@ func (a *AliPanClient) FileCopy(param *FileCopyParam) (*FileCopyResult, *AliApiE
 	}
 
 	// parse result
-	r := &FileCopyResult{}
+	r := &FileAsyncTaskResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file copy result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileTrash 把文件或文件夹放入回收站
+func (a *AliPanClient) FileTrash(param *FileIdentityPair) (*FileAsyncTaskResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/recyclebin/trash", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file trash error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileAsyncTaskResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file trash result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileDelete 文件直接删除，不放到回收站直接删除
+func (a *AliPanClient) FileDelete(param *FileIdentityPair) (*FileAsyncTaskResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/delete", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file delete error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileAsyncTaskResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file delete result json error ", err2)
 		return nil, NewAliApiAppError(err2.Error())
 	}
 	return r, nil
