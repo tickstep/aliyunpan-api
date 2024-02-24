@@ -12,7 +12,7 @@ type (
 		// PartNumber 分片序列号，从 1 开始。单个文件分片最大限制5GB，最小限制100KB
 		PartNumber int `json:"part_number"`
 		// UploadUrl 分片上传URL地址
-		UploadUrl int `json:"upload_url"`
+		UploadUrl string `json:"upload_url"`
 		// PartSize 分片大小
 		PartSize int64 `json:"part_size"`
 	}
@@ -90,10 +90,53 @@ func (a *AliPanClient) FileUploadCreate(param *FileUploadCreateParam) (*FileUplo
 	if len(param.CheckNameMode) == 0 {
 		postData["check_name_mode"] = "auto_rename"
 	}
+
 	if strings.ToLower(param.Type) == "folder" {
-		// 文件夹
+		// 创建文件夹
 	} else if strings.ToLower(param.Type) == "file" {
-		// 文件
+		// 创建文件上传任务
+		postData["size"] = param.Size
+
+		// 分片
+		if param.PartInfoList != nil {
+			parts := []map[string]int{}
+			for _, v := range param.PartInfoList {
+				parts = append(parts, map[string]int{"part_number": v.PartNumber})
+			}
+			postData["part_info_list"] = parts
+		} else {
+			// 默认只有一个分片
+			postData["part_info_list"] = []map[string]int{
+				{"part_number": 1},
+			}
+		}
+
+		// 文件hash
+		if len(param.PreHash) > 0 {
+			postData["pre_hash"] = param.PreHash
+		}
+
+		if len(param.ContentHashName) > 0 {
+			postData["content_hash_name"] = param.ContentHashName
+		}
+		if len(param.ContentHash) > 0 {
+			postData["content_hash"] = param.ContentHash
+		}
+
+		if len(param.ProofVersion) > 0 {
+			postData["proof_version"] = param.ProofVersion
+		}
+		if len(param.ProofCode) > 0 {
+			postData["proof_code"] = param.ProofCode
+		}
+
+		// 时间
+		if len(param.LocalCreatedAt) > 0 {
+			postData["local_created_at"] = param.LocalCreatedAt
+		}
+		if len(param.LocalModifiedAt) > 0 {
+			postData["local_modified_at"] = param.LocalModifiedAt
+		}
 	}
 
 	// request
