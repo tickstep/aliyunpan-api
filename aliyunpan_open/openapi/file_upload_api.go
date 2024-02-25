@@ -130,6 +130,43 @@ type (
 		// NextPartNumberMarker	下一页起始资源标识符, 最后一页该值为空。
 		NextPartNumberMarker string `json:"next_part_number_marker"`
 	}
+
+	// FileUploadCompleteParam 上传完毕参数
+	FileUploadCompleteParam struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// FileId
+		FileId string `json:"file_id"`
+		// UploadId 文件创建获取的upload_id
+		UploadId string `json:"upload_id"`
+	}
+	// FileUploadCompleteResult 上传完毕返回值
+	FileUploadCompleteResult struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// ParentFileId 父目录id
+		ParentFileId string `json:"parent_file_id"`
+		// FileId 文件id
+		FileId string `json:"file_id"`
+		// Name 文件名称，按照 utf8 编码最长 1024 字节，不能以 / 结尾
+		Name string `json:"name"`
+		// Type file | folder
+		Type string `json:"type"`
+		// Size 文件大小，单位为 byte。秒传必须
+		Size int64 `json:"size"`
+		// Category 文件类别
+		Category string `json:"category"`
+		// FileExtension 文件扩展名
+		FileExtension string `json:"file_extension"`
+		// ContentHash 文件内容 hash 值，需要根据 content_hash_name 指定的算法计算，当前都是sha1算法
+		ContentHash string `json:"content_hash"`
+		// ContentHashName 秒传必须 ,默认都是 sha1
+		ContentHashName string `json:"content_hash_name"`
+		// LocalCreatedAt 本地创建时间，只对文件有效，格式yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+		LocalCreatedAt string `json:"local_created_at"`
+		// LocalModifiedAt 本地修改时间，只对文件有效，格式yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+		LocalModifiedAt string `json:"local_modified_at"`
+	}
 )
 
 // FileUploadCreate 文件（文件夹）创建
@@ -287,6 +324,38 @@ func (a *AliPanClient) FileUploadListUploadedParts(param *FileUploadListUploaded
 	r := &FileUploadListUploadedPartsResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file create result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileUploadComplete 上传完毕
+func (a *AliPanClient) FileUploadComplete(param *FileUploadCompleteParam) (*FileUploadCompleteResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/complete", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file complete error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileUploadCompleteResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file complete result json error ", err2)
 		return nil, NewAliApiAppError(err2.Error())
 	}
 	return r, nil
