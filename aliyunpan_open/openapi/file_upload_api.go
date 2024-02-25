@@ -71,6 +71,31 @@ type (
 		// 最大分片数量 10000
 		PartInfoList []*PartInfoItem `json:"part_info_list"`
 	}
+
+	// FileUploadGetUploadUrlParam 刷新获取上传地址参数
+	FileUploadGetUploadUrlParam struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// FileId
+		FileId string `json:"file_id"`
+		// UploadId 文件创建获取的upload_id
+		UploadId string `json:"upload_id"`
+		// 最大分片数量 10000
+		PartInfoList []*PartInfoItem `json:"part_info_list"`
+	}
+	// FileUploadGetUploadUrlResult 刷新获取上传地址返回值
+	FileUploadGetUploadUrlResult struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// FileId
+		FileId string `json:"file_id"`
+		// UploadId 文件创建获取的upload_id
+		UploadId string `json:"upload_id"`
+		// CreatedAt 创建时间，格式yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+		CreatedAt string `json:"created_at"`
+		// 最大分片数量 10000
+		PartInfoList []*PartInfoItem `json:"part_info_list"`
+	}
 )
 
 // FileUploadCreate 文件（文件夹）创建
@@ -155,6 +180,38 @@ func (a *AliPanClient) FileUploadCreate(param *FileUploadCreateParam) (*FileUplo
 
 	// parse result
 	r := &FileUploadCreateResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file create result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileUploadGetUploadUrl 刷新获取上传地址
+func (a *AliPanClient) FileUploadGetUploadUrl(param *FileUploadGetUploadUrlParam) (*FileUploadGetUploadUrlResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/getUploadUrl", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file create error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileUploadGetUploadUrlResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file create result json error ", err2)
 		return nil, NewAliApiAppError(err2.Error())
