@@ -17,6 +17,15 @@ type (
 		PartSize int64 `json:"part_size"`
 	}
 
+	UploadedPartItem struct {
+		// Etag 在上传分片结束后，服务端会返回这个分片的Etag，在complete的时候可以在uploadInfo指定分片的Etag，服务端会在合并时对每个分片Etag做校验
+		Etag string `json:"etag"`
+		// PartNumber 分片序列号，从 1 开始。单个文件分片最大限制5GB，最小限制100KB
+		PartNumber int `json:"part_number"`
+		// PartSize 分片大小
+		PartSize int64 `json:"part_size"`
+	}
+
 	// FileUploadCreateParam 文件创建参数
 	FileUploadCreateParam struct {
 		// DriveId 网盘ID
@@ -95,6 +104,31 @@ type (
 		CreatedAt string `json:"created_at"`
 		// 最大分片数量 10000
 		PartInfoList []*PartInfoItem `json:"part_info_list"`
+	}
+
+	// FileUploadListUploadedPartsParam 列举已上传分片参数
+	FileUploadListUploadedPartsParam struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// FileId
+		FileId string `json:"file_id"`
+		// UploadId 文件创建获取的upload_id
+		UploadId string `json:"upload_id"`
+		// PartNumberMarker 分页标记
+		PartNumberMarker string `json:"part_number_marker"`
+	}
+	// FileUploadListUploadedPartsResult 列举已上传分片返回值
+	FileUploadListUploadedPartsResult struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// UploadId 文件创建获取的upload_id
+		UploadId string `json:"upload_id"`
+		// ParallelUpload 是否并行上传
+		ParallelUpload bool `json:"parallelUpload"`
+		// UploadedParts 已经上传分片列表
+		UploadedParts []*UploadedPartItem `json:"uploaded_parts"`
+		// NextPartNumberMarker	下一页起始资源标识符, 最后一页该值为空。
+		NextPartNumberMarker string `json:"next_part_number_marker"`
 	}
 )
 
@@ -212,6 +246,45 @@ func (a *AliPanClient) FileUploadGetUploadUrl(param *FileUploadGetUploadUrlParam
 
 	// parse result
 	r := &FileUploadGetUploadUrlResult{}
+	if err2 := json.Unmarshal(body, r); err2 != nil {
+		logger.Verboseln("parse file create result json error ", err2)
+		return nil, NewAliApiAppError(err2.Error())
+	}
+	return r, nil
+}
+
+// FileUploadListUploadedParts 列举已上传分片
+func (a *AliPanClient) FileUploadListUploadedParts(param *FileUploadListUploadedPartsParam) (*FileUploadListUploadedPartsResult, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/listUploadedParts", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := map[string]interface{}{
+		"drive_id":  "19519221",
+		"file_id":   "65db23c016b484ac4a0f4d629653442b2e6d9ef9",
+		"upload_id": "ADC37FC345574D7BB94E71B1C143F5D3",
+	}
+	if len(param.PartNumberMarker) > 0 {
+		postData["part_number_marker"] = param.PartNumberMarker
+	}
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file list uploaded parts error ", err)
+		return nil, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var body []byte
+	var apiErrResult *AliApiErrResult
+	if body, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		return nil, apiErrResult
+	}
+
+	// parse result
+	r := &FileUploadListUploadedPartsResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file create result json error ", err2)
 		return nil, NewAliApiAppError(err2.Error())
