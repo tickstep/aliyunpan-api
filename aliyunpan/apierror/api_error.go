@@ -124,6 +124,9 @@ func (a *ApiError) SetErr(code ApiCode, err string) {
 }
 
 func (a *ApiError) Error() string {
+	if a == nil {
+		return ""
+	}
 	return a.Err
 }
 

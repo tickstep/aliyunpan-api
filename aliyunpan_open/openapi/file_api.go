@@ -223,7 +223,7 @@ func (a *AliPanClient) FileList(param *FileListParam) (*FileListResult, *AliApiE
 
 	// parameters
 	postData := param
-	if postData.Limit > 100 {
+	if 0 <= postData.Limit || postData.Limit > 100 {
 		postData.Limit = 100
 	}
 
