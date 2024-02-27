@@ -137,7 +137,7 @@ type (
 		// FileId 文件ID
 		FileId string `json:"file_id"`
 		// ExpireSec 下载地址过期时间，单位为秒，默认为 900 秒,最长4h（14400秒，需要申请）
-		ExpireSec int64 `json:"expire_sec"`
+		ExpireSec int `json:"expire_sec"`
 	}
 	// FileDownloadUrlResult 文件下载链接返回值
 	FileDownloadUrlResult struct {
