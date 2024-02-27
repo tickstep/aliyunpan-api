@@ -196,7 +196,7 @@ func (p *PanClient) GetListByShare(shareToken, shareID, marker string) (*ListByS
 }
 
 type (
-	FileCopyParam struct {
+	FileSaveParam struct {
 		ShareID        string `json:"share_id"`
 		FileId         string `json:"file_id"`
 		AutoRename     bool   `json:"auto_rename"` // default: true
@@ -204,7 +204,7 @@ type (
 		ToParentFileId string `json:"to_parent_file_id"`
 	}
 
-	FileCopyResult struct {
+	FileSaveResult struct {
 		DomainID    string `json:"domain_id"`
 		FileId      string `json:"file_id"`
 		DriveId     string `json:"tdrive_id"`
@@ -213,7 +213,7 @@ type (
 	}
 )
 
-func (p *PanClient) FileCopy(shareToken string, param []*FileCopyParam) ([]*FileCopyResult, *apierror.ApiError) {
+func (p *PanClient) FileCopy(shareToken string, param []*FileSaveParam) ([]*FileSaveResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v2/batch", API_URL)
@@ -237,9 +237,9 @@ func (p *PanClient) FileCopy(shareToken string, param []*FileCopyParam) ([]*File
 	}
 
 	// parse result
-	r := []*FileCopyResult{}
+	r := []*FileSaveResult{}
 	for _, item := range result.Responses {
-		var result FileCopyResult
+		var result FileSaveResult
 		if domainID, ok := item.Body["domain_id"]; ok {
 			result.DomainID, _ = domainID.(string)
 		}
@@ -259,7 +259,7 @@ func (p *PanClient) FileCopy(shareToken string, param []*FileCopyParam) ([]*File
 	return r, nil
 }
 
-func (p *PanClient) getFileCopyBatchRequestList(param []*FileCopyParam) (BatchRequestList, *apierror.ApiError) {
+func (p *PanClient) getFileCopyBatchRequestList(param []*FileSaveParam) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}
