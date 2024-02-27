@@ -15,10 +15,7 @@
 package openapi
 
 import (
-	"encoding/json"
 	"github.com/tickstep/library-go/requester"
-	"io/ioutil"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -33,11 +30,13 @@ type (
 	// ApiToken 登录Token
 	ApiToken struct {
 		AccessToken string `json:"accessToken"`
-		ExpireTime  int64  `json:"expireTime"`
+		ExpiredAt   int64  `json:"expired"`
 	}
 
 	// ApiConfig 存储客户端相关配置参数
 	ApiConfig struct {
+		TicketId     string `json:"ticket_id"`
+		UserId       string `json:"user_id"`
 		ClientId     string `json:"clientId"`
 		ClientSecret string `json:"clientSecret"`
 	}
@@ -52,12 +51,6 @@ type (
 		// 网盘文件绝对路径到网盘文件信息实体映射缓存，避免FileInfoByPath频繁访问服务器触发风控
 		filePathCacheMap sync.Map
 	}
-
-	// AliApiErrResult openapi错误响应
-	AliApiErrResult struct {
-		Code    string `json:"code"`
-		Message string `json:"message"`
-	}
 )
 
 func NewAliPanClient(token ApiToken, apiConfig ApiConfig) *AliPanClient {
@@ -71,25 +64,6 @@ func NewAliPanClient(token ApiToken, apiConfig ApiConfig) *AliPanClient {
 		cacheMutex:       &sync.Mutex{},
 		useCache:         false,
 		filePathCacheMap: sync.Map{},
-	}
-}
-
-func NewAliApiError(code, msg string) *AliApiErrResult {
-	return &AliApiErrResult{
-		Code:    code,
-		Message: msg,
-	}
-}
-func NewAliApiHttpError(msg string) *AliApiErrResult {
-	return &AliApiErrResult{
-		Code:    "TS.HttpError",
-		Message: msg,
-	}
-}
-func NewAliApiAppError(msg string) *AliApiErrResult {
-	return &AliApiErrResult{
-		Code:    "TS.AppError",
-		Message: msg,
 	}
 }
 
@@ -114,6 +88,10 @@ func (a *AliPanClient) Headers() map[string]string {
 		"content-type":  "application/json",
 		"authorization": a.token.GetAuthorizationStr(),
 	}
+}
+
+func (a *AliPanClient) GetApiConfig() ApiConfig {
+	return a.apiConfig
 }
 
 // EnableCache 启用缓存
@@ -177,27 +155,4 @@ func formatPathStyle(pathStr string) string {
 		pathStr = strings.TrimSuffix(pathStr, "/")
 	}
 	return pathStr
-}
-
-// ParseCommonOpenApiError 解析阿里云盘API错误，如果没有错误则返回nil
-func ParseCommonOpenApiError(resp *http.Response) ([]byte, *AliApiErrResult) {
-	if resp == nil {
-		return nil, nil
-	}
-
-	switch resp.StatusCode {
-	case 429:
-		return nil, NewAliApiError("TooManyRequests", "请求太频繁，已被阿里云盘临时限流")
-	}
-	data, e := ioutil.ReadAll(resp.Body)
-	if e != nil {
-		return nil, NewAliApiError("TS.ReadError", e.Error())
-	}
-	errResult := &AliApiErrResult{}
-	if err := json.Unmarshal(data, errResult); err == nil {
-		if errResult.Code != "" {
-			return nil, errResult
-		}
-	}
-	return data, nil
 }

@@ -83,6 +83,10 @@ const (
 	ApiCodeUserDeviceOffline ApiCode = 31
 	// ApiCodeDeviceSessionSignatureInvalid 签名过期，需要更新签名密钥
 	ApiCodeDeviceSessionSignatureInvalid ApiCode = 32
+	// ApiCodePermissionDenied 用户已取消授权，或权限已失效，或 token 无效。需要重新发起授权
+	ApiCodePermissionDenied ApiCode = 33
+	// ApiCodeUserNotAllowedAccessDrive 用户没有授权应用访问当前drive
+	ApiCodeUserNotAllowedAccessDrive ApiCode = 34
 )
 
 type ApiCode int
