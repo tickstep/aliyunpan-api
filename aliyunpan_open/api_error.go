@@ -32,6 +32,10 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 	switch respErr.HttpStatusCode {
 	case 200:
 		return apierror.NewFailedApiError(respErr.Message)
+	case 400:
+		if respErr.Code == "NotFound.File" {
+			return apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, respErr.Message)
+		}
 	case 401:
 		if respErr.Code == "AccessTokenExpired" {
 			return apierror.NewApiError(apierror.ApiCodeAccessTokenInvalid, respErr.Message)
@@ -64,8 +68,8 @@ func (p *OpenPanClient) HandleAliApiError(respErr *openapi.AliApiErrResult, retr
 		// get new access token
 		time.Sleep(time.Duration(1) * time.Second)
 		if tokenErr := p.RefreshNewAccessToken(); tokenErr != nil {
-			logger.Verboseln("get new access token error: ", tokenErr)
-			return NewApiErrorHandleResp(false, myApiErr)
+			logger.Verboseln("get new access token from server error: ", tokenErr)
+			time.Sleep(time.Duration(2) * time.Second)
 		}
 		// retry check
 		if *retryTime < ApiRetryMaxTimes {
