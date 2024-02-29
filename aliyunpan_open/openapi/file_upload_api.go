@@ -26,6 +26,24 @@ type (
 		PartSize int64 `json:"part_size"`
 	}
 
+	// FileUploadCheckPreHashParam 文件PreHash检测参数
+	FileUploadCheckPreHashParam struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// ParentFileId 父目录id，上传到根目录时填写 root
+		ParentFileId string `json:"parent_file_id"`
+		// Name 文件名称，按照 utf8 编码最长 1024 字节，不能以 / 结尾
+		Name string `json:"name"`
+		// Type file | folder
+		Type string `json:"type"`
+		// CheckNameMode auto_rename 自动重命名，存在并发问题 ,refuse 同名不创建 ,ignore 同名文件可创建
+		CheckNameMode string `json:"check_name_mode"`
+		// Size 文件大小，单位为 byte。秒传必须
+		Size int64 `json:"size"`
+		// PreHash 针对大文件sha1计算非常耗时的情况， 可以先在读取文件的前1k的sha1， 如果前1k的sha1没有匹配的， 那么说明文件无法做秒传， 如果1ksha1有匹配再计算文件sha1进行秒传，这样有效边避免无效的sha1计算。
+		PreHash string `json:"pre_hash"`
+	}
+
 	// FileUploadCreateParam 文件创建参数
 	FileUploadCreateParam struct {
 		// DriveId 网盘ID
@@ -42,8 +60,6 @@ type (
 		Size int64 `json:"size"`
 		// 最大分片数量 10000
 		PartInfoList []*PartInfoItem `json:"part_info_list"`
-		// PreHash 针对大文件sha1计算非常耗时的情况， 可以先在读取文件的前1k的sha1， 如果前1k的sha1没有匹配的， 那么说明文件无法做秒传， 如果1ksha1有匹配再计算文件sha1进行秒传，这样有效边避免无效的sha1计算。
-		PreHash string `json:"pre_hash"`
 		// ContentHash 文件内容 hash 值，需要根据 content_hash_name 指定的算法计算，当前都是sha1算法
 		ContentHash string `json:"content_hash"`
 		// ContentHashName 秒传必须 ,默认都是 sha1
@@ -169,6 +185,33 @@ type (
 	}
 )
 
+// FileUploadCheckPreHash 文件PreHash检测
+func (a *AliPanClient) FileUploadCheckPreHash(param *FileUploadCheckPreHashParam) (bool, *AliApiErrResult) {
+	fullUrl := &strings.Builder{}
+	fmt.Fprintf(fullUrl, "%s/adrive/v1.0/openFile/create", OPENAPI_URL)
+	logger.Verboseln("do request url: " + fullUrl.String())
+
+	// parameters
+	postData := param
+
+	// request
+	resp, err := a.httpclient.Req("POST", fullUrl.String(), postData, a.Headers())
+	if err != nil {
+		logger.Verboseln("file check pre hash error ", err)
+		return false, NewAliApiHttpError(err.Error())
+	}
+
+	// handler common error
+	var apiErrResult *AliApiErrResult
+	if _, apiErrResult = ParseCommonOpenApiError(resp); apiErrResult != nil {
+		if apiErrResult.Code == "PreHashMatched" {
+			return true, nil
+		}
+		return false, apiErrResult
+	}
+	return false, nil
+}
+
 // FileUploadCreate 文件（文件夹）创建
 func (a *AliPanClient) FileUploadCreate(param *FileUploadCreateParam) (*FileUploadCreateResult, *AliApiErrResult) {
 	fullUrl := &strings.Builder{}
@@ -208,10 +251,6 @@ func (a *AliPanClient) FileUploadCreate(param *FileUploadCreateParam) (*FileUplo
 		}
 
 		// 文件hash
-		if len(param.PreHash) > 0 {
-			postData["pre_hash"] = param.PreHash
-		}
-
 		if len(param.ContentHashName) > 0 {
 			postData["content_hash_name"] = param.ContentHashName
 		}

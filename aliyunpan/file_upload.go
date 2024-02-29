@@ -49,6 +49,10 @@ type (
 		// 分片大小
 		// 不进行json序列化
 		BlockSize int64 `json:"-"`
+		// LocalCreatedAt 本地创建时间，只对文件有效，格式yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+		LocalCreatedAt string `json:"-"`
+		// LocalModifiedAt 本地修改时间，只对文件有效，格式yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+		LocalModifiedAt string `json:"-"`
 	}
 
 	FileUploadPartInfoResult struct {
