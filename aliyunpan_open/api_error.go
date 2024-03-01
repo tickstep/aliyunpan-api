@@ -38,7 +38,7 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 		}
 	case 401:
 		if respErr.Code == "AccessTokenExpired" {
-			return apierror.NewApiError(apierror.ApiCodeAccessTokenInvalid, respErr.Message)
+			return apierror.NewApiError(apierror.ApiCodeTokenExpiredCode, respErr.Message)
 		} else if respErr.Code == "RefreshTokenExpired" {
 			return apierror.NewApiError(apierror.ApiCodeRefreshTokenExpiredCode, respErr.Message)
 		}
