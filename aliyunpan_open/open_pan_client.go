@@ -20,7 +20,7 @@ const (
 
 type (
 	// AccessTokenRefreshCallback Token刷新回调
-	AccessTokenRefreshCallback func(newToken openapi.ApiToken) error
+	AccessTokenRefreshCallback func(userId string, newToken openapi.ApiToken) error
 
 	// OpenPanClient 开放接口客户端
 	OpenPanClient struct {
@@ -49,6 +49,11 @@ func NewOpenPanClient(apiConfig openapi.ApiConfig, apiToken openapi.ApiToken, to
 		useCache:                   false,
 		filePathCacheMap:           sync.Map{},
 	}
+}
+
+// SetAccessTokenRefreshCallback 设置 Token 回调
+func (p *OpenPanClient) SetAccessTokenRefreshCallback(tokenCallback AccessTokenRefreshCallback) {
+	p.accessTokenRefreshCallback = tokenCallback
 }
 
 // SetTimeout 设置 http 请求超时时间
@@ -98,7 +103,7 @@ func (p *OpenPanClient) RefreshNewAccessToken() error {
 	token := *r.Data
 	p.apiClient.UpdateToken(token)
 	if p.accessTokenRefreshCallback != nil {
-		p.accessTokenRefreshCallback(token)
+		p.accessTokenRefreshCallback(p.apiClient.GetApiConfig().UserId, token)
 	}
 	return nil
 }
