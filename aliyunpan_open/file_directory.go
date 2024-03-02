@@ -27,7 +27,7 @@ func createFileEntity(f *openapi.FileItem) *aliyunpan.FileEntity {
 		ParentFileId:    f.ParentFileId,
 		ContentHash:     f.ContentHash,
 		ContentHashName: f.ContentHashName,
-		Path:            f.Name,
+		Path:            "",
 		Category:        f.Category,
 	}
 }
@@ -161,6 +161,7 @@ RetryBegin:
 	}
 	if result, err := p.apiClient.FileGetDetailInfoByPath(opParam); err == nil {
 		fileInfo = createFileEntity(result)
+		fileInfo.Path = pathStr
 		p.storeFilePathToCache(driveId, pathStr, fileInfo)
 		return fileInfo, nil
 	} else {
