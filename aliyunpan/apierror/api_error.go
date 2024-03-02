@@ -53,7 +53,7 @@ const (
 	ApiCodeFileAlreadyExisted = 16
 	// ApiCodeUserDayFlowOverLimited 上传达到日数量上限
 	ApiCodeUserDayFlowOverLimited = 17
-	// ApiCodeAccessTokenInvalid Token无效或者已过期 AccessTokenInvalid
+	// ApiCodeAccessTokenInvalid Token无效或者已过期 AccessTokenInvalid，合并到ApiCodeTokenExpiredCode错误
 	ApiCodeAccessTokenInvalid = 18
 	// ApiCodeForbidden 被禁止 Forbidden
 	ApiCodeForbidden = 19
@@ -154,7 +154,7 @@ func ParseCommonApiError(data []byte) *ApiError {
 	if err := json.Unmarshal(data, errResp); err == nil {
 		if errResp.ErrorCode != "" {
 			if "AccessTokenInvalid" == errResp.ErrorCode {
-				return NewApiError(ApiCodeAccessTokenInvalid, errResp.GetErrorMsg())
+				return NewApiError(ApiCodeTokenExpiredCode, errResp.GetErrorMsg())
 			} else if "NotFound.File" == errResp.ErrorCode || "NotFound.FileId" == errResp.ErrorCode {
 				return NewApiError(ApiCodeFileNotFoundCode, errResp.GetErrorMsg())
 			} else if "AlreadyExist.File" == errResp.ErrorCode {

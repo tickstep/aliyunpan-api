@@ -64,7 +64,7 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 func (p *OpenPanClient) HandleAliApiError(respErr *openapi.AliApiErrResult, retryTime *int) *ApiErrorHandleResp {
 	// handle error, retry, token refresh
 	myApiErr := p.ParseAliApiError(respErr)
-	if myApiErr.Code == apierror.ApiCodeAccessTokenInvalid {
+	if myApiErr.Code == apierror.ApiCodeTokenExpiredCode {
 		// get new access token
 		time.Sleep(time.Duration(1) * time.Second)
 		if tokenErr := p.RefreshNewAccessToken(); tokenErr != nil {
