@@ -144,6 +144,10 @@ func (p *OpenPanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo
 	if len(pathStr) > 1 {
 		pathStr = path.Clean(pathStr)
 	}
+	// 根目录
+	if pathStr == "/" {
+		return aliyunpan.NewFileEntityForRootDir(), nil
+	}
 
 	// try cache
 	if v := p.loadFilePathFromCache(driveId, pathStr); v != nil {
