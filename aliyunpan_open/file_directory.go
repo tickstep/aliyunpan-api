@@ -5,6 +5,7 @@ import (
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/aliyunpan-api/aliyunpan_open/openapi"
+	"path"
 	"strings"
 	"time"
 )
@@ -133,13 +134,31 @@ RetryBegin:
 func (p *OpenPanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *aliyunpan.FileEntity, error *apierror.ApiError) {
 	retryTime := 0
 
+	if pathStr == "" {
+		pathStr = "/"
+	}
+	//pathStr = path.Clean(pathStr)
+	if !path.IsAbs(pathStr) {
+		return nil, apierror.NewFailedApiError("pathStr必须是绝对路径")
+	}
+	if len(pathStr) > 1 {
+		pathStr = path.Clean(pathStr)
+	}
+
+	// try cache
+	if v := p.loadFilePathFromCache(driveId, pathStr); v != nil {
+		return v, nil
+	}
+
 RetryBegin:
 	opParam := &openapi.FilePathPair{
 		DriveId:  driveId,
 		FilePath: pathStr,
 	}
 	if result, err := p.apiClient.FileGetDetailInfoByPath(opParam); err == nil {
-		return createFileEntity(result), nil
+		fileInfo = createFileEntity(result)
+		p.storeFilePathToCache(driveId, pathStr, fileInfo)
+		return fileInfo, nil
 	} else {
 		// handle common error
 		if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {

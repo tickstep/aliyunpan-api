@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan_open/openapi"
 	"github.com/tickstep/library-go/logger"
 	"github.com/tickstep/library-go/requester"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -26,6 +28,12 @@ type (
 		apiClient  *openapi.AliPanClient
 
 		accessTokenRefreshCallback AccessTokenRefreshCallback
+
+		// 缓存
+		cacheMutex *sync.Mutex
+		useCache   bool
+		// 网盘文件绝对路径到网盘文件信息实体映射缓存，避免FileInfoByPath频繁访问服务器触发风控
+		filePathCacheMap sync.Map
 	}
 )
 
@@ -37,6 +45,9 @@ func NewOpenPanClient(apiConfig openapi.ApiConfig, apiToken openapi.ApiToken, to
 		httpClient:                 myclient,
 		apiClient:                  openapi.NewAliPanClient(apiToken, apiConfig),
 		accessTokenRefreshCallback: tokenCallback,
+		cacheMutex:                 &sync.Mutex{},
+		useCache:                   false,
+		filePathCacheMap:           sync.Map{},
 	}
 }
 
@@ -97,4 +108,62 @@ func (p *OpenPanClient) UpdateUserId(userId string) {
 	c := p.apiClient.GetApiConfig()
 	c.UserId = userId
 	p.apiClient.UpdateApiConfig(c)
+}
+
+// EnableCache 启用缓存
+func (p *OpenPanClient) EnableCache() {
+	p.cacheMutex.Lock()
+	p.cacheMutex.Unlock()
+	p.useCache = true
+}
+
+// ClearCache 清除已经缓存的数据
+func (p *OpenPanClient) ClearCache() {
+	p.cacheMutex.Lock()
+	p.cacheMutex.Unlock()
+	p.filePathCacheMap = sync.Map{}
+}
+
+// DisableCache 禁用缓存
+func (p *OpenPanClient) DisableCache() {
+	p.cacheMutex.Lock()
+	p.cacheMutex.Unlock()
+	p.useCache = false
+}
+
+// storeFilePathToCache 存储文件信息到缓存
+func (p *OpenPanClient) storeFilePathToCache(driveId, pathStr string, fileEntity *aliyunpan.FileEntity) {
+	p.cacheMutex.Lock()
+	p.cacheMutex.Unlock()
+	if !p.useCache {
+		return
+	}
+	pathStr = formatPathStyle(pathStr)
+	cache, _ := p.filePathCacheMap.LoadOrStore(driveId, &sync.Map{})
+	cache.(*sync.Map).Store(pathStr, fileEntity)
+}
+
+// loadFilePathFromCache 从缓存获取文件信息
+func (p *OpenPanClient) loadFilePathFromCache(driveId, pathStr string) *aliyunpan.FileEntity {
+	p.cacheMutex.Lock()
+	p.cacheMutex.Unlock()
+	if !p.useCache {
+		return nil
+	}
+	pathStr = formatPathStyle(pathStr)
+	cache, _ := p.filePathCacheMap.LoadOrStore(driveId, &sync.Map{})
+	s := cache.(*sync.Map)
+	if v, ok := s.Load(pathStr); ok {
+		logger.Verboseln("file path cache hit: ", pathStr)
+		return v.(*aliyunpan.FileEntity)
+	}
+	return nil
+}
+
+func formatPathStyle(pathStr string) string {
+	pathStr = strings.ReplaceAll(pathStr, "\\", "/")
+	if pathStr != "/" {
+		pathStr = strings.TrimSuffix(pathStr, "/")
+	}
+	return pathStr
 }
