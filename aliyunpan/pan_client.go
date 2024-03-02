@@ -148,6 +148,11 @@ func (p *PanClient) SetTimeout(t time.Duration) {
 	}
 }
 
+// UpdateUserId 更新用户ID
+func (p *PanClient) UpdateUserId(userId string) {
+	p.appConfig.UserId = userId
+}
+
 func formatPathStyle(pathStr string) string {
 	pathStr = strings.ReplaceAll(pathStr, "\\", "/")
 	if pathStr != "/" {

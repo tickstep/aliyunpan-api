@@ -91,3 +91,10 @@ func (p *OpenPanClient) RefreshNewAccessToken() error {
 	}
 	return nil
 }
+
+// UpdateUserId 更新用户ID
+func (p *OpenPanClient) UpdateUserId(userId string) {
+	c := p.apiClient.GetApiConfig()
+	c.UserId = userId
+	p.apiClient.UpdateApiConfig(c)
+}
