@@ -69,7 +69,7 @@ func (p *OpenPanClient) HandleAliApiError(respErr *openapi.AliApiErrResult, retr
 		time.Sleep(time.Duration(1) * time.Second)
 		if tokenErr := p.RefreshNewAccessToken(); tokenErr != nil {
 			logger.Verboseln("get new access token from server error: ", tokenErr)
-			time.Sleep(time.Duration(2) * time.Second)
+			return NewApiErrorHandleResp(false, myApiErr)
 		}
 		// retry check
 		if *retryTime < ApiRetryMaxTimes {
