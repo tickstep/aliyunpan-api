@@ -80,7 +80,9 @@ func (p *OpenPanClient) RefreshNewAccessToken() error {
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// request
-	data, err := p.httpClient.Fetch("GET", fullUrl.String(), nil, p.apiClient.Headers())
+	h := p.apiClient.Headers()
+	h["old-token"] = p.GetAccessToken()
+	data, err := p.httpClient.Fetch("GET", fullUrl.String(), nil, h)
 	if err != nil {
 		logger.Verboseln("get new access token error ", err)
 		return err
