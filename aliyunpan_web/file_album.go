@@ -1,8 +1,9 @@
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
@@ -114,14 +115,14 @@ type (
 
 	// AlbumDeleteFileParam 相簿删除文件参数
 	AlbumDeleteFileParam struct {
-		AlbumId       string                 `json:"album_id"`
-		DriveFileList []FileBatchActionParam `json:"drive_file_list"`
+		AlbumId       string                           `json:"album_id"`
+		DriveFileList []aliyunpan.FileBatchActionParam `json:"drive_file_list"`
 	}
 
 	// AlbumAddFileParam 相簿增加文件参数
 	AlbumAddFileParam struct {
-		AlbumId       string                 `json:"album_id"`
-		DriveFileList []FileBatchActionParam `json:"drive_file_list"`
+		AlbumId       string                           `json:"album_id"`
+		DriveFileList []aliyunpan.FileBatchActionParam `json:"drive_file_list"`
 	}
 )
 
@@ -145,9 +146,9 @@ func (a *AlbumEntity) UpdatedAtStr() string {
 
 func (a *AlbumDeleteFileParam) AddFileItem(driveId, fileId string) {
 	if a.DriveFileList == nil {
-		a.DriveFileList = []FileBatchActionParam{}
+		a.DriveFileList = []aliyunpan.FileBatchActionParam{}
 	}
-	a.DriveFileList = append(a.DriveFileList, FileBatchActionParam{
+	a.DriveFileList = append(a.DriveFileList, aliyunpan.FileBatchActionParam{
 		DriveId: driveId,
 		FileId:  fileId,
 	})
@@ -155,9 +156,9 @@ func (a *AlbumDeleteFileParam) AddFileItem(driveId, fileId string) {
 
 func (a *AlbumAddFileParam) AddFileItem(driveId, fileId string) {
 	if a.DriveFileList == nil {
-		a.DriveFileList = []FileBatchActionParam{}
+		a.DriveFileList = []aliyunpan.FileBatchActionParam{}
 	}
-	a.DriveFileList = append(a.DriveFileList, FileBatchActionParam{
+	a.DriveFileList = append(a.DriveFileList, aliyunpan.FileBatchActionParam{
 		DriveId: driveId,
 		FileId:  fileId,
 	})
@@ -466,7 +467,7 @@ func (p *PanClient) AlbumShareCreate(param *AlbumShareCreateParam) (*AlbumShareC
 }
 
 // AlbumListFileGetAll 获取指定相簿下的所有文件列表
-func (p *PanClient) AlbumListFileGetAll(param *AlbumListFileParam) (FileList, *apierror.ApiError) {
+func (p *PanClient) AlbumListFileGetAll(param *AlbumListFileParam) (aliyunpan.FileList, *apierror.ApiError) {
 	internalParam := &AlbumListFileParam{
 		AlbumId: param.AlbumId,
 		Limit:   param.Limit,
@@ -476,7 +477,7 @@ func (p *PanClient) AlbumListFileGetAll(param *AlbumListFileParam) (FileList, *a
 		internalParam.Limit = 100
 	}
 
-	fileList := FileList{}
+	fileList := aliyunpan.FileList{}
 	result, err := p.AlbumListFile(internalParam)
 	if err != nil || result == nil {
 		return nil, err
@@ -497,9 +498,9 @@ func (p *PanClient) AlbumListFileGetAll(param *AlbumListFileParam) (FileList, *a
 }
 
 // AlbumListFile 获取相簿下的文件列表
-func (p *PanClient) AlbumListFile(param *AlbumListFileParam) (*FileListResult, *apierror.ApiError) {
-	result := &FileListResult{
-		FileList:   FileList{},
+func (p *PanClient) AlbumListFile(param *AlbumListFileParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
+	result := &aliyunpan.FileListResult{
+		FileList:   aliyunpan.FileList{},
 		NextMarker: "",
 	}
 	if flr, err := p.albumListFileReq(param); err == nil {
@@ -594,7 +595,7 @@ func (p *PanClient) AlbumDeleteFile(param *AlbumDeleteFileParam) (bool, *apierro
 }
 
 // AlbumAddFile 相簿增加文件列表
-func (p *PanClient) AlbumAddFile(param *AlbumAddFileParam) (*FileList, *apierror.ApiError) {
+func (p *PanClient) AlbumAddFile(param *AlbumAddFileParam) (*aliyunpan.FileList, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -629,7 +630,7 @@ func (p *PanClient) AlbumAddFile(param *AlbumAddFileParam) (*FileList, *apierror
 		logger.Verboseln("parse add album file result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
 	}
-	fileList := FileList{}
+	fileList := aliyunpan.FileList{}
 	for k := range r.Items {
 		if r.Items[k] == nil {
 			continue

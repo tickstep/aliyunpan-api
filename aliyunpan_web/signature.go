@@ -1,4 +1,4 @@
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/hex"

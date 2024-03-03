@@ -12,38 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"strings"
 )
 
-type (
-	FileMoveParam struct {
-		// 源网盘ID
-		DriveId string `json:"drive_id"`
-		// 源文件ID
-		FileId string `json:"file_id"`
-		// 目标网盘ID
-		ToDriveId string `json:"to_drive_id"`
-		// 目标文件夹ID
-		ToParentFileId string `json:"to_parent_file_id"`
-	}
-
-	FileMoveResult struct {
-		// 文件ID
-		FileId string
-		// 是否成功
-		Success bool
-	}
-)
+type ()
 
 // FileMove 移动文件
-func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierror.ApiError) {
+func (p *PanClient) FileMove(param []*aliyunpan.FileMoveParam) ([]*aliyunpan.FileMoveResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
@@ -67,9 +50,9 @@ func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierr
 	}
 
 	// parse result
-	r := []*FileMoveResult{}
+	r := []*aliyunpan.FileMoveResult{}
 	for _, item := range result.Responses {
-		r = append(r, &FileMoveResult{
+		r = append(r, &aliyunpan.FileMoveResult{
 			FileId:  item.Id,
 			Success: item.Status == 200,
 		})
@@ -77,7 +60,7 @@ func (p *PanClient) FileMove(param []*FileMoveParam) ([]*FileMoveResult, *apierr
 	return r, nil
 }
 
-func (p *PanClient) getFileMoveBatchRequestList(param []*FileMoveParam) (BatchRequestList, *apierror.ApiError) {
+func (p *PanClient) getFileMoveBatchRequestList(param []*aliyunpan.FileMoveParam) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}

@@ -12,31 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"strings"
 )
 
-type(
-
-)
+type ()
 
 // FileStarred 收藏文件
-func (p *PanClient) FileStarred(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+func (p *PanClient) FileStarred(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	return p.doFileStarredBatchRequestList(true, param)
 }
 
 // FileUnstarred 取消收藏文件
-func (p *PanClient) FileUnstarred(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+func (p *PanClient) FileUnstarred(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	return p.doFileStarredBatchRequestList(false, param)
 }
 
-func (p *PanClient) doFileStarredBatchRequestList(starred bool, param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+func (p *PanClient) doFileStarredBatchRequestList(starred bool, param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}
@@ -48,7 +47,7 @@ func (p *PanClient) doFileStarredBatchRequestList(starred bool, param []*FileBat
 
 	// param
 	pr := BatchRequestList{}
-	for _,item := range param {
+	for _, item := range param {
 		body := apiutil.GetMapSet(item)
 		if starred {
 			body["starred"] = true
@@ -59,13 +58,13 @@ func (p *PanClient) doFileStarredBatchRequestList(starred bool, param []*FileBat
 		}
 
 		pr = append(pr, &BatchRequest{
-			Id:      item.FileId,
-			Method:  "PUT",
-			Url:     "/file/update",
+			Id:     item.FileId,
+			Method: "PUT",
+			Url:    "/file/update",
 			Headers: map[string]string{
 				"Content-Type": "application/json",
 			},
-			Body:    body,
+			Body: body,
 		})
 	}
 
@@ -75,17 +74,17 @@ func (p *PanClient) doFileStarredBatchRequestList(starred bool, param []*FileBat
 	}
 
 	// request
-	result,err := p.BatchTask(fullUrl.String(), &batchParam)
+	result, err := p.BatchTask(fullUrl.String(), &batchParam)
 	if err != nil {
 		logger.Verboseln("file starred error ", err)
 		return nil, apierror.NewFailedApiError(err.Error())
 	}
 
 	// parse result
-	r := []*FileBatchActionResult{}
-	for _,item := range result.Responses{
-		r = append(r, &FileBatchActionResult{
-			FileId: item.Id,
+	r := []*aliyunpan.FileBatchActionResult{}
+	for _, item := range result.Responses {
+		r = append(r, &aliyunpan.FileBatchActionResult{
+			FileId:  item.Id,
 			Success: item.Status == 200,
 		})
 	}

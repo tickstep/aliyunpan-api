@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // 电脑手机客户端API，例如MAC客户端
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"github.com/tickstep/library-go/requester"
@@ -21,7 +21,7 @@ import (
 
 type (
 	AppLoginToken struct {
-		AccessToken string `json:"accessToken"`
+		AccessToken  string `json:"accessToken"`
 		RefreshToken string `json:"refreshToken"`
 	}
 )

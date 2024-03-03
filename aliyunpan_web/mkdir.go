@@ -12,34 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"strings"
 )
 
-type (
-	MkdirResult struct {
-		ParentFileId string `json:"parent_file_id"`
-		Type         string `json:"type"`
-		FileId       string `json:"file_id"`
-		DomainId     string `json:"domain_id"`
-		DriveId      string `json:"drive_id"`
-		FileName     string `json:"file_name"`
-		EncryptMode  string `json:"encrypt_mode"`
-	}
-)
+type ()
 
 // Mkdir 创建文件夹
-func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, *apierror.ApiError) {
+func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
 	if parentFileId == "" {
 		// 默认根目录
-		parentFileId = DefaultRootParentFileId
+		parentFileId = aliyunpan.DefaultRootParentFileId
 	}
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -70,7 +61,7 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 	}
 
 	// parse result
-	r := &MkdirResult{}
+	r := &aliyunpan.MkdirResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file info result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
@@ -78,17 +69,17 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*MkdirResult, 
 	return r, nil
 }
 
-func (p *PanClient) MkdirByFullPath(driveId, fullPath string) (*MkdirResult, *apierror.ApiError) {
+func (p *PanClient) MkdirByFullPath(driveId, fullPath string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
 	fullPath = strings.ReplaceAll(fullPath, "//", "/")
 	pathSlice := strings.Split(fullPath, "/")
 	return p.MkdirRecursive(driveId, "", "", 0, pathSlice)
 }
 
-func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string, index int, pathSlice []string) (*MkdirResult, *apierror.ApiError) {
-	r := &MkdirResult{}
+func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string, index int, pathSlice []string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
+	r := &aliyunpan.MkdirResult{}
 	if parentFileId == "" {
 		// default root "/" entity
-		parentFileId = NewFileEntityForRootDir().FileId
+		parentFileId = aliyunpan.NewFileEntityForRootDir().FileId
 		if index == 0 && len(pathSlice) == 1 {
 			// root path "/"
 			r.FileId = parentFileId
@@ -104,7 +95,7 @@ func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string
 		return r, nil
 	}
 
-	listFilePath := &FileListParam{}
+	listFilePath := &aliyunpan.FileListParam{}
 	listFilePath.DriveId = driveId
 	listFilePath.ParentFileId = parentFileId
 	fileResult, err := p.FileListGetAll(listFilePath, 0)

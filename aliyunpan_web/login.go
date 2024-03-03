@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // WEB端API
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
@@ -26,32 +26,31 @@ import (
 	"time"
 )
 
-const (
-)
+const ()
 
 type (
 	refreshTokenResult struct {
-		AccessToken string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-		ExpiresIn int `json:"expires_in"`
-		TokenType string `json:"token_type"`
-		UserId string `json:"user_id"`
-		UserName string `json:"user_name"`
-		NickName string `json:"nick_name"`
-		DefaultDriveId string `json:"default_drive_id"`
+		AccessToken        string `json:"access_token"`
+		RefreshToken       string `json:"refresh_token"`
+		ExpiresIn          int    `json:"expires_in"`
+		TokenType          string `json:"token_type"`
+		UserId             string `json:"user_id"`
+		UserName           string `json:"user_name"`
+		NickName           string `json:"nick_name"`
+		DefaultDriveId     string `json:"default_drive_id"`
 		DefaultSboxDriveId string `json:"default_sbox_drive_id"`
-		Role string `json:"role"`
-		Status string `json:"status"`
-		ExpireTime string `json:"expire_time"`
-		DeviceId string `json:"device_id"`
+		Role               string `json:"role"`
+		Status             string `json:"status"`
+		ExpireTime         string `json:"expire_time"`
+		DeviceId           string `json:"device_id"`
 	}
 
 	WebLoginToken struct {
 		AccessTokenType string `json:"accessTokenType"`
-		AccessToken string `json:"accessToken"`
-		RefreshToken string `json:"refreshToken"`
-		ExpiresIn int `json:"expiresIn"`
-		ExpireTime string `json:"expireTime"`
+		AccessToken     string `json:"accessToken"`
+		RefreshToken    string `json:"refreshToken"`
+		ExpiresIn       int    `json:"expiresIn"`
+		ExpireTime      string `json:"expireTime"`
 	}
 )
 
@@ -70,15 +69,15 @@ func (w *WebLoginToken) IsAccessTokenExpired() bool {
 func GetAccessTokenFromRefreshToken(refreshToken string) (*WebLoginToken, *apierror.ApiError) {
 	myclient := requester.NewHTTPClient()
 
-	header := map[string]string {}
+	header := map[string]string{}
 
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/v2/account/token", AUTH_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
-	postData := map[string]string {
+	postData := map[string]string{
 		"refresh_token": refreshToken,
-		"api_id": "pJZInNHN2dZWk8qg",
-		"grant_type": "refresh_token",
+		"api_id":        "pJZInNHN2dZWk8qg",
+		"grant_type":    "refresh_token",
 	}
 
 	body, err := myclient.Fetch("POST", fullUrl.String(), postData, apiutil.AddCommonHeader(header))

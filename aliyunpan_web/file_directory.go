@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
@@ -26,69 +27,6 @@ import (
 )
 
 type (
-	// HandleFileDirectoryFunc 处理文件或目录的元信息, 返回值控制是否退出递归
-	HandleFileDirectoryFunc func(depth int, fdPath string, fd *FileEntity, apierr *apierror.ApiError) bool
-
-	// FileListParam 文件列表参数
-	FileListParam struct {
-		OrderBy        FileOrderBy        `json:"order_by"`
-		OrderDirection FileOrderDirection `json:"order_direction"`
-		DriveId        string             `json:"drive_id"`
-		ParentFileId   string             `json:"parent_file_id"`
-		Limit          int                `json:"limit"`
-		// Marker 下一页参数
-		Marker string `json:"marker"`
-	}
-
-	// FileListResult 文件列表返回值
-	FileListResult struct {
-		FileList FileList `json:"file_list"`
-		// NextMarker 不为空代表还有下一页
-		NextMarker string `json:"next_marker"`
-	}
-
-	FileList []*FileEntity
-
-	// FileEntity 文件/文件夹信息
-	FileEntity struct {
-		// 网盘ID
-		DriveId string `json:"driveId"`
-		// 域ID
-		DomainId string `json:"domainId"`
-		// FileId 文件ID
-		FileId string `json:"fileId"`
-		// FileName 文件名
-		FileName string `json:"fileName"`
-		// FileSize 文件大小
-		FileSize int64 `json:"fileSize"`
-		// 文件类别 folder / file
-		FileType string `json:"fileType"`
-		// 创建时间
-		CreatedAt string `json:"createdAt"`
-		// 最后修改时间
-		UpdatedAt string `json:"updatedAt"`
-		// 后缀名，例如：dmg
-		FileExtension string `json:"fileExtension"`
-		// 文件上传ID
-		UploadId string `json:"uploadId"`
-		// 父文件夹ID
-		ParentFileId string `json:"parentFileId"`
-		// 内容CRC64校验值，只有文件才会有
-		Crc64Hash string `json:"crc64Hash"`
-		// 内容Hash值，只有文件才会有
-		ContentHash string `json:"contentHash"`
-		// 内容Hash计算方法，只有文件才会有，默认为：sha1
-		ContentHashName string `json:"contentHashName"`
-		// FilePath 文件的完整路径
-		Path string `json:"path"`
-		// Category 文件分类，例如：image/video/doc/others
-		Category string `json:"category"`
-		// SyncFlag 同步盘标记，该文件夹是否是同步盘的文件
-		SyncFlag bool `json:"syncFlag"`
-		// SyncMeta 如果是同步盘的文件夹，则这里会记录该文件对应的同步机器和目录等信息
-		SyncMeta string `json:"syncMeta"`
-	}
-
 	fileEntityResult struct {
 		DriveId         string `json:"drive_id"`
 		DomainId        string `json:"domain_id"`
@@ -124,66 +62,13 @@ type (
 		// NextMarker 不为空，说明还有下一页
 		NextMarker string `json:"next_marker"`
 	}
-
-	FileOrderBy        string
-	FileOrderDirection string
-
-	// FileGetPathResult 文件路径详情信息结果
-	FileGetPathResult struct {
-		// 每一个item对应一个目录，最顶层的目录是root放在最后
-		// 例如路径：/myphoto/photo2022/photo01，则对应顺序为item[0]={"photo01"}, item[1]={"photo2022"}, item[2]={"myphoto"}, item[3]={"root"}(只有root目录下的子文件夹才会有)
-		Items []struct {
-			Trashed      bool      `json:"trashed"`
-			DriveId      string    `json:"drive_id"`
-			FileId       string    `json:"file_id"`
-			CreatedAt    time.Time `json:"created_at"`
-			DomainId     string    `json:"domain_id"`
-			EncryptMode  string    `json:"encrypt_mode"`
-			Hidden       bool      `json:"hidden"`
-			Name         string    `json:"name"`
-			ParentFileId string    `json:"parent_file_id"`
-			Starred      bool      `json:"starred"`
-			Status       string    `json:"status"`
-			Type         string    `json:"type"`
-			UpdatedAt    string    `json:"updated_at"`
-			UserMeta     string    `json:"user_meta"`
-		} `json:"items"`
-	}
 )
 
-const (
-	DefaultRootParentFileId string = "root"
-
-	FileOrderByName      FileOrderBy = "name"
-	FileOrderByCreatedAt FileOrderBy = "created_at"
-	FileOrderByUpdatedAt FileOrderBy = "updated_at"
-	FileOrderBySize      FileOrderBy = "size"
-
-	// FileOrderDirectionDesc 降序
-	FileOrderDirectionDesc FileOrderDirection = "DESC"
-	// FileOrderDirectionAsc 升序
-	FileOrderDirectionAsc FileOrderDirection = "ASC"
-
-	// 最大重试次数（应对请求频繁的错误限制）
-	MaxRequestRetryCount = int64(10)
-)
-
-// NewFileEntityForRootDir 创建根目录"/"的默认文件信息
-func NewFileEntityForRootDir() *FileEntity {
-	return &FileEntity{
-		FileId:       DefaultRootParentFileId,
-		FileType:     "folder",
-		FileName:     "/",
-		ParentFileId: "",
-		Path:         "/",
-	}
-}
-
-func createFileEntity(f *fileEntityResult) *FileEntity {
+func createFileEntity(f *fileEntityResult) *aliyunpan.FileEntity {
 	if f == nil {
 		return nil
 	}
-	return &FileEntity{
+	return &aliyunpan.FileEntity{
 		DriveId:         f.DriveId,
 		DomainId:        f.DomainId,
 		FileId:          f.FileId,
@@ -205,75 +90,10 @@ func createFileEntity(f *fileEntityResult) *FileEntity {
 	}
 }
 
-// IsFolder 是否是文件夹
-func (f *FileEntity) IsFolder() bool {
-	return f.FileType == "folder"
-}
-
-// 是否是文件
-func (f *FileEntity) IsFile() bool {
-	return f.FileType == "file"
-}
-
-// 是否是网盘根目录
-func (f *FileEntity) IsDriveRootFolder() bool {
-	return f.FileId == DefaultRootParentFileId
-}
-
-// 文件展示信息
-func (f *FileEntity) String() string {
-	builder := &strings.Builder{}
-	builder.WriteString("文件ID: " + f.FileId + "\n")
-	builder.WriteString("文件名: " + f.FileName + "\n")
-	if f.IsFolder() {
-		builder.WriteString("文件类型: 目录\n")
-	} else {
-		builder.WriteString("文件类型: 文件\n")
-	}
-	builder.WriteString("文件路径: " + f.Path + "\n")
-	return builder.String()
-}
-
-// TotalSize 获取目录下文件的总大小
-func (fl FileList) TotalSize() int64 {
-	var size int64
-	for k := range fl {
-		if fl[k] == nil {
-			continue
-		}
-
-		size += fl[k].FileSize
-	}
-	return size
-}
-
-// Count 获取文件总数和目录总数
-func (fl FileList) Count() (fileN, directoryN int64) {
-	for k := range fl {
-		if fl[k] == nil {
-			continue
-		}
-
-		if fl[k].IsFolder() {
-			directoryN++
-		} else {
-			fileN++
-		}
-	}
-	return
-}
-func (fl FileList) ItemCount() int {
-	return len(fl)
-}
-
-func (fl FileList) Item(index int) *FileEntity {
-	return fl[index]
-}
-
 // FileList 获取文件列表
-func (p *PanClient) FileList(param *FileListParam) (*FileListResult, *apierror.ApiError) {
-	result := &FileListResult{
-		FileList:   FileList{},
+func (p *PanClient) FileList(param *aliyunpan.FileListParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
+	result := &aliyunpan.FileListResult{
+		FileList:   aliyunpan.FileList{},
 		NextMarker: "",
 	}
 	retryCount := int64(1)
@@ -289,7 +109,7 @@ retry:
 		result.NextMarker = flr.NextMarker
 	} else {
 		if err.Code == apierror.ApiCodeTooManyRequests {
-			if retryCount <= MaxRequestRetryCount {
+			if retryCount <= aliyunpan.MaxRequestRetryCount {
 				logger.Verboseln("too many request error, sleep and retry later")
 				time.Sleep(time.Duration(retryCount*2) * time.Second)
 				retryCount++
@@ -311,7 +131,7 @@ retry:
 	return result, nil
 }
 
-func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierror.ApiError) {
+func (p *PanClient) fileListReq(param *aliyunpan.FileListParam) (*fileListResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -322,17 +142,17 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 
 	pFileId := param.ParentFileId
 	if pFileId == "" {
-		pFileId = DefaultRootParentFileId
+		pFileId = aliyunpan.DefaultRootParentFileId
 	}
 	limit := param.Limit
 	if limit <= 0 {
 		limit = 100
 	}
 	if param.OrderBy == "" {
-		param.OrderBy = FileOrderByUpdatedAt
+		param.OrderBy = aliyunpan.FileOrderByUpdatedAt
 	}
 	if param.OrderDirection == "" {
-		param.OrderDirection = FileOrderDirectionDesc
+		param.OrderDirection = aliyunpan.FileOrderDirectionDesc
 	}
 	postData := map[string]interface{}{
 		"drive_id":                param.DriveId,
@@ -375,7 +195,7 @@ func (p *PanClient) fileListReq(param *FileListParam) (*fileListResult, *apierro
 }
 
 // FileInfoById 通过FileId获取文件信息
-func (p *PanClient) FileInfoById(driveId, fileId string) (*FileEntity, *apierror.ApiError) {
+func (p *PanClient) FileInfoById(driveId, fileId string) (*aliyunpan.FileEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -386,7 +206,7 @@ func (p *PanClient) FileInfoById(driveId, fileId string) (*FileEntity, *apierror
 
 	pFileId := fileId
 	if pFileId == "" {
-		pFileId = DefaultRootParentFileId
+		pFileId = aliyunpan.DefaultRootParentFileId
 	}
 	postData := map[string]interface{}{
 		"drive_id": driveId,
@@ -415,7 +235,7 @@ func (p *PanClient) FileInfoById(driveId, fileId string) (*FileEntity, *apierror
 }
 
 // FileInfoByPath 通过路径获取文件详情，pathStr是绝对路径
-func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *FileEntity, error *apierror.ApiError) {
+func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *aliyunpan.FileEntity, error *apierror.ApiError) {
 	if pathStr == "" {
 		pathStr = "/"
 	}
@@ -436,7 +256,7 @@ func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *Fi
 	if pathStr == "/" {
 		pathSlice = []string{""}
 	} else {
-		pathSlice = strings.Split(pathStr, PathSeparator)
+		pathSlice = strings.Split(pathStr, aliyunpan.PathSeparator)
 		if pathSlice[0] != "" {
 			return nil, apierror.NewFailedApiError("pathStr必须是绝对路径")
 		}
@@ -449,10 +269,10 @@ func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *Fi
 	return fileInfo, error
 }
 
-func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]string, parentFileInfo *FileEntity) (*FileEntity, *apierror.ApiError) {
+func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]string, parentFileInfo *aliyunpan.FileEntity) (*aliyunpan.FileEntity, *apierror.ApiError) {
 	if parentFileInfo == nil {
 		// default root "/" entity
-		parentFileInfo = NewFileEntityForRootDir()
+		parentFileInfo = aliyunpan.NewFileEntityForRootDir()
 		if index == 0 && len(*pathSlice) == 1 {
 			// root path "/"
 			return parentFileInfo, nil
@@ -476,7 +296,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 		return p.getFileInfoByPath(driveId, index+1, pathSlice, v)
 	}
 
-	fileListParam := &FileListParam{
+	fileListParam := &aliyunpan.FileListParam{
 		DriveId:      driveId,
 		ParentFileId: parentFileInfo.FileId,
 	}
@@ -488,7 +308,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 	if fileResult == nil || len(fileResult) == 0 {
 		return nil, apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, "文件不存在")
 	}
-	var targetFile *FileEntity = nil
+	var targetFile *aliyunpan.FileEntity = nil
 	curParentPathStr := ""
 	for idx := 0; idx <= (index - 1); idx++ {
 		if (*pathSlice)[idx] == "" {
@@ -514,7 +334,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 }
 
 // FilesDirectoriesRecurseList 递归获取目录下的文件和目录列表
-func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, handleFileDirectoryFunc HandleFileDirectoryFunc) FileList {
+func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, handleFileDirectoryFunc aliyunpan.HandleFileDirectoryFunc) aliyunpan.FileList {
 	targetFileInfo, er := p.FileInfoByPath(driveId, path)
 	if er != nil {
 		if handleFileDirectoryFunc != nil {
@@ -532,10 +352,10 @@ func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, han
 		if handleFileDirectoryFunc != nil {
 			handleFileDirectoryFunc(0, path, targetFileInfo, nil)
 		}
-		return FileList{targetFileInfo}
+		return aliyunpan.FileList{targetFileInfo}
 	}
 
-	fld := &FileList{}
+	fld := &aliyunpan.FileList{}
 	ok := p.recurseList(driveId, targetFileInfo, 1, handleFileDirectoryFunc, fld)
 	if !ok {
 		return nil
@@ -543,8 +363,8 @@ func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, han
 	return *fld
 }
 
-func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth int, handleFileDirectoryFunc HandleFileDirectoryFunc, fld *FileList) bool {
-	flp := &FileListParam{
+func (p *PanClient) recurseList(driveId string, folderInfo *aliyunpan.FileEntity, depth int, handleFileDirectoryFunc aliyunpan.HandleFileDirectoryFunc, fld *aliyunpan.FileList) bool {
+	flp := &aliyunpan.FileListParam{
 		DriveId:      driveId,
 		ParentFileId: folderInfo.FileId,
 	}
@@ -557,7 +377,7 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 	}
 	ok := true
 	for _, fi := range r {
-		fi.Path = strings.ReplaceAll(folderInfo.Path+PathSeparator+fi.FileName, "//", "/")
+		fi.Path = strings.ReplaceAll(folderInfo.Path+aliyunpan.PathSeparator+fi.FileName, "//", "/")
 		*fld = append(*fld, fi)
 		if fi.IsFolder() {
 			if handleFileDirectoryFunc != nil {
@@ -577,8 +397,8 @@ func (p *PanClient) recurseList(driveId string, folderInfo *FileEntity, depth in
 }
 
 // FileListGetAll 获取指定目录下的所有文件列表
-func (p *PanClient) FileListGetAll(param *FileListParam, delayMilliseconds int) (FileList, *apierror.ApiError) {
-	internalParam := &FileListParam{
+func (p *PanClient) FileListGetAll(param *aliyunpan.FileListParam, delayMilliseconds int) (aliyunpan.FileList, *apierror.ApiError) {
+	internalParam := &aliyunpan.FileListParam{
 		OrderBy:        param.OrderBy,
 		OrderDirection: param.OrderDirection,
 		DriveId:        param.DriveId,
@@ -590,7 +410,7 @@ func (p *PanClient) FileListGetAll(param *FileListParam, delayMilliseconds int) 
 		internalParam.Limit = 100
 	}
 
-	fileList := FileList{}
+	fileList := aliyunpan.FileList{}
 	result, err := p.FileList(internalParam)
 	if err != nil || result == nil {
 		return nil, err
@@ -614,7 +434,7 @@ func (p *PanClient) FileListGetAll(param *FileListParam, delayMilliseconds int) 
 }
 
 // FileGetPath 通过fileId获取对应的目录层级信息
-func (p *PanClient) FileGetPath(driveId, fileId string) (*FileGetPathResult, *apierror.ApiError) {
+func (p *PanClient) FileGetPath(driveId, fileId string) (*aliyunpan.FileGetPathResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -642,7 +462,7 @@ func (p *PanClient) FileGetPath(driveId, fileId string) (*FileGetPathResult, *ap
 	}
 
 	// parse result
-	r := &FileGetPathResult{}
+	r := &aliyunpan.FileGetPathResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file path result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())

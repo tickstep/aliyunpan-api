@@ -1,6 +1,7 @@
-package aliyunpan
+package aliyunpan_web
 
 import (
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/library-go/escaper"
 	"github.com/tickstep/library-go/logger"
@@ -8,15 +9,12 @@ import (
 	"strings"
 )
 
-const (
-	// ShellPatternCharacters 通配符字符串
-	ShellPatternCharacters = "*?[]"
-)
+const ()
 
-func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pathSlice *[]string, parentFileInfo *FileEntity, resultList *FileList) {
+func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pathSlice *[]string, parentFileInfo *aliyunpan.FileEntity, resultList *aliyunpan.FileList) {
 	if parentFileInfo == nil {
 		// default root "/" entity
-		parentFileInfo = NewFileEntityForRootDir()
+		parentFileInfo = aliyunpan.NewFileEntityForRootDir()
 		if index == 0 && len(*pathSlice) == 1 {
 			// root path "/"
 			*resultList = append(*resultList, parentFileInfo)
@@ -32,7 +30,7 @@ func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pa
 		return
 	}
 
-	if !strings.ContainsAny((*pathSlice)[index], ShellPatternCharacters) {
+	if !strings.ContainsAny((*pathSlice)[index], aliyunpan.ShellPatternCharacters) {
 		// 不包含通配符，先查缓存
 		curPathStr := path.Clean(parentFileInfo.Path + "/" + (*pathSlice)[index])
 
@@ -47,7 +45,7 @@ func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pa
 	if parentFileInfo.IsFile() {
 		return
 	}
-	fileListParam := &FileListParam{
+	fileListParam := &aliyunpan.FileListParam{
 		DriveId:      driveId,
 		ParentFileId: parentFileInfo.FileId,
 	}
@@ -94,11 +92,11 @@ func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pa
 }
 
 // MatchPathByShellPattern 通配符匹配文件路径, pattern为绝对路径，符合的路径文件存放在resultList中
-func (p *PanClient) MatchPathByShellPattern(driveId string, pattern string) (resultList *FileList, error *apierror.ApiError) {
+func (p *PanClient) MatchPathByShellPattern(driveId string, pattern string) (resultList *aliyunpan.FileList, error *apierror.ApiError) {
 	errInfo := apierror.NewApiError(apierror.ApiCodeFailed, "")
-	resultList = &FileList{}
+	resultList = &aliyunpan.FileList{}
 
-	patternSlice := strings.Split(escaper.Escape(path.Clean(pattern), []rune{'['}), PathSeparator) // 转义中括号
+	patternSlice := strings.Split(escaper.Escape(path.Clean(pattern), []rune{'['}), aliyunpan.PathSeparator) // 转义中括号
 	if patternSlice[0] != "" {
 		errInfo.Err = "路径不是绝对路径"
 		return nil, errInfo
@@ -110,7 +108,7 @@ func (p *PanClient) MatchPathByShellPattern(driveId string, pattern string) (res
 		}
 	}()
 
-	parentFile := NewFileEntityForRootDir()
+	parentFile := aliyunpan.NewFileEntityForRootDir()
 	if path.Clean(strings.TrimSpace(pattern)) == "/" {
 		*resultList = append(*resultList, parentFile)
 		return resultList, nil

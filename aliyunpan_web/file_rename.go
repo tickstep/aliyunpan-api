@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
@@ -59,7 +60,7 @@ func (p *PanClient) FileRename(driveId, renameFileId, newName string) (bool, *ap
 	}
 
 	// parse result
-	r := &FileEntity{}
+	r := &aliyunpan.FileEntity{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse rename result json error ", err2)
 		return false, apierror.NewFailedApiError(err2.Error())

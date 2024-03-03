@@ -18,6 +18,7 @@ import (
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tickstep/aliyunpan-api/aliyunpan"
+	"github.com/tickstep/aliyunpan-api/aliyunpan_web"
 	"github.com/tickstep/library-go/jsonhelper"
 	"math/rand"
 	"os"
@@ -65,11 +66,11 @@ func main() {
 	}
 
 	// do login
-	webToken, _ := aliyunpan.GetAccessTokenFromRefreshToken(userpw.RefreshToken)
+	webToken, _ := aliyunpan_web.GetAccessTokenFromRefreshToken(userpw.RefreshToken)
 	fmt.Println(objToJsonStr(webToken))
 
 	// pan client
-	appConfig := aliyunpan.AppConfig{
+	appConfig := aliyunpan_web.AppConfig{
 		AppId: "25dzX3vbYqktVxyX",
 		//DeviceId: "878BF0KXVmMCAXF092E1C7sT",
 		DeviceId: "T6ZJyY7JqX6EN2cDzLCxMVYZ",
@@ -78,14 +79,14 @@ func main() {
 		Nonce:     0,
 		PublicKey: "",
 	}
-	panClient := aliyunpan.NewPanClient(*webToken, aliyunpan.AppLoginToken{}, appConfig, aliyunpan.SessionConfig{
+	panClient := aliyunpan_web.NewPanClient(*webToken, aliyunpan_web.AppLoginToken{}, appConfig, aliyunpan_web.SessionConfig{
 		DeviceName: "Chrome浏览器",
 		ModelName:  "Windows网页版",
 	})
 
 	// create session
 	fmt.Println("CreateSession")
-	r, e := panClient.CreateSession(&aliyunpan.CreateSessionParam{
+	r, e := panClient.CreateSession(&aliyunpan_web.CreateSessionParam{
 		DeviceName: "Chrome浏览器",
 		ModelName:  "Windows网页版",
 	})

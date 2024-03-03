@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
@@ -25,43 +26,6 @@ import (
 )
 
 type (
-	UserRole   string
-	UserStatus string
-
-	// UserInfo 用户信息
-	UserInfo struct {
-		// DomainId 域ID
-		DomainId string `json:"domainId"`
-		// FileDriveId 备份（文件）网盘ID
-		FileDriveId string `json:"fileDriveId"`
-		// SafeBoxDriveId 保险箱网盘ID
-		SafeBoxDriveId string `json:"safeBoxDriveId"`
-		// AlbumDriveId 相册网盘ID
-		AlbumDriveId string `json:"albumDriveId"`
-		// ResourceDriveId 资源库网盘ID
-		ResourceDriveId string `json:"resourceDriveId"`
-		// 用户UID
-		UserId string `json:"userId"`
-		// UserName 用户名
-		UserName string `json:"userName"`
-		// CreatedAt 创建时间
-		CreatedAt string `json:"createdAt"`
-		// Email 邮箱
-		Email string `json:"email"`
-		// Phone 手机
-		Phone string `json:"phone"`
-		// Role 角色，默认是user
-		Role UserRole `json:"role"`
-		// Status 是否被禁用，enable / disable
-		Status UserStatus `json:"status"`
-		// Nickname 昵称，如果没有设置则为空
-		Nickname string `json:"nickname"`
-		// TotalSize 网盘空间总大小
-		TotalSize uint64 `json:"totalSize"`
-		// UsedSize 网盘已使用空间大小
-		UsedSize uint64 `json:"usedSize"`
-	}
-
 	// userInfoResult 用户信息返回实体
 	userInfoResult struct {
 		DomainId        string `json:"domain_id"`
@@ -139,33 +103,27 @@ type (
 	}
 )
 
-const (
-	User        UserRole = "user"
-	UnknownRole UserRole = "unknown"
+const ()
 
-	Enabled       UserStatus = "enable"
-	UnknownStatus UserStatus = "unknown"
-)
-
-func parseUserRole(role string) UserRole {
+func parseUserRole(role string) aliyunpan.UserRole {
 	switch role {
 	case "user":
-		return User
+		return aliyunpan.User
 	}
-	return UnknownRole
+	return aliyunpan.UnknownRole
 }
 
-func parseUserStatus(status string) UserStatus {
+func parseUserStatus(status string) aliyunpan.UserStatus {
 	switch status {
 	case "enabled":
-		return Enabled
+		return aliyunpan.Enabled
 	}
-	return UnknownStatus
+	return aliyunpan.UnknownStatus
 }
 
 // GetUserInfo 获取用户信息
-func (p *PanClient) GetUserInfo() (*UserInfo, *apierror.ApiError) {
-	userInfo := &UserInfo{}
+func (p *PanClient) GetUserInfo() (*aliyunpan.UserInfo, *apierror.ApiError) {
+	userInfo := &aliyunpan.UserInfo{}
 
 	if r, err := p.getUserInfoReq(); err == nil {
 		userInfo.DomainId = r.DomainId

@@ -1,8 +1,9 @@
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
@@ -28,9 +29,9 @@ type (
 )
 
 // RecycleBinFileList 获取回收站文件列表
-func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*FileListResult, *apierror.ApiError) {
-	result := &FileListResult{
-		FileList:   FileList{},
+func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
+	result := &aliyunpan.FileListResult{
+		FileList:   aliyunpan.FileList{},
 		NextMarker: "",
 	}
 	if flr, err := p.recycleBinFileListReq(param); err == nil {
@@ -47,7 +48,7 @@ func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*FileLis
 }
 
 // RecycleBinFileListGetAll 获取所有列表文件
-func (p *PanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (FileList, *apierror.ApiError) {
+func (p *PanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (aliyunpan.FileList, *apierror.ApiError) {
 	internalParam := &RecycleBinFileListParam{
 		DriveId: param.DriveId,
 		Limit:   param.Limit,
@@ -57,7 +58,7 @@ func (p *PanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (Fi
 		internalParam.Limit = 100
 	}
 
-	fileList := FileList{}
+	fileList := aliyunpan.FileList{}
 	result, err := p.RecycleBinFileList(internalParam)
 	if err != nil || result == nil {
 		return nil, err

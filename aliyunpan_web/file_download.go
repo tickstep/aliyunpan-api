@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/cachepool"
@@ -28,44 +29,12 @@ import (
 	"strings"
 )
 
-type (
-	DownloadFuncCallback func(httpMethod, fullUrl string, headers map[string]string) (resp *http.Response, err error)
+type ()
 
-	// FileDownloadRange 分片。0-100,101-200,201-300...
-	FileDownloadRange struct {
-		// 起始值，包含
-		Offset int64
-		// 结束值，包含
-		End int64
-	}
-
-	GetFileDownloadUrlParam struct {
-		DriveId   string `json:"drive_id"`
-		FileId    string `json:"file_id"`
-		ExpireSec int    `json:"expire_sec"`
-	}
-
-	GetFileDownloadUrlResult struct {
-		Method      string `json:"method"`
-		Url         string `json:"url"`
-		InternalUrl string `json:"internal_url"`
-		CdnUrl      string `json:"cdn_url"`
-		Expiration  string `json:"expiration"`
-		Size        int64  `json:"size"`
-		Ratelimit   struct {
-			PartSpeed int64 `json:"part_speed"`
-			PartSize  int64 `json:"part_size"`
-		} `json:"ratelimit"`
-	}
-)
-
-const (
-	// 资源被屏蔽，提示资源非法链接
-	IllegalDownloadUrlPrefix = "https://pds-system-file.oss-cn-beijing.aliyuncs.com/illegal"
-)
+const ()
 
 // GetFileDownloadUrl 获取文件下载URL路径
-func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFileDownloadUrlResult, *apierror.ApiError) {
+func (p *PanClient) GetFileDownloadUrl(param *aliyunpan.GetFileDownloadUrlParam) (*aliyunpan.GetFileDownloadUrlResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -100,7 +69,7 @@ func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFile
 	}
 
 	// parse result
-	r := &GetFileDownloadUrlResult{}
+	r := &aliyunpan.GetFileDownloadUrlResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse file download url result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
@@ -111,7 +80,7 @@ func (p *PanClient) GetFileDownloadUrl(param *GetFileDownloadUrlParam) (*GetFile
 }
 
 // DownloadFileData 下载文件内容
-func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange FileDownloadRange, downloadFunc DownloadFuncCallback) *apierror.ApiError {
+func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange aliyunpan.FileDownloadRange, downloadFunc aliyunpan.DownloadFuncCallback) *apierror.ApiError {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s", downloadFileUrl)
@@ -145,7 +114,7 @@ func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange FileDownl
 }
 
 // DownloadFileDataAndSave 下载文件并存储到指定IO设备里面。该方法是同步阻塞的
-func (p *PanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange FileDownloadRange, writerAt io.WriterAt) *apierror.ApiError {
+func (p *PanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange aliyunpan.FileDownloadRange, writerAt io.WriterAt) *apierror.ApiError {
 	var resp *http.Response
 	var err error
 	var client = requester.NewHTTPClient()

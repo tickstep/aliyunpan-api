@@ -1,8 +1,9 @@
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
@@ -26,8 +27,8 @@ type (
 		UpdatedAt  string `json:"updated_at"`
 		CreatedAt  string `json:"created_at"`
 		// forbidden-已违规，enabled-正常
-		Status    string      `json:"status"`
-		FirstFile *FileEntity `json:"first_file"`
+		Status    string                `json:"status"`
+		FirstFile *aliyunpan.FileEntity `json:"first_file"`
 	}
 
 	shareEntityResult struct {

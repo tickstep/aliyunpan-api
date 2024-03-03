@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/library-go/crypto"
 	"github.com/tickstep/library-go/crypto/secp256k1"
 	"github.com/tickstep/library-go/logger"
@@ -24,10 +25,7 @@ import (
 	"time"
 )
 
-const (
-	// PathSeparator 路径分隔符
-	PathSeparator = "/"
-)
+const ()
 
 type (
 	// AppConfig 存储客户端相关配置参数，目前主要是签名需要用的参数
@@ -114,7 +112,7 @@ func (p *PanClient) DisableCache() {
 	p.useCache = false
 }
 
-func (p *PanClient) storeFilePathToCache(driveId, pathStr string, fileEntity *FileEntity) {
+func (p *PanClient) storeFilePathToCache(driveId, pathStr string, fileEntity *aliyunpan.FileEntity) {
 	p.cacheMutex.Lock()
 	p.cacheMutex.Unlock()
 	if !p.useCache {
@@ -125,7 +123,7 @@ func (p *PanClient) storeFilePathToCache(driveId, pathStr string, fileEntity *Fi
 	cache.(*sync.Map).Store(pathStr, fileEntity)
 }
 
-func (p *PanClient) loadFilePathFromCache(driveId, pathStr string) *FileEntity {
+func (p *PanClient) loadFilePathFromCache(driveId, pathStr string) *aliyunpan.FileEntity {
 	p.cacheMutex.Lock()
 	p.cacheMutex.Unlock()
 	if !p.useCache {
@@ -136,7 +134,7 @@ func (p *PanClient) loadFilePathFromCache(driveId, pathStr string) *FileEntity {
 	s := cache.(*sync.Map)
 	if v, ok := s.Load(pathStr); ok {
 		logger.Verboseln("file path cache hit: ", pathStr)
-		return v.(*FileEntity)
+		return v.(*aliyunpan.FileEntity)
 	}
 	return nil
 }

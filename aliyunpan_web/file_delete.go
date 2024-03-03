@@ -12,34 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aliyunpan
+package aliyunpan_web
 
 import (
 	"fmt"
+	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/library-go/logger"
 	"strings"
 )
 
-type (
-	FileBatchActionParam struct {
-		// 网盘ID
-		DriveId string `json:"drive_id"`
-		// 文件ID
-		FileId string `json:"file_id"`
-	}
-
-	FileBatchActionResult struct {
-		// 文件ID
-		FileId string
-		// 是否成功
-		Success bool
-	}
-)
+type ()
 
 // FileDelete 删除文件到回收站
-func (p *PanClient) FileDelete(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+func (p *PanClient) FileDelete(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
@@ -50,7 +37,7 @@ func (p *PanClient) FileDelete(param []*FileBatchActionParam) ([]*FileBatchActio
 }
 
 // RecycleBinFileDelete 回收站彻底删除文件
-func (p *PanClient) RecycleBinFileDelete(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+func (p *PanClient) RecycleBinFileDelete(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
@@ -61,7 +48,7 @@ func (p *PanClient) RecycleBinFileDelete(param []*FileBatchActionParam) ([]*File
 }
 
 // RecycleBinFileRestore 回收站还原文件。还原的文件会存放会原来的地方
-func (p *PanClient) RecycleBinFileRestore(param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+func (p *PanClient) RecycleBinFileRestore(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
@@ -71,7 +58,7 @@ func (p *PanClient) RecycleBinFileRestore(param []*FileBatchActionParam) ([]*Fil
 	return p.doFileBatchRequest(fullUrl.String(), "/recyclebin/restore", param)
 }
 
-func (p *PanClient) doFileBatchRequest(url, actionUrl string, param []*FileBatchActionParam) ([]*FileBatchActionResult, *apierror.ApiError) {
+func (p *PanClient) doFileBatchRequest(url, actionUrl string, param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	requests, e := p.getFileDeleteBatchRequestList(actionUrl, param)
 	if e != nil {
 		return nil, e
@@ -89,9 +76,9 @@ func (p *PanClient) doFileBatchRequest(url, actionUrl string, param []*FileBatch
 	}
 
 	// parse result
-	r := []*FileBatchActionResult{}
+	r := []*aliyunpan.FileBatchActionResult{}
 	for _, item := range result.Responses {
-		r = append(r, &FileBatchActionResult{
+		r = append(r, &aliyunpan.FileBatchActionResult{
 			FileId:  item.Id,
 			Success: item.Status == 204 || item.Status == 202 || item.Status == 200,
 		})
@@ -99,7 +86,7 @@ func (p *PanClient) doFileBatchRequest(url, actionUrl string, param []*FileBatch
 	return r, nil
 }
 
-func (p *PanClient) getFileDeleteBatchRequestList(actionUrl string, param []*FileBatchActionParam) (BatchRequestList, *apierror.ApiError) {
+func (p *PanClient) getFileDeleteBatchRequestList(actionUrl string, param []*aliyunpan.FileBatchActionParam) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}
