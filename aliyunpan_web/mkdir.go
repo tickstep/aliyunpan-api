@@ -27,7 +27,7 @@ import (
 type ()
 
 // Mkdir 创建文件夹
-func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
+func (p *WebPanClient) Mkdir(driveId, parentFileId, dirName string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
 	if parentFileId == "" {
 		// 默认根目录
 		parentFileId = aliyunpan.DefaultRootParentFileId
@@ -69,13 +69,13 @@ func (p *PanClient) Mkdir(driveId, parentFileId, dirName string) (*aliyunpan.Mkd
 	return r, nil
 }
 
-func (p *PanClient) MkdirByFullPath(driveId, fullPath string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
+func (p *WebPanClient) MkdirByFullPath(driveId, fullPath string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
 	fullPath = strings.ReplaceAll(fullPath, "//", "/")
 	pathSlice := strings.Split(fullPath, "/")
 	return p.MkdirRecursive(driveId, "", "", 0, pathSlice)
 }
 
-func (p *PanClient) MkdirRecursive(driveId, parentFileId string, fullPath string, index int, pathSlice []string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
+func (p *WebPanClient) MkdirRecursive(driveId, parentFileId string, fullPath string, index int, pathSlice []string) (*aliyunpan.MkdirResult, *apierror.ApiError) {
 	r := &aliyunpan.MkdirResult{}
 	if parentFileId == "" {
 		// default root "/" entity

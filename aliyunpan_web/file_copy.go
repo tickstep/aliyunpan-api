@@ -46,7 +46,7 @@ type (
 )
 
 // FileCrossDriveCopy 跨网盘复制文件，支持资源库和备份盘之间复制文件
-func (p *PanClient) FileCrossDriveCopy(param *FileCrossCopyParam) ([]*FileCrossCopyResult, *apierror.ApiError) {
+func (p *WebPanClient) FileCrossDriveCopy(param *FileCrossCopyParam) ([]*FileCrossCopyResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -94,7 +94,7 @@ func (p *PanClient) FileCrossDriveCopy(param *FileCrossCopyParam) ([]*FileCrossC
 }
 
 // FileCrossDriveMove 跨网盘移动文件，只支持从资源库移动到备份盘
-func (p *PanClient) FileCrossDriveMove(param *FileCrossCopyParam) ([]*FileCrossCopyResult, *apierror.ApiError) {
+func (p *WebPanClient) FileCrossDriveMove(param *FileCrossCopyParam) ([]*FileCrossCopyResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),

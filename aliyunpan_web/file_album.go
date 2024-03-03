@@ -165,7 +165,7 @@ func (a *AlbumAddFileParam) AddFileItem(driveId, fileId string) {
 }
 
 // AlbumListGetAll 获取所有相册列表
-func (p *PanClient) AlbumListGetAll(param *AlbumListParam) (AlbumList, *apierror.ApiError) {
+func (p *WebPanClient) AlbumListGetAll(param *AlbumListParam) (AlbumList, *apierror.ApiError) {
 	internalParam := &AlbumListParam{
 		OrderBy:        param.OrderBy,
 		OrderDirection: param.OrderDirection,
@@ -197,7 +197,7 @@ func (p *PanClient) AlbumListGetAll(param *AlbumListParam) (AlbumList, *apierror
 }
 
 // AlbumList 获取相册列表
-func (p *PanClient) AlbumList(param *AlbumListParam) (*AlbumListResult, *apierror.ApiError) {
+func (p *WebPanClient) AlbumList(param *AlbumListParam) (*AlbumListResult, *apierror.ApiError) {
 	result := &AlbumListResult{
 		Items:      AlbumList{},
 		NextMarker: "",
@@ -214,7 +214,7 @@ func (p *PanClient) AlbumList(param *AlbumListParam) (*AlbumListResult, *apierro
 	return result, nil
 }
 
-func (p *PanClient) albumListReq(param *AlbumListParam) (*AlbumListResult, *apierror.ApiError) {
+func (p *WebPanClient) albumListReq(param *AlbumListParam) (*AlbumListResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -264,7 +264,7 @@ func (p *PanClient) albumListReq(param *AlbumListParam) (*AlbumListResult, *apie
 }
 
 // AlbumEdit 相簿编辑
-func (p *PanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apierror.ApiError) {
+func (p *WebPanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -304,7 +304,7 @@ func (p *PanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apierro
 }
 
 // AlbumEdit 相簿编辑
-func (p *PanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror.ApiError) {
+func (p *WebPanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -348,7 +348,7 @@ func (p *PanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror.Ap
 }
 
 // AlbumDelete 相簿删除
-func (p *PanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.ApiError) {
+func (p *WebPanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -381,7 +381,7 @@ func (p *PanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.ApiErr
 }
 
 // AlbumGet 获取相簿信息
-func (p *PanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.ApiError) {
+func (p *WebPanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -420,7 +420,7 @@ func (p *PanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.ApiE
 }
 
 // AlbumShareCreate 相簿创建分享链接
-func (p *PanClient) AlbumShareCreate(param *AlbumShareCreateParam) (*AlbumShareCreateResult, *apierror.ApiError) {
+func (p *WebPanClient) AlbumShareCreate(param *AlbumShareCreateParam) (*AlbumShareCreateResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -467,7 +467,7 @@ func (p *PanClient) AlbumShareCreate(param *AlbumShareCreateParam) (*AlbumShareC
 }
 
 // AlbumListFileGetAll 获取指定相簿下的所有文件列表
-func (p *PanClient) AlbumListFileGetAll(param *AlbumListFileParam) (aliyunpan.FileList, *apierror.ApiError) {
+func (p *WebPanClient) AlbumListFileGetAll(param *AlbumListFileParam) (aliyunpan.FileList, *apierror.ApiError) {
 	internalParam := &AlbumListFileParam{
 		AlbumId: param.AlbumId,
 		Limit:   param.Limit,
@@ -498,7 +498,7 @@ func (p *PanClient) AlbumListFileGetAll(param *AlbumListFileParam) (aliyunpan.Fi
 }
 
 // AlbumListFile 获取相簿下的文件列表
-func (p *PanClient) AlbumListFile(param *AlbumListFileParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
+func (p *WebPanClient) AlbumListFile(param *AlbumListFileParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
 	result := &aliyunpan.FileListResult{
 		FileList:   aliyunpan.FileList{},
 		NextMarker: "",
@@ -515,7 +515,7 @@ func (p *PanClient) AlbumListFile(param *AlbumListFileParam) (*aliyunpan.FileLis
 	return result, nil
 }
 
-func (p *PanClient) albumListFileReq(param *AlbumListFileParam) (*fileListResult, *apierror.ApiError) {
+func (p *WebPanClient) albumListFileReq(param *AlbumListFileParam) (*fileListResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -565,7 +565,7 @@ func (p *PanClient) albumListFileReq(param *AlbumListFileParam) (*fileListResult
 }
 
 // AlbumDeleteFile 相簿删除文件列表
-func (p *PanClient) AlbumDeleteFile(param *AlbumDeleteFileParam) (bool, *apierror.ApiError) {
+func (p *WebPanClient) AlbumDeleteFile(param *AlbumDeleteFileParam) (bool, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -595,7 +595,7 @@ func (p *PanClient) AlbumDeleteFile(param *AlbumDeleteFileParam) (bool, *apierro
 }
 
 // AlbumAddFile 相簿增加文件列表
-func (p *PanClient) AlbumAddFile(param *AlbumAddFileParam) (*aliyunpan.FileList, *apierror.ApiError) {
+func (p *WebPanClient) AlbumAddFile(param *AlbumAddFileParam) (*aliyunpan.FileList, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}

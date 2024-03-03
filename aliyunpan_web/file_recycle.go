@@ -29,7 +29,7 @@ type (
 )
 
 // RecycleBinFileList 获取回收站文件列表
-func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
+func (p *WebPanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
 	result := &aliyunpan.FileListResult{
 		FileList:   aliyunpan.FileList{},
 		NextMarker: "",
@@ -48,7 +48,7 @@ func (p *PanClient) RecycleBinFileList(param *RecycleBinFileListParam) (*aliyunp
 }
 
 // RecycleBinFileListGetAll 获取所有列表文件
-func (p *PanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (aliyunpan.FileList, *apierror.ApiError) {
+func (p *WebPanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (aliyunpan.FileList, *apierror.ApiError) {
 	internalParam := &RecycleBinFileListParam{
 		DriveId: param.DriveId,
 		Limit:   param.Limit,
@@ -78,7 +78,7 @@ func (p *PanClient) RecycleBinFileListGetAll(param *RecycleBinFileListParam) (al
 	return fileList, nil
 }
 
-func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*fileListResult, *apierror.ApiError) {
+func (p *WebPanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*fileListResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 		"referer":       "https://www.aliyundrive.com/",
@@ -127,7 +127,7 @@ func (p *PanClient) recycleBinFileListReq(param *RecycleBinFileListParam) (*file
 }
 
 // RecycleBinFileClear 清空回收站
-func (p *PanClient) RecycleBinFileClear(param *RecycleBinFileClearParam) (*RecycleBinFileClearResult, *apierror.ApiError) {
+func (p *WebPanClient) RecycleBinFileClear(param *RecycleBinFileClearParam) (*RecycleBinFileClearResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 		"referer":       "https://www.aliyundrive.com/",

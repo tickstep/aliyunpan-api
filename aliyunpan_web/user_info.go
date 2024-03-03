@@ -122,7 +122,7 @@ func parseUserStatus(status string) aliyunpan.UserStatus {
 }
 
 // GetUserInfo 获取用户信息
-func (p *PanClient) GetUserInfo() (*aliyunpan.UserInfo, *apierror.ApiError) {
+func (p *WebPanClient) GetUserInfo() (*aliyunpan.UserInfo, *apierror.ApiError) {
 	userInfo := &aliyunpan.UserInfo{}
 
 	if r, err := p.getUserInfoReq(); err == nil {
@@ -164,7 +164,7 @@ func (p *PanClient) GetUserInfo() (*aliyunpan.UserInfo, *apierror.ApiError) {
 }
 
 // getUserInfoReq 获取用户基本信息
-func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
+func (p *WebPanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -196,7 +196,7 @@ func (p *PanClient) getUserInfoReq() (*userInfoResult, *apierror.ApiError) {
 }
 
 // getPersonalInfoReq 获取用户网盘基本信息，包括配额，上传下载等权限限制
-func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiError) {
+func (p *WebPanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -228,7 +228,7 @@ func (p *PanClient) getPersonalInfoReq() (*personalInfoResult, *apierror.ApiErro
 }
 
 // getSafeBoxInfoReq 获取保险箱信息
-func (p *PanClient) getSafeBoxInfoReq() (*safeBoxInfoResult, *apierror.ApiError) {
+func (p *WebPanClient) getSafeBoxInfoReq() (*safeBoxInfoResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -259,7 +259,7 @@ func (p *PanClient) getSafeBoxInfoReq() (*safeBoxInfoResult, *apierror.ApiError)
 	return r, nil
 }
 
-func (p *PanClient) getAlbumInfoReq() (*albumInfoResult, *apierror.ApiError) {
+func (p *WebPanClient) getAlbumInfoReq() (*albumInfoResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -285,7 +285,7 @@ func (p *PanClient) getAlbumInfoReq() (*albumInfoResult, *apierror.ApiError) {
 	return r, nil
 }
 
-func (p *PanClient) getVipInfoReq() (*vipInfoResult, *apierror.ApiError) {
+func (p *WebPanClient) getVipInfoReq() (*vipInfoResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}

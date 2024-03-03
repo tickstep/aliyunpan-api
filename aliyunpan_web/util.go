@@ -11,7 +11,7 @@ import (
 
 const ()
 
-func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pathSlice *[]string, parentFileInfo *aliyunpan.FileEntity, resultList *aliyunpan.FileList) {
+func (p *WebPanClient) recurseMatchPathByShellPattern(driveId string, index int, pathSlice *[]string, parentFileInfo *aliyunpan.FileEntity, resultList *aliyunpan.FileList) {
 	if parentFileInfo == nil {
 		// default root "/" entity
 		parentFileInfo = aliyunpan.NewFileEntityForRootDir()
@@ -92,7 +92,7 @@ func (p *PanClient) recurseMatchPathByShellPattern(driveId string, index int, pa
 }
 
 // MatchPathByShellPattern 通配符匹配文件路径, pattern为绝对路径，符合的路径文件存放在resultList中
-func (p *PanClient) MatchPathByShellPattern(driveId string, pattern string) (resultList *aliyunpan.FileList, error *apierror.ApiError) {
+func (p *WebPanClient) MatchPathByShellPattern(driveId string, pattern string) (resultList *aliyunpan.FileList, error *apierror.ApiError) {
 	errInfo := apierror.NewApiError(apierror.ApiCodeFailed, "")
 	resultList = &aliyunpan.FileList{}
 

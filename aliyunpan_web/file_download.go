@@ -34,7 +34,7 @@ type ()
 const ()
 
 // GetFileDownloadUrl 获取文件下载URL路径
-func (p *PanClient) GetFileDownloadUrl(param *aliyunpan.GetFileDownloadUrlParam) (*aliyunpan.GetFileDownloadUrlResult, *apierror.ApiError) {
+func (p *WebPanClient) GetFileDownloadUrl(param *aliyunpan.GetFileDownloadUrlParam) (*aliyunpan.GetFileDownloadUrlResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -80,7 +80,7 @@ func (p *PanClient) GetFileDownloadUrl(param *aliyunpan.GetFileDownloadUrlParam)
 }
 
 // DownloadFileData 下载文件内容
-func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange aliyunpan.FileDownloadRange, downloadFunc aliyunpan.DownloadFuncCallback) *apierror.ApiError {
+func (p *WebPanClient) DownloadFileData(downloadFileUrl string, fileRange aliyunpan.FileDownloadRange, downloadFunc aliyunpan.DownloadFuncCallback) *apierror.ApiError {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s", downloadFileUrl)
@@ -114,7 +114,7 @@ func (p *PanClient) DownloadFileData(downloadFileUrl string, fileRange aliyunpan
 }
 
 // DownloadFileDataAndSave 下载文件并存储到指定IO设备里面。该方法是同步阻塞的
-func (p *PanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange aliyunpan.FileDownloadRange, writerAt io.WriterAt) *apierror.ApiError {
+func (p *WebPanClient) DownloadFileDataAndSave(downloadFileUrl string, fileRange aliyunpan.FileDownloadRange, writerAt io.WriterAt) *apierror.ApiError {
 	var resp *http.Response
 	var err error
 	var client = requester.NewHTTPClient()

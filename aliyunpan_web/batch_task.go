@@ -39,7 +39,7 @@ type (
 )
 
 // BatchTask 批量请求任务。多选操作基本都是批量任务
-func (p *PanClient) BatchTask(url string, param *BatchRequestParam, headers ...[2]string) (*BatchResponseResult, *apierror.ApiError) {
+func (p *WebPanClient) BatchTask(url string, param *BatchRequestParam, headers ...[2]string) (*BatchResponseResult, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}

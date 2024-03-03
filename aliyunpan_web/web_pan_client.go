@@ -46,7 +46,7 @@ type (
 		ModelName  string `json:"modelName"`
 	}
 
-	PanClient struct {
+	WebPanClient struct {
 		client        *requester.HTTPClient // http 客户端
 		webToken      WebLoginToken
 		appToken      AppLoginToken
@@ -60,10 +60,11 @@ type (
 	}
 )
 
-func NewPanClient(webToken WebLoginToken, appToken AppLoginToken, appConfig AppConfig, sessionConfig SessionConfig) *PanClient {
+// NewWebPanClient 创建WebPanClient
+func NewWebPanClient(webToken WebLoginToken, appToken AppLoginToken, appConfig AppConfig, sessionConfig SessionConfig) *WebPanClient {
 	myclient := requester.NewHTTPClient()
 
-	return &PanClient{
+	return &WebPanClient{
 		client:           myclient,
 		webToken:         webToken,
 		appToken:         appToken,
@@ -75,44 +76,44 @@ func NewPanClient(webToken WebLoginToken, appToken AppLoginToken, appConfig AppC
 	}
 }
 
-func (p *PanClient) UpdateToken(webToken WebLoginToken) {
+func (p *WebPanClient) UpdateToken(webToken WebLoginToken) {
 	p.webToken = webToken
 }
 
-func (p *PanClient) UpdateAppConfig(appConfig AppConfig) {
+func (p *WebPanClient) UpdateAppConfig(appConfig AppConfig) {
 	p.appConfig = appConfig
 }
 
-func (p *PanClient) UpdateSessionConfig(sessionConfig SessionConfig) {
+func (p *WebPanClient) UpdateSessionConfig(sessionConfig SessionConfig) {
 	p.sessionConfig = sessionConfig
 }
 
-func (p *PanClient) GetAccessToken() string {
+func (p *WebPanClient) GetAccessToken() string {
 	return p.webToken.AccessToken
 }
 
 // EnableCache 启用缓存
-func (p *PanClient) EnableCache() {
+func (p *WebPanClient) EnableCache() {
 	p.cacheMutex.Lock()
 	p.cacheMutex.Unlock()
 	p.useCache = true
 }
 
 // ClearCache 清除已经缓存的数据
-func (p *PanClient) ClearCache() {
+func (p *WebPanClient) ClearCache() {
 	p.cacheMutex.Lock()
 	p.cacheMutex.Unlock()
 	p.filePathCacheMap = sync.Map{}
 }
 
 // DisableCache 禁用缓存
-func (p *PanClient) DisableCache() {
+func (p *WebPanClient) DisableCache() {
 	p.cacheMutex.Lock()
 	p.cacheMutex.Unlock()
 	p.useCache = false
 }
 
-func (p *PanClient) storeFilePathToCache(driveId, pathStr string, fileEntity *aliyunpan.FileEntity) {
+func (p *WebPanClient) storeFilePathToCache(driveId, pathStr string, fileEntity *aliyunpan.FileEntity) {
 	p.cacheMutex.Lock()
 	p.cacheMutex.Unlock()
 	if !p.useCache {
@@ -123,7 +124,7 @@ func (p *PanClient) storeFilePathToCache(driveId, pathStr string, fileEntity *al
 	cache.(*sync.Map).Store(pathStr, fileEntity)
 }
 
-func (p *PanClient) loadFilePathFromCache(driveId, pathStr string) *aliyunpan.FileEntity {
+func (p *WebPanClient) loadFilePathFromCache(driveId, pathStr string) *aliyunpan.FileEntity {
 	p.cacheMutex.Lock()
 	p.cacheMutex.Unlock()
 	if !p.useCache {
@@ -140,14 +141,14 @@ func (p *PanClient) loadFilePathFromCache(driveId, pathStr string) *aliyunpan.Fi
 }
 
 // SetTimeout 设置 http 请求超时时间
-func (p *PanClient) SetTimeout(t time.Duration) {
+func (p *WebPanClient) SetTimeout(t time.Duration) {
 	if p.client != nil {
 		p.client.Timeout = t
 	}
 }
 
 // UpdateUserId 更新用户ID
-func (p *PanClient) UpdateUserId(userId string) {
+func (p *WebPanClient) UpdateUserId(userId string) {
 	p.appConfig.UserId = userId
 }
 

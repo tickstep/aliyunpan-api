@@ -33,7 +33,7 @@ type GetShareByAnonymous struct {
 	} `json:"save_button"`
 }
 
-func (p *PanClient) GetShareInfo(shareID string) (*GetShareByAnonymous, *apierror.ApiError) {
+func (p *WebPanClient) GetShareInfo(shareID string) (*GetShareByAnonymous, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -77,7 +77,7 @@ type GetShareTokenResult struct {
 	ShareToken string    `json:"share_token"`
 }
 
-func (p *PanClient) GetShareToken(shareID, sharePwd string) (*GetShareTokenResult, *apierror.ApiError) {
+func (p *WebPanClient) GetShareToken(shareID, sharePwd string) (*GetShareTokenResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -146,7 +146,7 @@ type ListByShareItem struct {
 	RevisionID string `json:"revision_id,omitempty"`
 }
 
-func (p *PanClient) GetListByShare(shareToken, shareID, marker string) (*ListByShareResult, *apierror.ApiError) {
+func (p *WebPanClient) GetListByShare(shareToken, shareID, marker string) (*ListByShareResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -213,7 +213,7 @@ type (
 	}
 )
 
-func (p *PanClient) FileCopy(shareToken string, param []*FileSaveParam) ([]*FileSaveResult, *apierror.ApiError) {
+func (p *WebPanClient) FileCopy(shareToken string, param []*FileSaveParam) ([]*FileSaveResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v2/batch", API_URL)
@@ -259,7 +259,7 @@ func (p *PanClient) FileCopy(shareToken string, param []*FileSaveParam) ([]*File
 	return r, nil
 }
 
-func (p *PanClient) getFileCopyBatchRequestList(param []*FileSaveParam) (BatchRequestList, *apierror.ApiError) {
+func (p *WebPanClient) getFileCopyBatchRequestList(param []*FileSaveParam) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}
@@ -284,7 +284,7 @@ type AsyncTaskGetResult struct {
 	Success     bool
 }
 
-func (p *PanClient) AsyncTaskGet(shareToken string, asyncTaskIds []string) ([]*AsyncTaskGetResult, *apierror.ApiError) {
+func (p *WebPanClient) AsyncTaskGet(shareToken string, asyncTaskIds []string) ([]*AsyncTaskGetResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v2/batch", API_URL)
@@ -319,7 +319,7 @@ func (p *PanClient) AsyncTaskGet(shareToken string, asyncTaskIds []string) ([]*A
 	return r, nil
 }
 
-func (p *PanClient) getAsyncTaskGetBatchRequestList(param []string) (BatchRequestList, *apierror.ApiError) {
+func (p *WebPanClient) getAsyncTaskGetBatchRequestList(param []string) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}

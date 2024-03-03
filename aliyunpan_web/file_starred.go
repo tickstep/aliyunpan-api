@@ -26,16 +26,16 @@ import (
 type ()
 
 // FileStarred 收藏文件
-func (p *PanClient) FileStarred(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
+func (p *WebPanClient) FileStarred(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	return p.doFileStarredBatchRequestList(true, param)
 }
 
 // FileUnstarred 取消收藏文件
-func (p *PanClient) FileUnstarred(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
+func (p *WebPanClient) FileUnstarred(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	return p.doFileStarredBatchRequestList(false, param)
 }
 
-func (p *PanClient) doFileStarredBatchRequestList(starred bool, param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
+func (p *WebPanClient) doFileStarredBatchRequestList(starred bool, param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}

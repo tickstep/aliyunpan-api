@@ -27,7 +27,7 @@ type (
 )
 
 // AsyncTaskQueryStatus 查询异步任务进度和状态
-func (p *PanClient) AsyncTaskQueryStatus(param *AsyncTaskQueryStatusParam) (*AsyncTaskQueryStatusResult, *apierror.ApiError) {
+func (p *WebPanClient) AsyncTaskQueryStatus(param *AsyncTaskQueryStatusParam) (*AsyncTaskQueryStatusResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 		"referer":       "https://www.aliyundrive.com/",

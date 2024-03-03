@@ -56,7 +56,7 @@ func getNextNonce(nonce int32) int32 {
 }
 
 // CalcSignature 生成新的密钥并计算接口签名
-func (p *PanClient) calcSignature() error {
+func (p *WebPanClient) calcSignature() error {
 	max := 32
 	key := randomString(max)
 	p.appConfig.Nonce = 0
@@ -75,7 +75,7 @@ func (p *PanClient) calcSignature() error {
 }
 
 // CalcNextSignature 使用已有的密钥并生成新的签名
-//func (p *PanClient) CalcNextSignature() error {
+//func (p *WebPanClient) CalcNextSignature() error {
 //	p.appConfig.Nonce = getNextNonce(p.appConfig.Nonce)
 //	data := fmt.Sprintf("%s:%s:%s:%d", p.appConfig.AppId, p.appConfig.DeviceId, p.appConfig.UserId, p.appConfig.Nonce)
 //	signature, err := p.appConfig.PrivKey.Sign([]byte(data))
@@ -87,7 +87,7 @@ func (p *PanClient) calcSignature() error {
 //}
 
 // AddSignatureHeader 增加接口签名header
-func (p *PanClient) AddSignatureHeader(headers map[string]string) map[string]string {
+func (p *WebPanClient) AddSignatureHeader(headers map[string]string) map[string]string {
 	if headers == nil {
 		return headers
 	}
@@ -100,7 +100,7 @@ func (p *PanClient) AddSignatureHeader(headers map[string]string) map[string]str
 }
 
 // CreateSession 上传会话签名秘钥给服务器
-func (p *PanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResult, *apierror.ApiError) {
+func (p *WebPanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResult, *apierror.ApiError) {
 	if param == nil {
 		param = &CreateSessionParam{
 			DeviceName: p.sessionConfig.DeviceName,
@@ -150,7 +150,7 @@ func (p *PanClient) CreateSession(param *CreateSessionParam) (*CreateSessionResu
 }
 
 // RenewSession 刷新签名秘钥，如果刷新失败则需要调用CreateSession重新上传新秘钥
-//func (p *PanClient) RenewSession() (*CreateSessionResult, *apierror.ApiError) {
+//func (p *WebPanClient) RenewSession() (*CreateSessionResult, *apierror.ApiError) {
 //	// header
 //	header := map[string]string{
 //		"authorization": p.webToken.GetAuthorizationStr(),

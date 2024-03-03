@@ -26,7 +26,7 @@ import (
 type ()
 
 // FileMove 移动文件
-func (p *PanClient) FileMove(param []*aliyunpan.FileMoveParam) ([]*aliyunpan.FileMoveResult, *apierror.ApiError) {
+func (p *WebPanClient) FileMove(param []*aliyunpan.FileMoveParam) ([]*aliyunpan.FileMoveResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
@@ -60,7 +60,7 @@ func (p *PanClient) FileMove(param []*aliyunpan.FileMoveParam) ([]*aliyunpan.Fil
 	return r, nil
 }
 
-func (p *PanClient) getFileMoveBatchRequestList(param []*aliyunpan.FileMoveParam) (BatchRequestList, *apierror.ApiError) {
+func (p *WebPanClient) getFileMoveBatchRequestList(param []*aliyunpan.FileMoveParam) (BatchRequestList, *apierror.ApiError) {
 	if param == nil {
 		return nil, apierror.NewFailedApiError("参数不能为空")
 	}

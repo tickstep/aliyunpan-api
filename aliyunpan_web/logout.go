@@ -19,7 +19,7 @@ type (
 )
 
 // DeviceLogout 退出登录，登录的设备会同步注销
-func (p *PanClient) DeviceLogout() (*DeviceLogoutResult, *apierror.ApiError) {
+func (p *WebPanClient) DeviceLogout() (*DeviceLogoutResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),

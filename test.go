@@ -79,7 +79,7 @@ func main() {
 		Nonce:     0,
 		PublicKey: "",
 	}
-	panClient := aliyunpan_web.NewPanClient(*webToken, aliyunpan_web.AppLoginToken{}, appConfig, aliyunpan_web.SessionConfig{
+	panClient := aliyunpan_web.NewWebPanClient(*webToken, aliyunpan_web.AppLoginToken{}, appConfig, aliyunpan_web.SessionConfig{
 		DeviceName: "Chrome浏览器",
 		ModelName:  "Windows网页版",
 	})

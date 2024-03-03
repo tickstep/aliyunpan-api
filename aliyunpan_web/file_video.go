@@ -13,7 +13,7 @@ import (
 type ()
 
 // VideoGetPreviewPlayInfo 获取视频预览信息，调用该接口会触发视频云端转码
-func (p *PanClient) VideoGetPreviewPlayInfo(param *aliyunpan.VideoGetPreviewPlayInfoParam) (*aliyunpan.VideoGetPreviewPlayInfoResult, error) {
+func (p *WebPanClient) VideoGetPreviewPlayInfo(param *aliyunpan.VideoGetPreviewPlayInfoParam) (*aliyunpan.VideoGetPreviewPlayInfoResult, error) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}

@@ -25,7 +25,7 @@ import (
 )
 
 // FileRename 重命名文件
-func (p *PanClient) FileRename(driveId, renameFileId, newName string) (bool, *apierror.ApiError) {
+func (p *WebPanClient) FileRename(driveId, renameFileId, newName string) (bool, *apierror.ApiError) {
 	if renameFileId == "" {
 		return false, apierror.NewFailedApiError("请指定命名的文件")
 	}

@@ -133,7 +133,7 @@ func createShareEntity(item *shareEntityResult) *ShareEntity {
 }
 
 // ShareLinkList 获取所有分享链接列表
-func (p *PanClient) ShareLinkList(userId string) ([]*ShareEntity, *apierror.ApiError) {
+func (p *WebPanClient) ShareLinkList(userId string) ([]*ShareEntity, *apierror.ApiError) {
 	resultList := []*ShareEntity{}
 	param := ShareListParam{
 		Creator: userId,
@@ -161,7 +161,7 @@ func (p *PanClient) ShareLinkList(userId string) ([]*ShareEntity, *apierror.ApiE
 }
 
 // ShareLinkCancel 取消分享链接
-func (p *PanClient) ShareLinkCancel(shareIdList []string) ([]*ShareCancelResult, *apierror.ApiError) {
+func (p *WebPanClient) ShareLinkCancel(shareIdList []string) ([]*ShareCancelResult, *apierror.ApiError) {
 	// url
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "%s/adrive/v4/batch", API_URL)
@@ -207,7 +207,7 @@ func (p *PanClient) ShareLinkCancel(shareIdList []string) ([]*ShareCancelResult,
 }
 
 // ShareLinkCreate 创建分享
-func (p *PanClient) ShareLinkCreate(param ShareCreateParam) (*ShareEntity, *apierror.ApiError) {
+func (p *WebPanClient) ShareLinkCreate(param ShareCreateParam) (*ShareEntity, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -253,7 +253,7 @@ func (p *PanClient) ShareLinkCreate(param ShareCreateParam) (*ShareEntity, *apie
 	return createShareEntity(r), nil
 }
 
-func (p *PanClient) GetShareLinkListReq(param ShareListParam) (*ShareListResult, *apierror.ApiError) {
+func (p *WebPanClient) GetShareLinkListReq(param ShareListParam) (*ShareListResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -303,7 +303,7 @@ func (p *PanClient) GetShareLinkListReq(param ShareListParam) (*ShareListResult,
 }
 
 // FastShareLinkCreate 创建快传分享
-func (p *PanClient) FastShareLinkCreate(param FastShareCreateParam) (*FastShareCreateResult, *apierror.ApiError) {
+func (p *WebPanClient) FastShareLinkCreate(param FastShareCreateParam) (*FastShareCreateResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),

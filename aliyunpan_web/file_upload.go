@@ -40,7 +40,7 @@ type (
 const ()
 
 // CreateUploadFile 创建上传文件，如果文件已经上传过则会直接秒传
-func (p *PanClient) CreateUploadFile(param *aliyunpan.CreateFileUploadParam) (*aliyunpan.CreateFileUploadResult, *apierror.ApiError) {
+func (p *WebPanClient) CreateUploadFile(param *aliyunpan.CreateFileUploadParam) (*aliyunpan.CreateFileUploadResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -100,7 +100,7 @@ func (p *PanClient) CreateUploadFile(param *aliyunpan.CreateFileUploadParam) (*a
 // GetUploadUrl 获取上传数据链接参数
 // 因为有些文件过大，或者暂定上传后，然后过段时间再继续上传，这时候之前的上传链接可能已经失效了，所以需要重新获取上传数据的链接
 // 如果该文件已经上传完毕，则该接口返回错误
-func (p *PanClient) GetUploadUrl(param *aliyunpan.GetUploadUrlParam) (*aliyunpan.GetUploadUrlResult, *apierror.ApiError) {
+func (p *WebPanClient) GetUploadUrl(param *aliyunpan.GetUploadUrlParam) (*aliyunpan.GetUploadUrlResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -137,7 +137,7 @@ func (p *PanClient) GetUploadUrl(param *aliyunpan.GetUploadUrlParam) (*aliyunpan
 }
 
 // UploadFileData 上传文件数据
-func (p *PanClient) UploadFileData(uploadUrl string, uploadFunc aliyunpan.UploadFunc) *apierror.ApiError {
+func (p *WebPanClient) UploadFileData(uploadUrl string, uploadFunc aliyunpan.UploadFunc) *apierror.ApiError {
 	// header
 	header := map[string]string{
 		"referer": "https://www.aliyundrive.com/",
@@ -160,7 +160,7 @@ func (p *PanClient) UploadFileData(uploadUrl string, uploadFunc aliyunpan.Upload
 }
 
 // UploadDataChunk 上传数据。该方法是同步阻塞的
-func (p *PanClient) UploadDataChunk(url string, data *aliyunpan.FileUploadChunkData) *apierror.ApiError {
+func (p *WebPanClient) UploadDataChunk(url string, data *aliyunpan.FileUploadChunkData) *apierror.ApiError {
 	var client = requester.NewHTTPClient()
 
 	// header
@@ -187,7 +187,7 @@ func (p *PanClient) UploadDataChunk(url string, data *aliyunpan.FileUploadChunkD
 }
 
 // CompleteUploadFile 完成文件上传确认。完成文件数据上传后，需要调用该接口文件才会显示再网盘中
-func (p *PanClient) CompleteUploadFile(param *aliyunpan.CompleteUploadFileParam) (*aliyunpan.CompleteUploadFileResult, *apierror.ApiError) {
+func (p *WebPanClient) CompleteUploadFile(param *aliyunpan.CompleteUploadFileParam) (*aliyunpan.CompleteUploadFileResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),

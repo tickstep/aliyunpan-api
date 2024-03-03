@@ -91,7 +91,7 @@ func createFileEntity(f *fileEntityResult) *aliyunpan.FileEntity {
 }
 
 // FileList 获取文件列表
-func (p *PanClient) FileList(param *aliyunpan.FileListParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
+func (p *WebPanClient) FileList(param *aliyunpan.FileListParam) (*aliyunpan.FileListResult, *apierror.ApiError) {
 	result := &aliyunpan.FileListResult{
 		FileList:   aliyunpan.FileList{},
 		NextMarker: "",
@@ -131,7 +131,7 @@ retry:
 	return result, nil
 }
 
-func (p *PanClient) fileListReq(param *aliyunpan.FileListParam) (*fileListResult, *apierror.ApiError) {
+func (p *WebPanClient) fileListReq(param *aliyunpan.FileListParam) (*fileListResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -195,7 +195,7 @@ func (p *PanClient) fileListReq(param *aliyunpan.FileListParam) (*fileListResult
 }
 
 // FileInfoById 通过FileId获取文件信息
-func (p *PanClient) FileInfoById(driveId, fileId string) (*aliyunpan.FileEntity, *apierror.ApiError) {
+func (p *WebPanClient) FileInfoById(driveId, fileId string) (*aliyunpan.FileEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -235,7 +235,7 @@ func (p *PanClient) FileInfoById(driveId, fileId string) (*aliyunpan.FileEntity,
 }
 
 // FileInfoByPath 通过路径获取文件详情，pathStr是绝对路径
-func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *aliyunpan.FileEntity, error *apierror.ApiError) {
+func (p *WebPanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *aliyunpan.FileEntity, error *apierror.ApiError) {
 	if pathStr == "" {
 		pathStr = "/"
 	}
@@ -269,7 +269,7 @@ func (p *PanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo *al
 	return fileInfo, error
 }
 
-func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]string, parentFileInfo *aliyunpan.FileEntity) (*aliyunpan.FileEntity, *apierror.ApiError) {
+func (p *WebPanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]string, parentFileInfo *aliyunpan.FileEntity) (*aliyunpan.FileEntity, *apierror.ApiError) {
 	if parentFileInfo == nil {
 		// default root "/" entity
 		parentFileInfo = aliyunpan.NewFileEntityForRootDir()
@@ -334,7 +334,7 @@ func (p *PanClient) getFileInfoByPath(driveId string, index int, pathSlice *[]st
 }
 
 // FilesDirectoriesRecurseList 递归获取目录下的文件和目录列表
-func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, handleFileDirectoryFunc aliyunpan.HandleFileDirectoryFunc) aliyunpan.FileList {
+func (p *WebPanClient) FilesDirectoriesRecurseList(driveId string, path string, handleFileDirectoryFunc aliyunpan.HandleFileDirectoryFunc) aliyunpan.FileList {
 	targetFileInfo, er := p.FileInfoByPath(driveId, path)
 	if er != nil {
 		if handleFileDirectoryFunc != nil {
@@ -363,7 +363,7 @@ func (p *PanClient) FilesDirectoriesRecurseList(driveId string, path string, han
 	return *fld
 }
 
-func (p *PanClient) recurseList(driveId string, folderInfo *aliyunpan.FileEntity, depth int, handleFileDirectoryFunc aliyunpan.HandleFileDirectoryFunc, fld *aliyunpan.FileList) bool {
+func (p *WebPanClient) recurseList(driveId string, folderInfo *aliyunpan.FileEntity, depth int, handleFileDirectoryFunc aliyunpan.HandleFileDirectoryFunc, fld *aliyunpan.FileList) bool {
 	flp := &aliyunpan.FileListParam{
 		DriveId:      driveId,
 		ParentFileId: folderInfo.FileId,
@@ -397,7 +397,7 @@ func (p *PanClient) recurseList(driveId string, folderInfo *aliyunpan.FileEntity
 }
 
 // FileListGetAll 获取指定目录下的所有文件列表
-func (p *PanClient) FileListGetAll(param *aliyunpan.FileListParam, delayMilliseconds int) (aliyunpan.FileList, *apierror.ApiError) {
+func (p *WebPanClient) FileListGetAll(param *aliyunpan.FileListParam, delayMilliseconds int) (aliyunpan.FileList, *apierror.ApiError) {
 	internalParam := &aliyunpan.FileListParam{
 		OrderBy:        param.OrderBy,
 		OrderDirection: param.OrderDirection,
@@ -434,7 +434,7 @@ func (p *PanClient) FileListGetAll(param *aliyunpan.FileListParam, delayMillisec
 }
 
 // FileGetPath 通过fileId获取对应的目录层级信息
-func (p *PanClient) FileGetPath(driveId, fileId string) (*aliyunpan.FileGetPathResult, *apierror.ApiError) {
+func (p *WebPanClient) FileGetPath(driveId, fileId string) (*aliyunpan.FileGetPathResult, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
