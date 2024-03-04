@@ -74,6 +74,9 @@ func (p *OpenPanClient) GetAccessToken() string {
 
 // RefreshNewAccessToken 获取新的AccessToken
 func (p *OpenPanClient) RefreshNewAccessToken() error {
+	if p.apiClient.GetApiConfig().TicketId == "" {
+		return errors.New("not support refresh token automatically")
+	}
 	fullUrl := &strings.Builder{}
 	fmt.Fprintf(fullUrl, "https://api.tickstep.com/auth/tickstep/aliyunpan/token/openapi/%s/refresh?userId=%s",
 		p.apiClient.GetApiConfig().TicketId, p.apiClient.GetApiConfig().UserId)
