@@ -7,33 +7,26 @@ import (
 )
 
 // FileMove 移动文件
-func (p *OpenPanClient) FileMove(param []*aliyunpan.FileMoveParam) ([]*aliyunpan.FileMoveResult, *apierror.ApiError) {
+func (p *OpenPanClient) FileMove(param *aliyunpan.FileMoveParam) (*aliyunpan.FileMoveResult, *apierror.ApiError) {
 	retryTime := 0
-	returnResult := []*aliyunpan.FileMoveResult{}
 
-	for _, v := range param {
-	RetryBegin:
-		opParam := &openapi.FileMoveParam{
-			DriveId:        v.DriveId,
-			FileId:         v.FileId,
-			ToParentFileId: v.ToParentFileId,
-		}
-		if result, err := p.apiClient.FileMove(opParam); err == nil {
-			returnResult = append(returnResult, &aliyunpan.FileMoveResult{
-				FileId:  result.FileId,
-				Success: true,
-			})
+RetryBegin:
+	opParam := &openapi.FileMoveParam{
+		DriveId:        param.DriveId,
+		FileId:         param.FileId,
+		ToParentFileId: param.ToParentFileId,
+	}
+	if result, err := p.apiClient.FileMove(opParam); err == nil {
+		return &aliyunpan.FileMoveResult{
+			FileId:  result.FileId,
+			Success: true,
+		}, nil
+	} else {
+		// handle common error
+		if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {
+			goto RetryBegin
 		} else {
-			// handle common error
-			if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {
-				goto RetryBegin
-			} else {
-				returnResult = append(returnResult, &aliyunpan.FileMoveResult{
-					FileId:  result.FileId,
-					Success: false,
-				})
-			}
+			return nil, apiErrorHandleResp.ApiErr
 		}
 	}
-	return returnResult, nil
 }

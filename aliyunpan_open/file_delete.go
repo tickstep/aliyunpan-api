@@ -25,10 +25,7 @@ RetryBegin:
 		if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {
 			goto RetryBegin
 		} else {
-			return &aliyunpan.FileBatchActionResult{
-				FileId:  result.FileId,
-				Success: false,
-			}, apiErrorHandleResp.ApiErr
+			return nil, apiErrorHandleResp.ApiErr
 		}
 	}
 }
