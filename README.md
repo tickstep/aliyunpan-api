@@ -1,5 +1,6 @@
 # aliyunpan-api
-GO语言封装的 aliyunpan 阿里云盘官方OpenAPI接口和网页端Web接口。你可以基于该接口库实现对阿里云盘的二次开发。
+GO语言封装的 aliyunpan 阿里云盘官方OpenAPI接口和网页端Web接口。你可以基于该接口库实现对阿里云盘的二次开发。   
+两种接口都可以实现对阿里云盘的文件访问，但是由于阿里OpenAPI目前接口开放有限，有部分功能只有web端接口具备，例如：分享、相册等。你可以根据需要自行选择，也可以两者融合使用。
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/tickstep/aliyunpan-api?tab=doc)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://raw.githubusercontent.com/modern-go/concurrent/master/LICENSE)
@@ -26,7 +27,7 @@ import "github.com/tickstep/aliyunpan-api/aliyunpan"
 import "github.com/tickstep/aliyunpan-api/aliyunpan_open"
 ```
 
-使用授权登录后得到的AccessToken创建WebPanClient实例
+使用授权登录后得到的AccessToken创建OpenPanClient实例
 ```
 	openPanClient := aliyunpan_open.NewOpenPanClient(openapi.ApiConfig{
 		TicketId:     "",
