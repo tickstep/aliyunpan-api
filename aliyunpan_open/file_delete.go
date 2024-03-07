@@ -7,33 +7,28 @@ import (
 )
 
 // FileDelete 删除文件到回收站
-func (p *OpenPanClient) FileDelete(param []*aliyunpan.FileBatchActionParam) ([]*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
+func (p *OpenPanClient) FileDelete(param *aliyunpan.FileBatchActionParam) (*aliyunpan.FileBatchActionResult, *apierror.ApiError) {
 	retryTime := 0
-	returnResult := []*aliyunpan.FileBatchActionResult{}
 
-	for _, v := range param {
-	RetryBegin:
-		opParam := &openapi.FileIdentityPair{
-			DriveId: v.DriveId,
-			FileId:  v.FileId,
-		}
-		if result, err := p.apiClient.FileTrash(opParam); err == nil {
-			returnResult = append(returnResult, &aliyunpan.FileBatchActionResult{
-				FileId:  result.FileId,
-				Success: true,
-			})
+RetryBegin:
+	opParam := &openapi.FileIdentityPair{
+		DriveId: param.DriveId,
+		FileId:  param.FileId,
+	}
+	if result, err := p.apiClient.FileTrash(opParam); err == nil {
+		return &aliyunpan.FileBatchActionResult{
+			FileId:  result.FileId,
+			Success: true,
+		}, nil
+	} else {
+		// handle common error
+		if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {
+			goto RetryBegin
 		} else {
-			// handle common error
-			if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {
-				goto RetryBegin
-			} else {
-				returnResult = append(returnResult, &aliyunpan.FileBatchActionResult{
-					FileId:  result.FileId,
-					Success: false,
-				})
-			}
+			return &aliyunpan.FileBatchActionResult{
+				FileId:  result.FileId,
+				Success: false,
+			}, apiErrorHandleResp.ApiErr
 		}
 	}
-	return returnResult, nil
-
 }
