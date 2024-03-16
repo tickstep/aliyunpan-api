@@ -138,6 +138,7 @@ func (p *OpenPanClient) FileInfoByPath(driveId string, pathStr string) (fileInfo
 		pathStr = "/"
 	}
 	//pathStr = path.Clean(pathStr)
+	pathStr = strings.ReplaceAll(pathStr, "\\", "/")
 	if !path.IsAbs(pathStr) {
 		return nil, apierror.NewFailedApiError("pathStr必须是绝对路径")
 	}
