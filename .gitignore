@@ -37,3 +37,6 @@ userpw.txt
 test_test.go
 git_push.sh
 git_pull.sh
+my_test.go
+open_client_test.go
+open_test.go
