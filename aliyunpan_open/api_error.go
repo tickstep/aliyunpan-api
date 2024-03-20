@@ -77,7 +77,8 @@ func (p *OpenPanClient) HandleAliApiError(respErr *openapi.AliApiErrResult, retr
 			return NewApiErrorHandleResp(true, myApiErr)
 		}
 	} else if myApiErr.Code == apierror.ApiCodeTooManyRequests {
-		// sleep 3s
+		// sleep
+		// TODO: 可以根据429和 x-retry-after 头部来判断等待重试的时间
 		time.Sleep(time.Duration(int64(*retryTime+1)*2) * time.Second)
 		// retry check
 		if *retryTime < ApiRetryMaxTimes {

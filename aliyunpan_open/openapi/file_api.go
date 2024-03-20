@@ -66,7 +66,13 @@ type (
 		CreatedAt string `json:"created_at"`
 		// UpdatedAt 修改时间
 		UpdatedAt string `json:"updated_at"`
-		// PunishFlag 文件禁止标志，0-正常，103-禁止下载
+		// PunishFlag 文件禁止标志
+		// 0 ：正常文件，未被处罚
+		// 1 ：该文件禁止被分享
+		// 2 ：该文件被冻结，用户无法下载该文件，返回的 url 会被替换成一个默认的提示文件 url
+		// 3 ：该文件算法未识别或不支持，按照业务逻辑，暂时先禁止分享
+		// 102 : 可以忽略，不影响下载播放
+		// 103 ：文件非法，不允许下载
 		PunishFlag int `json:"punish_flag"`
 	}
 
