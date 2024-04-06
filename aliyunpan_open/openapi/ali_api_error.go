@@ -9,14 +9,11 @@ import (
 type (
 	// AliApiErrResult openapi错误响应
 	AliApiErrResult struct {
-		HttpStatusCode int    `json:"http_status_code"`
-		Code           string `json:"code"`
-		Message        string `json:"message"`
+		HttpStatusCode int                    `json:"http_status_code"`
+		Code           string                 `json:"code"`
+		Message        string                 `json:"message"`
+		extra          map[string]interface{} `json:"-"`
 	}
-)
-
-const (
-	AliErr = ""
 )
 
 func NewAliApiError(httpStatusCode int, code, msg string) *AliApiErrResult {
@@ -41,6 +38,23 @@ func NewAliApiAppError(msg string) *AliApiErrResult {
 	}
 }
 
+func (a *AliApiErrResult) PutExtra(key string, value interface{}) *AliApiErrResult {
+	if a.extra == nil {
+		a.extra = map[string]interface{}{}
+	}
+	a.extra[key] = value
+	return a
+}
+func (a *AliApiErrResult) GetExtra(key string) interface{} {
+	if a.extra == nil {
+		return nil
+	}
+	if v, ok := a.extra[key]; ok {
+		return v
+	}
+	return nil
+}
+
 // ParseCommonOpenApiError 解析阿里云盘API错误，如果没有错误则返回nil
 func ParseCommonOpenApiError(resp *http.Response) ([]byte, *AliApiErrResult) {
 	if resp == nil {
@@ -56,6 +70,10 @@ func ParseCommonOpenApiError(resp *http.Response) ([]byte, *AliApiErrResult) {
 	if err := json.Unmarshal(data, errResult); err == nil {
 		if errResult.Code != "" {
 			errResult.HttpStatusCode = resp.StatusCode
+			// headers
+			if hv := resp.Header.Get("x-retry-after"); hv != "" {
+				errResult.PutExtra("x-retry-after", hv)
+			}
 			return nil, errResult
 		}
 	}

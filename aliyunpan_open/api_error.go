@@ -4,6 +4,7 @@ import (
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan_open/openapi"
 	"github.com/tickstep/library-go/logger"
+	"strconv"
 	"time"
 )
 
@@ -53,6 +54,7 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 			return apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, respErr.Message)
 		}
 	case 409:
+	case 429:
 		if respErr.Code == "TooManyRequests" {
 			return apierror.NewApiError(apierror.ApiCodeTooManyRequests, respErr.Message)
 		}
@@ -78,8 +80,17 @@ func (p *OpenPanClient) HandleAliApiError(respErr *openapi.AliApiErrResult, retr
 		}
 	} else if myApiErr.Code == apierror.ApiCodeTooManyRequests {
 		// sleep
-		// TODO: 可以根据429和 x-retry-after 头部来判断等待重试的时间
-		time.Sleep(time.Duration(int64(*retryTime+1)*2) * time.Second)
+		// 可以根据429和 x-retry-after 头部来判断等待重试的时间
+		if retryMillisecond := respErr.GetExtra("x-retry-after"); retryMillisecond != nil {
+			num, err := strconv.Atoi(retryMillisecond.(string))
+			if err == nil {
+				// 比官方要的延迟时间多1s
+				time.Sleep(time.Duration(int64(num)+1000) * time.Millisecond)
+			}
+		} else {
+			time.Sleep(time.Duration(int64(*retryTime+1)*2) * time.Second)
+		}
+
 		// retry check
 		if *retryTime < ApiRetryMaxTimes {
 			*retryTime++
