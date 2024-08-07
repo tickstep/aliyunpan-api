@@ -32,10 +32,15 @@ type (
 
 	UserVipInfoResult struct {
 		// Identity 枚举：member, vip, svip
-		Identity   string `json:"identity"`
-		PromotedAt string `json:"promotedAt"`
+		Identity string `json:"identity"`
+		// level 20TB、8TB
+		Level string `json:"level"`
 		// Expire 过期时间，时间戳，单位秒
 		Expire int64 `json:"expire"`
+		// ThirdPartyVip “三方权益包”是否生效
+		ThirdPartyVip bool `json:"thirdPartyVip"`
+		// ThirdPartyVipExpire “三方权益包”过期时间
+		ThirdPartyVipExpire int64 `json:"thirdPartyVipExpire"`
 	}
 
 	UserScopeList []*UserScopeItem
@@ -109,7 +114,7 @@ func (a *AliPanClient) UserGetSpaceInfo() (*PersonalSpaceInfoResult, *AliApiErrR
 // UserGetVipInfo 获取用户vip信息
 func (a *AliPanClient) UserGetVipInfo() (*UserVipInfoResult, *AliApiErrResult) {
 	fullUrl := &strings.Builder{}
-	fmt.Fprintf(fullUrl, "%s/v1.0/user/getVipInfo", OPENAPI_URL)
+	fmt.Fprintf(fullUrl, "%s/business/v1.0/user/getVipInfo", OPENAPI_URL)
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// request

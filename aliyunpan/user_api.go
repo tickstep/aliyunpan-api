@@ -44,5 +44,9 @@ type (
 		TotalSize uint64 `json:"totalSize"`
 		// UsedSize 网盘已使用空间大小
 		UsedSize uint64 `json:"usedSize"`
+		// ThirdPartyVip “三方权益包”是否生效
+		ThirdPartyVip bool `json:"thirdPartyVip"`
+		// ThirdPartyVipExpire “三方权益包”过期时间
+		ThirdPartyVipExpire string `json:"thirdPartyVipExpire"`
 	}
 )
