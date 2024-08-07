@@ -155,6 +155,7 @@ type (
 		ContentHash     string `json:"content_hash"`
 		ContentHashName string `json:"content_hash_name"`
 		FileId          string `json:"file_id"`
+		Description     string `json:"description"`
 	}
 
 	// FileUpdateParam 文件更新参数

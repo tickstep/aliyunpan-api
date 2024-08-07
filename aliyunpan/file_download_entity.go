@@ -32,5 +32,6 @@ type (
 			PartSpeed int64 `json:"part_speed"`
 			PartSize  int64 `json:"part_size"`
 		} `json:"ratelimit"`
+		Description string `json:"description"`
 	}
 )

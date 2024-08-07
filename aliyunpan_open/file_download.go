@@ -29,6 +29,7 @@ RetryBegin:
 			CdnUrl:      "",
 			Expiration:  apiutil.UtcTime2LocalFormat(result.Expiration),
 			Size:        result.Size,
+			Description: result.Description,
 		}, nil
 	} else {
 		// handle common error
