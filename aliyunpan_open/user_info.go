@@ -62,7 +62,7 @@ RetryBegin:
 	if result, err := p.apiClient.UserGetVipInfo(); err == nil {
 		returnResult.ThirdPartyVip = result.ThirdPartyVip
 		if result.ThirdPartyVipExpire > 0 {
-			returnResult.ThirdPartyVipExpire = apiutil.UnixTime2LocalFormat(result.ThirdPartyVipExpire)
+			returnResult.ThirdPartyVipExpire = apiutil.UnixTime2LocalFormat(result.ThirdPartyVipExpire*1000)
 		}
 	} else {
 		// handle common error
