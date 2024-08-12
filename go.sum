@@ -52,6 +52,8 @@ github.com/tickstep/library-go v0.1.0 h1:lzz6wpYCeliSzmVISa7rp9bGB4r+uIa9/VUTtk8
 github.com/tickstep/library-go v0.1.0/go.mod h1:uAHeNOIpoywCzlaeLrWmmRSupn03m9kJVZKOEmuarmA=
 github.com/tickstep/library-go v0.1.2 h1:iewbEZBl5+aWeL9zcjVHVC4BXET4+9gwc52fuDC8MXQ=
 github.com/tickstep/library-go v0.1.2/go.mod h1:uAHeNOIpoywCzlaeLrWmmRSupn03m9kJVZKOEmuarmA=
+github.com/tickstep/library-go v0.1.3 h1:OUj6nkimTsqhHXh5s+PbmHq5hR0m739Y1tu9QpfA2ng=
+github.com/tickstep/library-go v0.1.3/go.mod h1:uAHeNOIpoywCzlaeLrWmmRSupn03m9kJVZKOEmuarmA=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200115085410-6d4e4cb37c7d/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
