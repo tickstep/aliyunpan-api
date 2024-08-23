@@ -337,9 +337,9 @@ func (a *AliPanClient) FileUploadListUploadedParts(param *FileUploadListUploaded
 
 	// parameters
 	postData := map[string]interface{}{
-		"drive_id":  "19519221",
-		"file_id":   "65db23c016b484ac4a0f4d629653442b2e6d9ef9",
-		"upload_id": "ADC37FC345574D7BB94E71B1C143F5D3",
+		"drive_id":  param.DriveId,
+		"file_id":   param.FileId,
+		"upload_id": param.UploadId,
 	}
 	if len(param.PartNumberMarker) > 0 {
 		postData["part_number_marker"] = param.PartNumberMarker

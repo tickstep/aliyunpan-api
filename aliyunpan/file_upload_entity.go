@@ -113,9 +113,8 @@ type (
 
 	// FileUploadChunkData 文件上传数据块
 	FileUploadChunkData struct {
-		Reader    io.Reader
-		ChunkSize int64
-
+		Reader       io.Reader
+		ChunkSize    int64
 		hasReadCount int64
 	}
 
@@ -139,6 +138,40 @@ type (
 		ContentHash     string `json:"content_hash"`
 		ContentHashName string `json:"content_hash_name"`
 		CreatedAt       string `json:"created_at"`
+	}
+
+	// GetUploadedPartItem 上传分片详情
+	GetUploadedPartItem struct {
+		// Etag 在上传分片结束后，服务端会返回这个分片的Etag，在complete的时候可以在uploadInfo指定分片的Etag，服务端会在合并时对每个分片Etag做校验
+		Etag string `json:"etag"`
+		// PartNumber 分片序列号，从 1 开始。单个文件分片最大限制5GB，最小限制100KB
+		PartNumber int `json:"part_number"`
+		// PartSize 分片大小
+		PartSize int64 `json:"part_size"`
+	}
+	// GetUploadedPartsParam 列举已上传分片参数
+	GetUploadedPartsParam struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// FileId
+		FileId string `json:"file_id"`
+		// UploadId 文件创建获取的upload_id
+		UploadId string `json:"upload_id"`
+		// PartNumberMarker 分页标记
+		PartNumberMarker string `json:"part_number_marker"`
+	}
+	// GetUploadedPartsResult 列举已上传分片返回值
+	GetUploadedPartsResult struct {
+		// DriveId 网盘ID
+		DriveId string `json:"drive_id"`
+		// UploadId 文件创建获取的upload_id
+		UploadId string `json:"upload_id"`
+		// ParallelUpload 是否并行上传
+		ParallelUpload bool `json:"parallelUpload"`
+		// UploadedParts 已经上传分片列表
+		UploadedParts []*GetUploadedPartItem `json:"uploaded_parts"`
+		// NextPartNumberMarker	下一页起始资源标识符, 最后一页该值为空。
+		NextPartNumberMarker string `json:"next_part_number_marker"`
 	}
 )
 

@@ -186,6 +186,63 @@ func (p *OpenPanClient) UploadFileData(uploadUrl string, uploadFunc aliyunpan.Up
 	return nil
 }
 
+// GetUploadedPartInfo 获取指定文件已经上传的分片信息（可能会有分页）
+func (p *OpenPanClient) GetUploadedPartInfo(param *aliyunpan.GetUploadedPartsParam) (*aliyunpan.GetUploadedPartsResult, *apierror.ApiError) {
+	retryTime := 0
+
+RetryBegin:
+	opParam := &openapi.FileUploadListUploadedPartsParam{
+		DriveId:          param.DriveId,
+		FileId:           param.FileId,
+		UploadId:         param.UploadId,
+		PartNumberMarker: param.PartNumberMarker,
+	}
+	if result, err := p.apiClient.FileUploadListUploadedParts(opParam); err == nil {
+		uploadedParts := []*aliyunpan.GetUploadedPartItem{}
+		if result.UploadedParts != nil {
+			for _, v := range result.UploadedParts {
+				uploadedParts = append(uploadedParts, &aliyunpan.GetUploadedPartItem{
+					Etag:       v.Etag,
+					PartNumber: v.PartNumber,
+					PartSize:   v.PartSize,
+				})
+			}
+		}
+		return &aliyunpan.GetUploadedPartsResult{
+			DriveId:              result.DriveId,
+			UploadId:             result.UploadId,
+			ParallelUpload:       result.ParallelUpload,
+			UploadedParts:        uploadedParts,
+			NextPartNumberMarker: result.NextPartNumberMarker,
+		}, nil
+	} else {
+		// handle common error
+		if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {
+			goto RetryBegin
+		} else {
+			return nil, apiErrorHandleResp.ApiErr
+		}
+	}
+}
+
+// GetUploadedPartInfoAllItem 获取指定文件已经上传的所有分片信息
+func (p *OpenPanClient) GetUploadedPartInfoAllItem(param *aliyunpan.GetUploadedPartsParam) (*aliyunpan.GetUploadedPartsResult, *apierror.ApiError) {
+	result, err := p.GetUploadedPartInfo(param)
+	if err != nil || result == nil {
+		return nil, err
+	}
+	param.PartNumberMarker = result.NextPartNumberMarker
+	for len(param.PartNumberMarker) > 0 {
+		r, er := p.GetUploadedPartInfo(param)
+		if er != nil || r == nil {
+			return result, err
+		}
+		result.UploadedParts = append(result.UploadedParts, r.UploadedParts...)
+		param.PartNumberMarker = r.NextPartNumberMarker
+	}
+	return result, nil
+}
+
 // CompleteUploadFile 完成文件上传确认。完成文件数据上传后，需要调用该接口文件才会显示再网盘中
 func (p *OpenPanClient) CompleteUploadFile(param *aliyunpan.CompleteUploadFileParam) (*aliyunpan.CompleteUploadFileResult, *apierror.ApiError) {
 	retryTime := 0
