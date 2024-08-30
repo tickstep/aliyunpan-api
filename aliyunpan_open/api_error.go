@@ -36,6 +36,8 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 	case 400:
 		if respErr.Code == "NotFound.File" {
 			return apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, respErr.Message)
+		} else if respErr.Code == "NotFound.UploadId" {
+			return apierror.NewApiError(apierror.ApiCodeUploadIdNotFound, respErr.Message)
 		}
 	case 401:
 		if respErr.Code == "AccessTokenExpired" {
