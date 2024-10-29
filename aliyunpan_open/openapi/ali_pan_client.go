@@ -87,6 +87,7 @@ func (a *AliPanClient) Headers() map[string]string {
 	return map[string]string{
 		"content-type":  "application/json",
 		"authorization": a.token.GetAuthorizationStr(),
+		//"X-Canary":      "label=gray", // 标记灰度测试header
 	}
 }
 

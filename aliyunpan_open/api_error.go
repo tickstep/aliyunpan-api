@@ -54,6 +54,8 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 	case 404:
 		if respErr.Code == "NotFound.FileId" {
 			return apierror.NewApiError(apierror.ApiCodeFileNotFoundCode, respErr.Message)
+		} else if respErr.Code == "Not Found" {
+			return apierror.NewApiError(apierror.ApiCodeFailed, respErr.Message)
 		}
 	case 409:
 	case 429:

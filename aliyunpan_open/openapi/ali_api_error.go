@@ -14,6 +14,14 @@ type (
 		Message        string                 `json:"message"`
 		extra          map[string]interface{} `json:"-"`
 	}
+
+	// AliApiDefaultErrResult openapi默认错误响应，例如404错误
+	AliApiDefaultErrResult struct {
+		Timestamp string `json:"timestamp"`
+		Status    int64  `json:"status"`
+		Error     string `json:"error"`
+		Path      string `json:"path"`
+	}
 )
 
 func NewAliApiError(httpStatusCode int, code, msg string) *AliApiErrResult {
@@ -66,6 +74,21 @@ func ParseCommonOpenApiError(resp *http.Response) ([]byte, *AliApiErrResult) {
 	if e != nil {
 		return nil, NewAliApiError(resp.StatusCode, "TS.ReadError", e.Error())
 	}
+
+	// 默认错误
+	errDefaultResult := &AliApiDefaultErrResult{}
+	if err := json.Unmarshal(data, errDefaultResult); err == nil {
+		if errDefaultResult.Error != "" && errDefaultResult.Status != 0 {
+			errResult := &AliApiErrResult{
+				HttpStatusCode: resp.StatusCode,
+				Code:           errDefaultResult.Error,
+				Message:        errDefaultResult.Error,
+			}
+			return nil, errResult
+		}
+	}
+
+	// 业务错误
 	errResult := &AliApiErrResult{}
 	if err := json.Unmarshal(data, errResult); err == nil {
 		if errResult.Code != "" {
