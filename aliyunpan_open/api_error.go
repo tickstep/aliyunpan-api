@@ -62,6 +62,10 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 		if respErr.Code == "TooManyRequests" {
 			return apierror.NewApiError(apierror.ApiCodeTooManyRequests, respErr.Message)
 		}
+	case 413:
+		if respErr.Code == "Payload Too Large" {
+			return apierror.NewApiError(apierror.ApiCodeUploadPayloadTooLarge, respErr.Message)
+		}
 	}
 	return apierror.NewFailedApiError(respErr.Message)
 }

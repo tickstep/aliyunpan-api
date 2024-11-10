@@ -88,7 +88,9 @@ const (
 	// ApiCodeUserNotAllowedAccessDrive 用户没有授权应用访问当前drive
 	ApiCodeUserNotAllowedAccessDrive ApiCode = 34
 	// ApiCodeUploadIdNotFound 上传文件ID不存在，意味着上传任务已经失效
-	ApiCodeUploadIdNotFound ApiCode = 12
+	ApiCodeUploadIdNotFound ApiCode = 35
+	// ApiCodeUploadPayloadTooLarge 上传文件大小超过限制
+	ApiCodeUploadPayloadTooLarge ApiCode = 36
 )
 
 type ApiCode int

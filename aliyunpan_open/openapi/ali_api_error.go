@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type (
@@ -73,6 +74,19 @@ func ParseCommonOpenApiError(resp *http.Response) ([]byte, *AliApiErrResult) {
 	data, e := ioutil.ReadAll(resp.Body)
 	if e != nil {
 		return nil, NewAliApiError(resp.StatusCode, "TS.ReadError", e.Error())
+	}
+
+	// 非json错误
+	plainText := string(data)
+	if !strings.HasPrefix(plainText, "{") {
+		formatStatusCode := int64(resp.StatusCode / 100.0 * 100)
+		if formatStatusCode != 200 {
+			return nil, &AliApiErrResult{
+				HttpStatusCode: resp.StatusCode,
+				Code:           plainText,
+				Message:        plainText,
+			}
+		}
 	}
 
 	// 默认错误
