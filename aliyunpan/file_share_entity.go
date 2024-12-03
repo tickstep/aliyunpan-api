@@ -28,4 +28,27 @@ type (
 		Status    string      `json:"status"`
 		FirstFile *FileEntity `json:"first_file"`
 	}
+
+	// FastShareCreateParam 创建快传分享
+	FastShareCreateParam struct {
+		DriveId    string   `json:"drive_id"`
+		FileIdList []string `json:"file_id_list"`
+	}
+	FastShareFileItem struct {
+		DriveId string `json:"drive_id"`
+		FileId  string `json:"file_id"`
+	}
+	// FastShareCreateResult 创建快传返回值
+	FastShareCreateResult struct {
+		Expiration    string              `json:"expiration"`
+		Thumbnail     string              `json:"thumbnail"`
+		ShareName     string              `json:"share_name"`
+		ShareId       string              `json:"share_id"`
+		ShareUrl      string              `json:"share_url"`
+		DriveFileList []FastShareFileItem `json:"drive_file_list"`
+		FullShareMsg  string              `json:"full_share_msg"`
+		ShareTitle    string              `json:"share_title"`
+		ShareSubtitle string              `json:"share_subtitle"`
+		Expired       bool                `json:"expired"`
+	}
 )

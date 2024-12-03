@@ -47,3 +47,43 @@ RetryBegin:
 		}
 	}
 }
+
+// FastShareLinkCreate 创建文件快传
+func (p *OpenPanClient) FastShareLinkCreate(param aliyunpan.FastShareCreateParam) (*aliyunpan.FastShareCreateResult, *apierror.ApiError) {
+	retryTime := 0
+
+	opParam := &openapi.FileFastShareCreateParam{
+		DriveFileList: []openapi.FileFastShareFileItem{},
+	}
+	for _, fileId := range param.FileIdList {
+		opParam.DriveFileList = append(opParam.DriveFileList, openapi.FileFastShareFileItem{
+			DriveId: param.DriveId,
+			FileId:  fileId,
+		})
+	}
+RetryBegin:
+	if result, err := p.apiClient.FileFastShareCreate(opParam); err == nil {
+		driveFileList := []aliyunpan.FastShareFileItem{}
+		for _, item := range result.DriveFileList {
+			driveFileList = append(driveFileList, aliyunpan.FastShareFileItem{
+				DriveId: item.DriveId,
+				FileId:  item.FileId,
+			})
+		}
+		return &aliyunpan.FastShareCreateResult{
+			ShareId:       result.ShareId,
+			ShareName:     "",
+			ShareUrl:      result.ShareUrl,
+			Expiration:    apiutil.UtcTime2LocalFormat(result.Expiration),
+			DriveFileList: driveFileList,
+			Expired:       false,
+		}, nil
+	} else {
+		// handle common error
+		if apiErrorHandleResp := p.HandleAliApiError(err, &retryTime); apiErrorHandleResp.NeedRetry {
+			goto RetryBegin
+		} else {
+			return nil, apiErrorHandleResp.ApiErr
+		}
+	}
+}

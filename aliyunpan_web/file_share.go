@@ -56,30 +56,6 @@ type (
 		// 是否成功
 		Success bool
 	}
-
-	// FastShareCreateParam 创建快传分享
-	FastShareCreateParam struct {
-		DriveId    string   `json:"drive_id"`
-		FileIdList []string `json:"file_id_list"`
-	}
-
-	FastShareFileItem struct {
-		DriveId string `json:"drive_id"`
-		FileId  string `json:"file_id"`
-	}
-
-	FastShareCreateResult struct {
-		Expiration    string              `json:"expiration"`
-		Thumbnail     string              `json:"thumbnail"`
-		ShareName     string              `json:"share_name"`
-		ShareId       string              `json:"share_id"`
-		ShareUrl      string              `json:"share_url"`
-		DriveFileList []FastShareFileItem `json:"drive_file_list"`
-		FullShareMsg  string              `json:"full_share_msg"`
-		ShareTitle    string              `json:"share_title"`
-		ShareSubtitle string              `json:"share_subtitle"`
-		Expired       bool                `json:"expired"`
-	}
 )
 
 func createShareEntity(item *shareEntityResult) *aliyunpan.ShareEntity {
@@ -274,7 +250,7 @@ func (p *WebPanClient) GetShareLinkListReq(param ShareListParam) (*ShareListResu
 }
 
 // FastShareLinkCreate 创建快传分享
-func (p *WebPanClient) FastShareLinkCreate(param FastShareCreateParam) (*FastShareCreateResult, *apierror.ApiError) {
+func (p *WebPanClient) FastShareLinkCreate(param aliyunpan.FastShareCreateParam) (*aliyunpan.FastShareCreateResult, *apierror.ApiError) {
 	// header
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
@@ -286,12 +262,12 @@ func (p *WebPanClient) FastShareLinkCreate(param FastShareCreateParam) (*FastSha
 	logger.Verboseln("do request url: " + fullUrl.String())
 
 	// data
-	var fileList []FastShareFileItem
+	var fileList []aliyunpan.FastShareFileItem
 	for _, fileId := range param.FileIdList {
-		fileList = append(fileList, FastShareFileItem{DriveId: param.DriveId, FileId: fileId})
+		fileList = append(fileList, aliyunpan.FastShareFileItem{DriveId: param.DriveId, FileId: fileId})
 	}
 	postData := struct {
-		DriveFileList []FastShareFileItem `json:"drive_file_list"`
+		DriveFileList []aliyunpan.FastShareFileItem `json:"drive_file_list"`
 	}{DriveFileList: fileList}
 
 	// request
@@ -308,7 +284,7 @@ func (p *WebPanClient) FastShareLinkCreate(param FastShareCreateParam) (*FastSha
 	}
 
 	// parse result
-	r := &FastShareCreateResult{}
+	r := &aliyunpan.FastShareCreateResult{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse fast share create result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
