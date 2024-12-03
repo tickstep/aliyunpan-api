@@ -50,6 +50,8 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 			return apierror.NewApiError(apierror.ApiCodePermissionDenied, respErr.Message)
 		} else if respErr.Code == "UserNotAllowedAccessDrive" {
 			return apierror.NewApiError(apierror.ApiCodeUserNotAllowedAccessDrive, respErr.Message)
+		} else if respErr.Code == "FileShareNotAllowed" {
+			return apierror.NewApiError(apierror.ApiCodeFileShareNotAllowed, respErr.Message)
 		}
 	case 404:
 		if respErr.Code == "NotFound.FileId" {

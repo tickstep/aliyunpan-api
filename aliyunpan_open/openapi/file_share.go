@@ -44,7 +44,7 @@ type (
 	// FileFastShareFileItem 快传文件项
 	FileFastShareFileItem struct {
 		// DriveId 网盘id
-		DriveId string `json:"driveId"`
+		DriveId string `json:"drive_id"`
 		// FileId 文件ID
 		FileId string `json:"file_id"`
 	}
@@ -59,20 +59,10 @@ type (
 		ShareId string `json:"share_id"`
 		// 分享过期时间
 		Expiration string `json:"expiration"`
-		// 分享是否已过期
-		Expired bool `json:"expired"`
-		// 分享提取码
-		SharePwd string `json:"share_pwd"`
 		// 分享链接地址
 		ShareUrl string `json:"share_url"`
 		// 分享创建者ID
-		Creator string `json:"creator"`
-		// 分享当前状态
-		Status string `json:"status"`
-		// 分享创建时间，格式：2024-09-14T02:11:34.264Z
-		CreatedAt string `json:"created_at"`
-		// 分享更新时间，格式：2024-09-14T02:11:34.264Z
-		UpdatedAt string `json:"update_at"`
+		CreatorId string `json:"creator_id"`
 		// DriveFileList 分享文件列表 [1,100]
 		DriveFileList []FileFastShareFileItem `json:"drive_file_list"`
 	}
