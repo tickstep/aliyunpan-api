@@ -20,20 +20,7 @@ type (
 		Marker string `json:"marker"`
 	}
 
-	// AlbumEntity 相薄实体
-	AlbumEntity struct {
-		Owner       string `json:"owner"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		AlbumId     string `json:"album_id"`
-		FileCount   int    `json:"file_count"`
-		ImageCount  int    `json:"image_count"`
-		VideoCount  int    `json:"video_count"`
-		CreatedAt   int64  `json:"created_at"`
-		UpdatedAt   int64  `json:"updated_at"`
-		IsSharing   bool   `json:"is_sharing"`
-	}
-	AlbumList []*AlbumEntity
+	AlbumList []*aliyunpan.AlbumEntity
 
 	AlbumListResult struct {
 		Items AlbumList `json:"items"`
@@ -78,31 +65,31 @@ type (
 
 	// AlbumShareCreateResult 创建相簿分享返回值
 	AlbumShareCreateResult struct {
-		Album             *AlbumEntity `json:"album"`
-		Popularity        int          `json:"popularity"`
-		ShareID           string       `json:"share_id"`
-		ShareMsg          string       `json:"share_msg"`
-		ShareName         string       `json:"share_name"`
-		Description       string       `json:"description"`
-		Expiration        string       `json:"expiration"`
-		Expired           bool         `json:"expired"`
-		SharePwd          string       `json:"share_pwd"`
-		ShareURL          string       `json:"share_url"`
-		Creator           string       `json:"creator"`
-		DriveID           string       `json:"drive_id"`
-		FileID            string       `json:"file_id"`
-		AlbumID           string       `json:"album_id"`
-		PreviewCount      int          `json:"preview_count"`
-		SaveCount         int          `json:"save_count"`
-		DownloadCount     int          `json:"download_count"`
-		Status            string       `json:"status"`
-		CreatedAt         string       `json:"created_at"`
-		UpdatedAt         string       `json:"updated_at"`
-		IsPhotoCollection bool         `json:"is_photo_collection"`
-		SyncToHomepage    bool         `json:"sync_to_homepage"`
-		PopularityStr     string       `json:"popularity_str"`
-		FullShareMsg      string       `json:"full_share_msg"`
-		DisplayName       string       `json:"display_name"`
+		Album             *aliyunpan.AlbumEntity `json:"album"`
+		Popularity        int                    `json:"popularity"`
+		ShareID           string                 `json:"share_id"`
+		ShareMsg          string                 `json:"share_msg"`
+		ShareName         string                 `json:"share_name"`
+		Description       string                 `json:"description"`
+		Expiration        string                 `json:"expiration"`
+		Expired           bool                   `json:"expired"`
+		SharePwd          string                 `json:"share_pwd"`
+		ShareURL          string                 `json:"share_url"`
+		Creator           string                 `json:"creator"`
+		DriveID           string                 `json:"drive_id"`
+		FileID            string                 `json:"file_id"`
+		AlbumID           string                 `json:"album_id"`
+		PreviewCount      int                    `json:"preview_count"`
+		SaveCount         int                    `json:"save_count"`
+		DownloadCount     int                    `json:"download_count"`
+		Status            string                 `json:"status"`
+		CreatedAt         string                 `json:"created_at"`
+		UpdatedAt         string                 `json:"updated_at"`
+		IsPhotoCollection bool                   `json:"is_photo_collection"`
+		SyncToHomepage    bool                   `json:"sync_to_homepage"`
+		PopularityStr     string                 `json:"popularity_str"`
+		FullShareMsg      string                 `json:"full_share_msg"`
+		DisplayName       string                 `json:"display_name"`
 	}
 
 	// AlbumListFileParam 相簿查询包含的文件列表
@@ -136,13 +123,6 @@ const (
 	// AlbumOrderDirectionAsc 升序
 	AlbumOrderDirectionAsc AlbumOrderDirection = "ASC"
 )
-
-func (a *AlbumEntity) CreatedAtStr() string {
-	return apiutil.UnixTime2LocalFormat(a.CreatedAt)
-}
-func (a *AlbumEntity) UpdatedAtStr() string {
-	return apiutil.UnixTime2LocalFormat(a.UpdatedAt)
-}
 
 func (a *AlbumDeleteFileParam) AddFileItem(driveId, fileId string) {
 	if a.DriveFileList == nil {
@@ -264,7 +244,7 @@ func (p *WebPanClient) albumListReq(param *AlbumListParam) (*AlbumListResult, *a
 }
 
 // AlbumCreate 相簿创建
-func (p *WebPanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apierror.ApiError) {
+func (p *WebPanClient) AlbumCreate(param *AlbumCreateParam) (*aliyunpan.AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -295,7 +275,7 @@ func (p *WebPanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apie
 	}
 
 	// parse result
-	r := &AlbumEntity{}
+	r := &aliyunpan.AlbumEntity{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse album create result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
@@ -304,7 +284,7 @@ func (p *WebPanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apie
 }
 
 // AlbumEdit 相簿编辑
-func (p *WebPanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror.ApiError) {
+func (p *WebPanClient) AlbumEdit(param *AlbumEditParam) (*aliyunpan.AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -339,7 +319,7 @@ func (p *WebPanClient) AlbumEdit(param *AlbumEditParam) (*AlbumEntity, *apierror
 	}
 
 	// parse result
-	r := &AlbumEntity{}
+	r := &aliyunpan.AlbumEntity{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse album edit result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
@@ -381,7 +361,7 @@ func (p *WebPanClient) AlbumDelete(param *AlbumDeleteParam) (bool, *apierror.Api
 }
 
 // AlbumGet 获取相簿信息
-func (p *WebPanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.ApiError) {
+func (p *WebPanClient) AlbumGet(param *AlbumGetParam) (*aliyunpan.AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
 	}
@@ -411,7 +391,7 @@ func (p *WebPanClient) AlbumGet(param *AlbumGetParam) (*AlbumEntity, *apierror.A
 	}
 
 	// parse result
-	r := &AlbumEntity{}
+	r := &aliyunpan.AlbumEntity{}
 	if err2 := json.Unmarshal(body, r); err2 != nil {
 		logger.Verboseln("parse album get result json error ", err2)
 		return nil, apierror.NewFailedApiError(err2.Error())
