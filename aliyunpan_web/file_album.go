@@ -263,7 +263,7 @@ func (p *WebPanClient) albumListReq(param *AlbumListParam) (*AlbumListResult, *a
 	return r, nil
 }
 
-// AlbumEdit 相簿编辑
+// AlbumCreate 相簿创建
 func (p *WebPanClient) AlbumCreate(param *AlbumCreateParam) (*AlbumEntity, *apierror.ApiError) {
 	header := map[string]string{
 		"authorization": p.webToken.GetAuthorizationStr(),
