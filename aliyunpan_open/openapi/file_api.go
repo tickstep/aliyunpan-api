@@ -74,6 +74,10 @@ type (
 		// 102 : 可以忽略，不影响下载播放
 		// 103 ：文件非法，不允许下载
 		PunishFlag int `json:"punish_flag"`
+		// Thumbnail 缩略图地址，只有相册文件才有
+		Thumbnail string `json:"thumbnail"`
+		// AlbumId 所属相册ID，只有相册文件才有
+		AlbumId string `json:"albumId"`
 	}
 
 	// FileListResult 获取文件列表返回值

@@ -44,6 +44,10 @@ type (
 		SyncFlag bool `json:"syncFlag"`
 		// SyncMeta 如果是同步盘的文件夹，则这里会记录该文件对应的同步机器和目录等信息
 		SyncMeta string `json:"syncMeta"`
+		// Thumbnail 缩略图URL地址，只有相册文件才有
+		Thumbnail string `json:"thumbnail"`
+		// AlbumId 所属相册ID，只有相册文件才有
+		AlbumId string `json:"albumId"`
 	}
 
 	FileOrderBy        string
@@ -77,6 +81,16 @@ func (f *FileEntity) String() string {
 	}
 	builder.WriteString("文件路径: " + f.Path + "\n")
 	return builder.String()
+}
+
+// IsAlbumFile 是否是相册文件
+func (f *FileEntity) IsAlbumFile() bool {
+	return f.AlbumId != ""
+}
+
+// IsAlbumLivePhotoFile 是否是相册实况图片文件
+func (f *FileEntity) IsAlbumLivePhotoFile() bool {
+	return f.IsAlbumFile() && strings.HasSuffix(strings.ToLower(f.FileName), ".livp")
 }
 
 // TotalSize 获取目录下文件的总大小
