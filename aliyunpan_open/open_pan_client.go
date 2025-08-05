@@ -91,7 +91,21 @@ func (p *OpenPanClient) RefreshNewAccessToken() error {
 		return err
 	}
 
-	// parse result
+	// 通用接口错误
+	type respComEntity struct {
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
+	}
+	rc := &respComEntity{}
+	if err2 := json.Unmarshal(data, rc); err2 != nil {
+		logger.Verboseln("parse access token result json error ", err2)
+		return err2
+	}
+	if rc.Code != 0 {
+		return errors.New(rc.Msg)
+	}
+
+	// 解析结果
 	type respEntity struct {
 		Code int               `json:"code"`
 		Data *openapi.ApiToken `json:"data"`
