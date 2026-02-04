@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-const (
-	// ShellPatternCharacters 通配符字符串
-	ShellPatternCharacters = "*?[]"
-)
-
 func (p *OpenPanClient) recurseMatchPathByShellPattern(driveId string, index int, pathSlice *[]string, parentFileInfo *aliyunpan.FileEntity, resultList *aliyunpan.FileList) {
 	if parentFileInfo == nil {
 		// default root "/" entity
@@ -33,7 +28,7 @@ func (p *OpenPanClient) recurseMatchPathByShellPattern(driveId string, index int
 		return
 	}
 
-	if !strings.ContainsAny((*pathSlice)[index], ShellPatternCharacters) {
+	if !strings.ContainsAny((*pathSlice)[index], aliyunpan.ShellPatternCharacters) {
 		// 不包含通配符，先查缓存
 		curPathStr := path.Clean(parentFileInfo.Path + "/" + (*pathSlice)[index])
 

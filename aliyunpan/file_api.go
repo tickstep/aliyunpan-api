@@ -35,6 +35,10 @@ const (
 	DefaultZeroSizeFileContentHash = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709"
 
 	// ShellPatternCharacters 文件名\文件路径通配符字符串
+	// 匹配规则：
+	// '*'  - 匹配任意数量的非 '/' 字符。样例："*.go"-匹配所有.go文件；"test*"-匹配以 test 开头的文件
+	// '?'  - 匹配单个非 '/' 字符。样例："test?.txt"匹配类似"test1.txt"、"test2.txt"这种
+	// '[]' - 字符类，匹配括号内的任意一个字符。样例："test[123].txt" - 匹配 1,2,3 例如test1.txt，但不匹配test4.txt
 	ShellPatternCharacters = "*?[]"
 
 	// PathSeparator 路径分隔符
