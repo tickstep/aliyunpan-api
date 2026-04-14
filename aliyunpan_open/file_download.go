@@ -2,13 +2,14 @@ package aliyunpan_open
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/tickstep/aliyunpan-api/aliyunpan"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apiutil"
 	"github.com/tickstep/aliyunpan-api/aliyunpan_open/openapi"
 	"github.com/tickstep/library-go/logger"
-	"strconv"
-	"strings"
 )
 
 // GetFileDownloadUrl 获取文件下载URL路径
@@ -69,7 +70,7 @@ func (p *OpenPanClient) DownloadFileData(downloadFileUrl string, fileRange aliyu
 	//resp, err := p.client.Req("GET", fullUrl.String(), nil, headers)
 
 	if err != nil {
-		logger.Verboseln("download file data response failed")
+		logger.Verboseln("download file data response failed: ", err)
 		return apierror.NewApiErrorWithError(err)
 	}
 	return nil

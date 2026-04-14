@@ -1,11 +1,12 @@
 package aliyunpan_open
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/tickstep/aliyunpan-api/aliyunpan/apierror"
 	"github.com/tickstep/aliyunpan-api/aliyunpan_open/openapi"
 	"github.com/tickstep/library-go/logger"
-	"strconv"
-	"time"
 )
 
 type (
@@ -76,6 +77,8 @@ func (p *OpenPanClient) ParseAliApiError(respErr *openapi.AliApiErrResult) *apie
 
 // HandleAliApiError 处理公共错误
 func (p *OpenPanClient) HandleAliApiError(respErr *openapi.AliApiErrResult, retryTime *int) *ApiErrorHandleResp {
+	logger.Verboseln("ali server error: ", respErr)
+
 	// handle error, retry, token refresh
 	myApiErr := p.ParseAliApiError(respErr)
 	if myApiErr.Code == apierror.ApiCodeTokenExpiredCode {
